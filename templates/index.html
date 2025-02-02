@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图形生成器</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .preview-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4">随机图形生成器</h1>
+            <button id="generateBtn" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                生成新图片
+            </button>
+        </div>
+
+        <div class="preview-container bg-white p-4 rounded-lg shadow-lg">
+            <div id="loadingIndicator" class="hidden text-center py-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="mt-2">生成中...</p>
+            </div>
+            
+            <div id="previewSection" class="hidden">
+                <img id="previewImage" class="preview-image mb-4" alt="生成的图片">
+                <div class="text-center">
+                    <a id="downloadBtn" href="#" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors inline-block">
+                        下载图片
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const previewSection = document.getElementById('previewSection');
+        const previewImage = document.getElementById('previewImage');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        generateBtn.addEventListener('click', async () => {
+            try {
+                loadingIndicator.classList.remove('hidden');
+                previewSection.classList.add('hidden');
+                
+                const response = await fetch('/generate', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    previewImage.src = data.image_url;
+                    downloadBtn.href = data.download_url;
+                    previewSection.classList.remove('hidden');
+                } else {
+                    alert('生成失败：' + data.error);
+                }
+            } catch (error) {
+                alert('发生错误：' + error.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html> 

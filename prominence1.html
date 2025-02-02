@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 1280px;
+            height: 800px;
+            margin: 0 auto;
+            position: relative;
+            padding: 8px;
+        }
+
+        .header {
+            width: 1264px;
+            height: 40px;
+            margin-top: 64px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 295px 918px;
+            grid-gap: 15px;
+            margin-top: 32px;
+        }
+
+        .grid-item {
+            background: #3F3F3F;
+            height: 171.9px;
+        }
+
+        .grid-item.wide {
+            grid-column: 2;
+        }
+
+        .grid-item.light {
+            background: #E8E8E8;
+        }
+
+        .grid-item.light .value-text {
+            color: #3F3F3F;
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 295.48px);
+            grid-gap: 15px;
+            margin-top: 15px;
+        }
+
+        .value-text {
+            color: #FFF;
+            font-size: 80px;
+            text-align: center;
+            line-height: 171.9px;
+        }
+
+        .co2-chart {
+            position: relative;
+            height: 88px;
+            margin-top: 324px;
+        }
+
+        .co2-label {
+            color: #FF8310;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .chart-container {
+            height: 55.44px;
+            border: 2px solid #FF9515;
+            background: #FF9F19;
+            margin-left: 80px;
+            width: 630px;
+        }
+
+        .numeric-display {
+            position: absolute;
+            right: 8px;
+            top: -4px;
+            width: 314px;
+            height: 96px;
+            background: #171717;
+            padding: 8px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 104px;
+            position: absolute;
+            right: 8px;
+            background: linear-gradient(to bottom, #6ECFFF 50%, #02ABFF 50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"></div>
+        <div class="grid-container">
+            <div class="grid-item"><div class="value-text">37</div></div>
+            <div class="grid-item wide"></div>
+            <div class="grid-item light"><div class="value-text">42</div></div>
+            <div class="grid-item wide"></div>
+            <div class="grid-item"><div class="value-text">28</div></div>
+            <div class="grid-item wide"></div>
+        </div>
+        <div class="bottom-grid">
+            <div class="grid-item"><div class="value-text">15</div></div>
+            <div class="grid-item"><div class="value-text">23</div></div>
+            <div class="grid-item"><div class="value-text">31</div></div>
+            <div class="grid-item"><div class="value-text">31</div></div>
+        </div>
+        <div class="co2-chart">
+            <div class="co2-label">CO2</div>
+            <div class="chart-container"></div>
+            <div class="numeric-display">
+                <div class="indicator"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateBlocks() {
+            // 获取所有可能成为异常方块的元素（左侧和底部的方块）
+            const normalBlocks = document.querySelectorAll('.grid-item:not(.wide)');
+            
+            // 移除所有现有的light类
+            normalBlocks.forEach(block => {
+                block.classList.remove('light');
+                // 生成新的随机两位数（10-99）
+                const randomNum = Math.floor(Math.random() * 90) + 10;
+                const valueText = block.querySelector('.value-text');
+                if (valueText) {
+                    valueText.textContent = randomNum;
+                }
+            });
+
+            // 随机选择一个方块变成异常方块
+            const randomIndex = Math.floor(Math.random() * normalBlocks.length);
+            normalBlocks[randomIndex].classList.add('light');
+        }
+
+        // 页面加载时立即更新一次
+        document.addEventListener('DOMContentLoaded', updateBlocks);
+
+        // 每30秒更新一次
+        setInterval(updateBlocks, 30000);
+    </script>
+</body>
+</html> 

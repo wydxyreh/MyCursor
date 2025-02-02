@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频实验</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .screen {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .instruction {
+            max-width: 800px;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .fixation {
+            font-size: 48px;
+            color: white;
+        }
+
+        #videoStimulus {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .practice-instruction {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 指导语界面 -->
+    <div id="instruction" class="screen active">
+        <div class="instruction">
+            <h2>实验指导语</h2>
+            <p>欢迎参加本次实验。</p>
+            <p>在实验中，你会看到一段视频。</p>
+            <p>看完视频后请根据提示回答问题。</p>
+            <p>问题回答规则：</p>
+            <ul>
+                <li>正确请按 A 键</li>
+                <li>错误请按 L 键</li>
+            </ul>
+            <p>按任意键继续...</p>
+        </div>
+    </div>
+
+    <!-- 练习提示语界面 -->
+    <div id="practiceInstruction" class="screen">
+        <div class="practice-instruction">
+            现在进入实验1的练习，你会看到一段视频，正确按A，错误按L
+        </div>
+    </div>
+
+    <!-- 注视点界面 -->
+    <div id="fixation" class="screen">
+        <div class="fixation">+</div>
+    </div>
+
+    <!-- 视频刺激界面 -->
+    <div id="stimulus" class="screen">
+        <video id="videoStimulus">
+            <source src="video/1.mp4" type="video/mp4">
+            您的浏览器不支持视频播放。
+        </video>
+    </div>
+
+    <!-- 问题界面 -->
+    <div id="question" class="screen">
+        <div class="question">
+            视频内容是否正确？
+            <p>正确按A，错误按L</p>
+        </div>
+    </div>
+
+    <script>
+        // 基本变量
+        let currentPhase = 'instruction';
+        let practiceCount = 0;
+        let formalCount = 0;
+        let startTime;
+        const results = [];
+        let lastResponse = '';
+
+        // 记录实验结果的函数
+        function recordResult(reactionTime) {
+            const trialType = practiceCount < 2 ? 'Excise' : 'Test';
+            const trialNumber = (practiceCount < 2 ? practiceCount + 1 : formalCount + 1)
+                .toString()
+                .padStart(2, '0');
+            
+            results.push({
+                trial: `${trialType}${trialNumber}`,
+                reactionTime: reactionTime,
+                response: lastResponse.toUpperCase()
+            });
+        }
+
+        // 导出CSV文件
+        function exportToCSV() {
+            let csvContent = "\ufeff实验次序,反应时间(ms),用户作答\n";
+            
+            results.forEach(result => {
+                csvContent += `${result.trial},${result.reactionTime},${result.response}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `video_experiment_results_${new Date().getTime()}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // 显示屏幕函数
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // 显示注视点
+        function showFixation() {
+            showScreen('fixation');
+            setTimeout(() => {
+                if (practiceCount < 2) {
+                    showPracticeInstruction();
+                } else {
+                    showVideo();
+                }
+            }, 1000);
+        }
+
+        // 显示练习提示语
+        function showPracticeInstruction() {
+            showScreen('practiceInstruction');
+            setTimeout(() => {
+                showVideo();
+            }, 2000);
+        }
+
+        // 显示视频
+        function showVideo() {
+            showScreen('stimulus');
+            const video = document.getElementById('videoStimulus');
+            video.currentTime = 0;
+            video.play();
+            
+            video.onended = () => {
+                showQuestion();
+            };
+        }
+
+        // 显示问题
+        function showQuestion() {
+            showScreen('question');
+            startTime = Date.now();
+        }
+
+        // 处理响应
+        function handleResponse(key) {
+            if (key === 'a' || key === 'l') {
+                const reactionTime = Date.now() - startTime;
+                lastResponse = key;
+                
+                recordResult(reactionTime);
+
+                if (practiceCount < 2) {
+                    practiceCount++;
+                    if (practiceCount === 2) {
+                        alert('练习结束，即将进入正式实验');
+                    }
+                    showFixation();
+                } else if (formalCount < 3) {
+                    formalCount++;
+                    if (formalCount === 3) {
+                        alert('实验结束！即将导出结果文件。');
+                        exportToCSV();
+                        return;
+                    }
+                    showFixation();
+                }
+            }
+        }
+
+        // 按键事件处理
+        window.onkeydown = function(event) {
+            if (currentPhase === 'instruction') {
+                currentPhase = 'experiment';
+                showFixation();
+                return;
+            }
+            
+            if (currentPhase === 'experiment' && 
+                document.getElementById('question').classList.contains('active')) {
+                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
+                    handleResponse(event.key.toLowerCase());
+                }
+            }
+        };
+
+        // 初始化
+        window.onload = function() {
+            showScreen('instruction');
+            currentPhase = 'instruction';
+        };
+    </script>
+</body>
+</html> 

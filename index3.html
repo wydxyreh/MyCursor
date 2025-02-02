@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温度控制面板</title>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .temperature-container {
+            width: 176px;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .temperature-panel {
+            background-color: #3f3f3f;
+            width: 175.582px;
+            height: 114.284px;
+            padding: 0;
+            position: relative;
+        }
+
+        .temperature-range {
+            display: flex;
+            align-items: start;
+            font: 400 18px Arial, sans-serif;
+            position: absolute;
+            width: 100%;
+            justify-content: space-between;
+            top: 37.095px;
+        }
+
+        .min-temp {
+            left: 1.675px;
+            width: 18px;
+            height: 18px;
+            position: absolute;
+        }
+
+        .max-temp {
+            right: 1.976px;
+            width: 22px;
+            height: 18px;
+            position: absolute;
+        }
+
+        .current-value {
+            position: absolute;
+            left: 42.137px;
+            top: 60.275px;
+            font-size: 31px;
+            width: 78px;
+            height: 31px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="temperature-container">
+        <div class="temperature-panel">
+            <div class="temperature-range">
+                <div class="min-temp">60</div>
+                <div class="max-temp">120</div>
+            </div>
+            <div class="current-value" aria-label="当前温度：90度">90</div>
+        </div>
+    </div>
+</body>
+</html> 

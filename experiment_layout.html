@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行为实验</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .screen {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            max-width: 800px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .instruction {
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .fixation {
+            font-size: 48px;
+            color: white;
+        }
+
+        .practice-instruction {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .stimulus img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .question {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 指导语界面 -->
+    <div id="instruction" class="screen active">
+        <div class="instruction">
+            <h2>实验指导语</h2>
+            <p>欢迎参加本次实验。</p>
+            <p>在实验中，你会看到一系列填充圆形阵列的图片，其中一些圆形被替换成了三角形。</p>
+            <p>每张图片展示5秒钟，请在这段时间内尽可能记住图片上的内容。</p>
+            <p>之后会出现一个问题，请根据记忆回答。</p>
+            <p>回答规则：</p>
+            <ul>
+                <li>正确请按 A 键</li>
+                <li>错误请按 L 键</li>
+            </ul>
+            <p>按任意键继续...</p>
+        </div>
+    </div>
+
+    <!-- 练习提示语界面 -->
+    <div id="practiceInstruction" class="screen">
+        <div class="practice-instruction">
+            现在进入实验的练习，你会看到一张填充圆形阵列的图片，
+            中间有些圆形被替换成了三角形，你需要在5秒内尽可能记住图片上的内容然后回答问题，
+            正确按A，错误按L
+        </div>
+    </div>
+
+    <!-- 注视点界面 -->
+    <div id="fixation" class="screen">
+        <div class="fixation">+</div>
+    </div>
+
+    <!-- 刺激呈现界面 -->
+    <div id="stimulus" class="screen">
+        <div class="stimulus">
+            <!-- 图片将在这里动态插入 -->
+        </div>
+    </div>
+
+    <!-- 问题界面 -->
+    <div id="question" class="screen">
+        <div class="question">
+            图中三角形的数量是否大于10？
+            <p>正确按A，错误按L</p>
+        </div>
+    </div>
+
+    <script>
+        // 基本变量
+        let currentPhase = 'instruction';  // 初始阶段设为instruction
+        let currentLayout = 1;             // 当前变量（1-4）
+        let currentRepetition = 1;         // 当前重复次数（1-3）
+        let practiceCount = 0;
+        let formalCount = 0;
+        let startTime;
+        let lastResponse = '';
+        let questionTimeout;
+        const results = [];
+
+        // 问题列表（可以手动修改）
+        const questions = {
+            practice: [
+                "图中三角形的数量是否大于10？",
+                "图中三角形是否都在左侧？",
+                "图中是否有红色的三角形？",
+                "图中三角形的数量是否小于15？"
+            ],
+            formal: [
+                "图中三角形的数量是否大于12？",
+                "图中三角形是否都在右侧？",
+                "图中是否有蓝色的三角形？"
+            ]
+        };
+
+        // 记录实验结果的函数
+        function recordResult(reactionTime) {
+            results.push({
+                trial: `Layout${currentLayout}_Rep${currentRepetition}_${practiceCount < 4 ? 
+                    `Excise${(practiceCount + 1).toString().padStart(2, '0')}` : 
+                    `Test${(formalCount + 1).toString().padStart(2, '0')}`}`,
+                reactionTime: reactionTime,
+                response: lastResponse.toUpperCase()
+            });
+        }
+
+        // 导出CSV文件
+        function exportToCSV() {
+            let csvContent = "\ufeff实验次序,反应时间(ms),用户作答\n";
+            
+            results.forEach(result => {
+                csvContent += `${result.trial},${result.reactionTime},${result.response}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // 显示屏幕函数
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            console.log('显示屏幕:', screenId);
+        }
+
+        // 显示注视点
+        function showFixation() {
+            showScreen('fixation');
+            setTimeout(() => {
+                showStimulus();
+            }, 1000);
+        }
+
+        // 显示练习提示语
+        function showPracticeInstruction() {
+            const practiceInstructionText = `现在进入变量${currentLayout}的第${currentRepetition}次实验练习，
+                你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
+                你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+            
+            document.querySelector('.practice-instruction').textContent = practiceInstructionText;
+            showScreen('practiceInstruction');
+            currentPhase = 'practiceInstruction';
+        }
+
+        // 显示刺激
+        function showStimulus() {
+            const stimulusContainer = document.querySelector('.stimulus');
+            const img = document.createElement('img');
+            
+            // 获取当前布局编号
+            const currentLayoutNumber = Math.floor(practiceCount / 7) + 1;
+            
+            // 根据当前阶段选择图片
+            const imageName = practiceCount % 7 < 4 ? 
+                `excise${(practiceCount % 7) + 1}.png` : 
+                `test${(formalCount % 3) + 1}.png`;
+            
+            // 构建完整的图片路径
+            img.src = `images/layout${currentLayoutNumber}/${imageName}`;
+            
+            stimulusContainer.innerHTML = '';
+            stimulusContainer.appendChild(img);
+            
+            showScreen('stimulus');
+
+            // 5秒后直接黑屏500ms，然后显示问题
+            setTimeout(() => {
+                document.body.style.backgroundColor = 'black';
+                stimulusContainer.innerHTML = ''; // 清空图片
+                
+                setTimeout(() => {
+                    showQuestion();
+                }, 500);
+            }, 5000);
+        }
+
+        // 显示问题
+        function showQuestion() {
+            // 根据当前阶段选择问题
+            const questionText = practiceCount < 4 ? 
+                questions.practice[practiceCount] : 
+                questions.formal[formalCount];
+            
+            document.querySelector('.question').innerHTML = `
+                ${questionText}
+                <p>正确按A，错误按L</p>
+            `;
+            
+            showScreen('question');
+            startTime = Date.now();
+
+            // 添加10秒超时处理
+            questionTimeout = setTimeout(() => {
+                handleTimeout();
+            }, 10000);
+        }
+
+        // 处理超时
+        function handleTimeout() {
+            results.push({
+                trial: `Layout${currentLayout}_Rep${currentRepetition}_${practiceCount < 4 ? 
+                    `Excise${(practiceCount + 1).toString().padStart(2, '0')}` : 
+                    `Test${(formalCount + 1).toString().padStart(2, '0')}`}`,
+                reactionTime: 10000,
+                response: 'TIMEOUT'
+            });
+
+            clearTimeout(questionTimeout);
+
+            if (practiceCount < 4) {
+                practiceCount++;
+                if (practiceCount === 4) {
+                    alert('练习结束，即将进入正式实验');
+                }
+                showFixation();
+            } else if (formalCount < 3) {
+                formalCount++;
+                if (formalCount === 3) {
+                    if (currentRepetition < 3) {
+                        // 重复当前变量的实验
+                        currentRepetition++;
+                        practiceCount = 0;
+                        formalCount = 0;
+                        alert(`变量${currentLayout}实验第${currentRepetition}次重复开始`);
+                        showPracticeInstruction();
+                    } else if (currentLayout < 4) {
+                        // 进入下一个变量
+                        currentLayout++;
+                        currentRepetition = 1;
+                        practiceCount = 0;
+                        formalCount = 0;
+                        alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
+                        showPracticeInstruction();
+                    } else {
+                        // 所有实验结束
+                        alert('实验结束！即将导出结果文件。');
+                        exportToCSV();
+                        return;
+                    }
+                } else {
+                    showFixation();
+                }
+            }
+        }
+
+        // 修改处理响应函数
+        function handleResponse(key) {
+            if (key === 'a' || key === 'l') {
+                clearTimeout(questionTimeout);
+                const reactionTime = Date.now() - startTime;
+                lastResponse = key;
+                recordResult(reactionTime);
+
+                if (practiceCount < 4) {
+                    practiceCount++;
+                    if (practiceCount === 4) {
+                        alert('练习结束，即将进入正式实验');
+                    }
+                    showFixation();
+                } else if (formalCount < 3) {
+                    formalCount++;
+                    if (formalCount === 3) {
+                        if (currentRepetition < 3) {
+                            // 重复当前变量的实验
+                            currentRepetition++;
+                            practiceCount = 0;
+                            formalCount = 0;
+                            alert(`变量${currentLayout}实验第${currentRepetition}次重复开始`);
+                            showPracticeInstruction();
+                        } else if (currentLayout < 4) {
+                            // 进入下一个变量
+                            currentLayout++;
+                            currentRepetition = 1;
+                            practiceCount = 0;
+                            formalCount = 0;
+                            alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
+                            showPracticeInstruction();
+                        } else {
+                            // 所有实验结束
+                            alert('实验结束！即将导出结果文件。');
+                            exportToCSV();
+                            return;
+                        }
+                    } else {
+                        showFixation();
+                    }
+                }
+            }
+        }
+
+        // 修改按键事件处理
+        window.onkeydown = function(event) {
+            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前重复:', currentRepetition);
+            
+            if (currentPhase === 'instruction') {
+                // 从指导语进入第一个变量的练习说明
+                currentPhase = 'practiceInstruction';
+                showPracticeInstruction();
+                return;
+            }
+            
+            if (currentPhase === 'practiceInstruction') {
+                currentPhase = 'experiment';
+                showFixation();
+                return;
+            }
+            
+            if (currentPhase === 'experiment' && 
+                document.getElementById('question').classList.contains('active')) {
+                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
+                    handleResponse(event.key.toLowerCase());
+                }
+            }
+        };
+
+        // 修改初始化函数
+        window.onload = function() {
+            // 确保所有变量都被正确初始化
+            currentPhase = 'instruction';
+            currentLayout = 1;
+            currentRepetition = 1;
+            practiceCount = 0;
+            formalCount = 0;
+            
+            showScreen('instruction');
+            console.log('实验初始化完成，当前阶段:', currentPhase);
+        };
+
+        // 在HTML中添加调试信息显示（可选）
+        const debugInfo = document.createElement('div');
+        debugInfo.style.position = 'fixed';
+        debugInfo.style.bottom = '10px';
+        debugInfo.style.right = '10px';
+        debugInfo.style.background = 'rgba(0,0,0,0.7)';
+        debugInfo.style.color = 'white';
+        debugInfo.style.padding = '5px';
+        debugInfo.style.fontSize = '12px';
+        document.body.appendChild(debugInfo);
+
+        // 更新调试信息
+        function updateDebugInfo() {
+            debugInfo.textContent = `阶段: ${currentPhase} | 变量: ${currentLayout} | 重复: ${currentRepetition} | 练习: ${practiceCount} | 正式: ${formalCount}`;
+        }
+
+        // 在每次状态改变时调用updateDebugInfo
+        setInterval(updateDebugInfo, 100);
+    </script>
+</body>
+</html>

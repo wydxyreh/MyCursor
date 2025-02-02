@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>趋势图</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            width: 1280px;
+            height: 800px;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .container {
+            position: relative;
+            margin: 32.3px 24.89px;
+            width: 1230.23px;
+            height: 735.88px;
+        }
+
+        /* 左侧数据面板样式 */
+        .data-panel {
+            position: absolute;
+            width: 295.49px;
+            height: 171.90px;
+            background: #3F3F3F;
+        }
+
+        .data-panel.spo2 {
+            left: 0;
+            top: 0;
+        }
+
+        .data-panel.ecg {
+            left: 0;
+            top: 187.99px;
+        }
+
+        .data-panel.etco2 {
+            left: 0;
+            top: 375.99px;
+        }
+
+        .data-panel.temp {
+            left: 0;
+            top: 563.98px;
+        }
+
+        /* 数据面板内部布局 */
+        .panel-content {
+            padding: 12px 8px;
+        }
+
+        .metric-header {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 19px;
+        }
+
+        .metric-name {
+            font-size: 16px;
+            line-height: 19.78px;
+        }
+
+        .metric-value {
+            font-size: 48px;
+            line-height: 56px;
+        }
+
+        .scale-container {
+            display: flex;
+            gap: 22px;
+        }
+
+        .scale-values {
+            display: flex;
+            flex-direction: column;
+            gap: 23px;
+        }
+
+        .scale-value {
+            font-size: 18px;
+            line-height: 23px;
+        }
+
+        .trend-line {
+            position: relative;
+            width: 189.69px;
+            height: 23.31px;
+        }
+
+        /* 点和线的样式 */
+        .trend-dot {
+            position: absolute;
+            width: 8.49px;
+            height: 8.49px;
+            background: #D9D9D9;
+            border-radius: 50%;
+        }
+
+        .trend-segment {
+            position: absolute;
+            height: 1.39px;
+            background: #fff;
+            transform-origin: left center;
+        }
+
+        /* 右侧图表区域样式 */
+        .chart-area {
+            position: absolute;
+            left: 311.59px;
+            width: 917.96px;
+            height: 171.90px;
+            background: #3F3F3F;
+        }
+
+        .chart-area.top {
+            left: 311.59px;
+            top: 0;
+        }
+
+        .chart-area.middle {
+            left: 311.59px;
+            top: 187.99px;
+        }
+
+        .chart-area.bottom {
+            left: 311.59px;
+            top: 375.99px;
+        }
+
+        /* 底部图表区域 */
+        .bottom-chart {
+            position: absolute;
+            top: 563.98px;
+            width: 295.48px;
+            height: 171.90px;
+            background: #3F3F3F;
+        }
+
+        .bottom-chart.left {
+            left: 311.59px;
+            top: 563.98px;
+        }
+
+        .bottom-chart.middle {
+            left: 623.17px;
+            top: 563.98px;
+        }
+
+        .bottom-chart.right {
+            left: 934.75px;
+            top: 563.98px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SpO2数据面板 -->
+        <div class="data-panel spo2">
+            <div class="panel-content">
+                <div class="metric-header">
+                    <div class="metric-name">SpO2</div>
+                    <div class="metric-value">98</div>
+                </div>
+                <div class="scale-container">
+                    <div class="scale-values">
+                        <div class="scale-value">100</div>
+                        <div class="scale-value">90</div>
+                    </div>
+                    <div class="trend-line" id="spo2-trend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ECG数据面板 -->
+        <div class="data-panel ecg">
+            <div class="panel-content">
+                <div class="metric-header">
+                    <div class="metric-name">ECG</div>
+                    <div class="metric-value">72</div>
+                </div>
+                <div class="scale-container">
+                    <div class="scale-values">
+                        <div class="scale-value">120</div>
+                        <div class="scale-value">60</div>
+                    </div>
+                    <div class="trend-line" id="ecg-trend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EtCO2数据面板 -->
+        <div class="data-panel etco2">
+            <div class="panel-content">
+                <div class="metric-header">
+                    <div class="metric-name">EtCO2</div>
+                    <div class="metric-value">35</div>
+                </div>
+                <div class="scale-container">
+                    <div class="scale-values">
+                        <div class="scale-value">45</div>
+                        <div class="scale-value">35</div>
+                    </div>
+                    <div class="trend-line" id="etco2-trend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEMP数据面板 -->
+        <div class="data-panel temp">
+            <div class="panel-content">
+                <div class="metric-header">
+                    <div class="metric-name">TEMP</div>
+                    <div class="metric-value">37.2</div>
+                </div>
+                <div class="scale-container">
+                    <div class="scale-values">
+                        <div class="scale-value">39</div>
+                        <div class="scale-value">36</div>
+                    </div>
+                    <div class="trend-line" id="temp-trend"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧图表区域 -->
+        <div class="chart-area top"></div>
+        <div class="chart-area middle"></div>
+        <div class="chart-area bottom"></div>
+
+        <!-- 底部图表区域 -->
+        <div class="bottom-chart left"></div>
+        <div class="bottom-chart middle"></div>
+        <div class="bottom-chart right"></div>
+    </div>
+
+    <script>
+        function createTrendLine(containerId, points) {
+            const container = document.getElementById(containerId);
+            
+            // 创建点
+            points.forEach((point, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'trend-dot';
+                dot.style.left = `${point.x}px`;
+                dot.style.top = `${point.y}px`;
+                container.appendChild(dot);
+
+                // 创建连接线
+                if (index < points.length - 1) {
+                    const nextPoint = points[index + 1];
+                    const segment = document.createElement('div');
+                    segment.className = 'trend-segment';
+                    
+                    // 计算线段长度和角度
+                    const length = Math.sqrt(
+                        Math.pow(nextPoint.x - point.x, 2) + 
+                        Math.pow(nextPoint.y - point.y, 2)
+                    );
+                    const angle = Math.atan2(
+                        nextPoint.y - point.y,
+                        nextPoint.x - point.x
+                    ) * 180 / Math.PI;
+
+                    segment.style.width = `${length}px`;
+                    segment.style.transform = `rotate(${angle}deg)`;
+                    segment.style.left = `${point.x}px`;
+                    segment.style.top = `${point.y + dot.offsetHeight/2}px`;
+                    
+                    container.appendChild(segment);
+                }
+            });
+        }
+
+        // 存储过去5秒的数据队列
+        const dataQueue = {
+            spo2: [],
+            ecg: [],
+            etco2: [],
+            temp: []
+        };
+
+        // 生成随机数据的函数
+        function generateRandomData() {
+            return {
+                spo2: Math.floor(95 + Math.random() * 5),    // 95-100
+                ecg: Math.floor(60 + Math.random() * 60),    // 60-120
+                etco2: Math.floor(35 + Math.random() * 10),  // 35-45
+                temp: (36 + Math.random() * 2).toFixed(1)    // 36-38
+            };
+        }
+
+        // 更新数据面板显示值
+        function updatePanelValues(data) {
+            document.querySelector('.data-panel.spo2 .metric-value').textContent = data.spo2;
+            document.querySelector('.data-panel.ecg .metric-value').textContent = data.ecg;
+            document.querySelector('.data-panel.etco2 .metric-value').textContent = data.etco2;
+            document.querySelector('.data-panel.temp .metric-value').textContent = data.temp;
+        }
+
+        // 更新趋势图
+        function updateTrendLines() {
+            const containerWidth = 189.69; // 趋势图容器宽度
+            const containerHeight = 23.31; // 趋势图容器高度
+            
+            Object.keys(dataQueue).forEach(metric => {
+                // 清空现有趋势图
+                const container = document.getElementById(`${metric}-trend`);
+                container.innerHTML = '';
+                
+                // 将数据点映射到趋势图尺寸
+                const points = dataQueue[metric].map((value, index) => {
+                    const x = (index / 4) * containerWidth; // 5个点平均分布
+                    
+                    // 根据不同指标计算y值的映射范围
+                    let yRange;
+                    switch(metric) {
+                        case 'spo2':
+                            yRange = {min: 90, max: 100};
+                            break;
+                        case 'ecg':
+                            yRange = {min: 60, max: 120};
+                            break;
+                        case 'etco2':
+                            yRange = {min: 35, max: 45};
+                            break;
+                        case 'temp':
+                            yRange = {min: 36, max: 38};
+                            break;
+                    }
+                    
+                    const normalizedY = (value - yRange.min) / (yRange.max - yRange.min);
+                    const y = containerHeight - (normalizedY * containerHeight);
+                    
+                    return {x, y};
+                });
+                
+                // 重新创建趋势图
+                createTrendLine(`${metric}-trend`, points);
+            });
+        }
+
+        // 主循环：每秒更新一次数据
+        setInterval(() => {
+            const newData = generateRandomData();
+            
+            // 更新显示值
+            updatePanelValues(newData);
+            
+            // 更新数据队列
+            Object.keys(newData).forEach(metric => {
+                dataQueue[metric].push(newData[metric]);
+                if (dataQueue[metric].length > 5) { // 保持5秒的数据
+                    dataQueue[metric].shift();
+                }
+            });
+            
+            // 更新趋势图
+            updateTrendLines();
+        }, 1000);
+
+        // 初始化：填充初始数据
+        for (let i = 0; i < 5; i++) {
+            const initialData = generateRandomData();
+            Object.keys(initialData).forEach(metric => {
+                dataQueue[metric].push(initialData[metric]);
+            });
+        }
+        updateTrendLines();
+    </script>
+</body>
+</html> 

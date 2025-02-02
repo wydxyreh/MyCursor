@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>医疗监控界面</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            width: 1280px;
+            height: 800px;
+        }
+
+        .container {
+            position: relative;
+            margin: 32.3px 24.89px;
+            width: 1230.23px;
+            height: 735.88px;
+        }
+
+        /* 左侧数据面板 */
+        .data-panel {
+            position: absolute;
+            width: 295.49px;
+            height: 171.90px;
+            background: #3F3F3F;
+            padding: 12px 8px;
+            box-sizing: border-box;
+        }
+
+        .data-panel.spo2 {
+            left: 0;
+            top: 0;
+        }
+
+        .data-panel.ecg {
+            left: 0;
+            top: 187.99px;
+        }
+
+        .data-panel.etco2 {
+            left: 0;
+            top: 375.99px;
+        }
+
+        .data-panel.temp {
+            left: 0;
+            top: 563.98px;
+        }
+
+        /* 数据面板内部样式 */
+        .metric-name {
+            color: #FFF;
+            font-size: 16px;
+            margin-bottom: 19px;
+            display: block;
+        }
+
+        .value-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .scale-values {
+            display: flex;
+            flex-direction: column;
+            gap: 23px;
+            color: #FFF;
+            font-size: 16px;
+        }
+
+        .value {
+            color: #FFF;
+            font-size: 48px;
+        }
+
+        /* 箭头指示器 */
+        .arrow {
+            width: 27.39px;
+            height: 36.53px;
+            position: relative;
+            margin-left: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .arrow::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 0, 100% 100%, 0 100%);
+            background-color: rgba(255, 255, 255, 0.5);
+            transition: background-color 0.3s ease;
+        }
+
+        .arrow.up {
+            display: block;
+            transform: rotate(0deg);
+            opacity: 1;
+        }
+
+        .arrow.down {
+            display: block;
+            transform: rotate(180deg);
+            opacity: 1;
+        }
+
+        .arrow.normal::before {
+            background-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .arrow.warning::before {
+            background-color: rgba(255, 193, 7, 0.5);
+        }
+
+        .arrow.danger::before {
+            background-color: rgba(255, 59, 48, 0.5);
+        }
+
+        /* 右侧图表区域 */
+        .chart-area {
+            position: absolute;
+            left: 311.59px;
+            width: 917.96px;
+            height: 171.90px;
+            background: #3F3F3F;
+        }
+
+        .chart-area.top {
+            top: 0;
+        }
+
+        .chart-area.middle {
+            top: 187.99px;
+        }
+
+        .chart-area.bottom {
+            top: 375.99px;
+        }
+
+        /* 底部图表区域 */
+        .bottom-chart {
+            position: absolute;
+            width: 295.48px;
+            height: 171.90px;
+            background: #3F3F3F;
+        }
+
+        .bottom-chart.left {
+            left: 311.59px;
+            top: 563.98px;
+        }
+
+        .bottom-chart.middle {
+            left: 623.17px;
+            top: 563.98px;
+        }
+
+        .bottom-chart.right {
+            left: 934.75px;
+            top: 563.98px;
+        }
+
+        /* 删除三角形的样式 */
+        .ecg .arrow {
+            display: none; /* 隐藏箭头 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SpO2数据面板 -->
+        <div class="data-panel spo2">
+            <span class="metric-name">SpO2</span>
+            <div class="value-container">
+                <div class="scale-values">
+                    <span>100</span>
+                    <span>90</span>
+                </div>
+                <span class="value">98</span>
+            </div>
+        </div>
+
+        <!-- ECG数据面板 -->
+        <div class="data-panel ecg">
+            <span class="metric-name">ECG</span>
+            <div class="value-container">
+                <div class="scale-values">
+                    <span>120</span>
+                    <span>60</span>
+                </div>
+                <span class="value">72</span>
+            </div>
+        </div>
+
+        <!-- EtCO2数据面板 -->
+        <div class="data-panel etco2">
+            <span class="metric-name">EtCO2</span>
+            <div class="value-container">
+                <div class="scale-values">
+                    <span>8.0</span>
+                    <span>3.3</span>
+                </div>
+                <span class="value">5.2</span>
+            </div>
+        </div>
+
+        <!-- 体温数据面板 -->
+        <div class="data-panel temp">
+            <span class="metric-name">Temp</span>
+            <div class="value-container">
+                <div class="scale-values">
+                    <span>39</span>
+                    <span>36</span>
+                </div>
+                <span class="value">37.2</span>
+            </div>
+        </div>
+
+        <!-- 右侧图表区域 -->
+        <div class="chart-area top"></div>
+        <div class="chart-area middle"></div>
+        <div class="chart-area bottom"></div>
+
+        <!-- 底部图表区域 -->
+        <div class="bottom-chart left"></div>
+        <div class="bottom-chart middle"></div>
+        <div class="bottom-chart right"></div>
+    </div>
+
+    <script>
+    // 定义数据范围和变化规则
+    const DATA_RANGES = {
+        spo2: { min: 95, max: 100, step: 0.5, normal: 98, precision: 1 },
+        ecg: { min: 60, max: 100, step: 1, normal: 75, precision: 0 },
+        etco2: { min: 35, max: 45, step: 0.2, normal: 40, precision: 1 },
+        temp: { min: 36.5, max: 37.8, step: 0.1, normal: 37, precision: 1 },
+        heartRate: { min: 60, max: 120, step: 1, normal: 75, precision: 0 },
+        bloodPressure: { min: 90, max: 180, step: 1, normal: 120, precision: 0 }
+    };
+
+    // 记录当前值和趋势
+    const currentData = {
+        heartRate: { value: 0, history: [] },
+        bloodPressure: { value: 0, history: [] },
+        spo2: { value: 0, history: [] },
+        etco2: { value: 0, history: [] },
+        temp: { value: 0, history: [] },
+        ecg: { value: 0, history: [] } // 确保这里有ecg的初始化
+    };
+
+    // 添加时间戳记录
+    const trendData = {
+        spo2: { values: [], timestamps: [], lastArrowUpdate: 0 },
+        ecg: { values: [], timestamps: [], lastArrowUpdate: 0 },
+        etco2: { values: [], timestamps: [], lastArrowUpdate: 0 },
+        temp: { values: [], timestamps: [], lastArrowUpdate: 0 }
+    };
+
+    // 箭头显示阈值配置
+    const THRESHOLDS = {
+        spo2: { change: 3, duration: 5000, warning: 5, danger: 8 },
+        ecg: { change: 5, duration: 5000, warning: 10, danger: 15 },
+        etco2: { change: 5, duration: 3000, warning: 8, danger: 10 },
+        temp: { change: 0.5, duration: 5000, warning: 1, danger: 1.5 }
+    };
+
+    // 设置箭头显示时间常量
+    const ARROW_DISPLAY_TIME = 5000; // 5秒，单位毫秒
+
+    // 确保每个数据面板都有箭头元素
+    function initializeArrows() {
+        document.querySelectorAll('.value-container').forEach(container => {
+            // 检查是否已存在箭头元素
+            if (!container.querySelector('.arrow')) {
+                const arrowDiv = document.createElement('div');
+                arrowDiv.className = 'arrow';
+                container.appendChild(arrowDiv);
+            }
+        });
+    }
+
+    // 更新箭头显示函数
+    function updateArrow(metric, trend, direction) {
+        const arrowElement = document.querySelector(`.${metric} .arrow`);
+        if (!arrowElement) {
+            console.error(`未找到 ${metric} 的箭头元素`);
+            return;
+        }
+
+        // 清除之前的类
+        arrowElement.className = 'arrow';
+
+        if (trend) {
+            console.log(`更新 ${metric} 箭头: ${direction} ${trend}`);
+            arrowElement.classList.add(direction);
+            arrowElement.classList.add(trend);
+
+            // 5秒后移除箭头
+            setTimeout(() => {
+                arrowElement.className = 'arrow';
+            }, ARROW_DISPLAY_TIME);
+        }
+    }
+
+    // 添加防抖功能
+    const arrowDebounce = {};
+
+    function checkTrendWithDebounce(metric) {
+        const now = Date.now();
+        
+        // 如果距离上次显示箭头不足5秒，则不显示新箭头
+        if (arrowDebounce[metric] && (now - arrowDebounce[metric] < ARROW_DISPLAY_TIME)) {
+            return { trend: null, direction: null };
+        }
+
+        const result = checkTrend(metric);
+        
+        // 如果需要显示箭头，记录时间戳
+        if (result.trend) {
+            arrowDebounce[metric] = now;
+        }
+
+        return result;
+    }
+
+    // 检查趋势函数
+    function checkTrend(metric) {
+        const data = trendData[metric];
+        const now = Date.now();
+        
+        // 删除超过监测时间窗口的数据
+        const timeWindow = THRESHOLDS[metric].duration;
+        while (data.timestamps.length > 0 && now - data.timestamps[0] > timeWindow) {
+            data.values.shift();
+            data.timestamps.shift();
+        }
+
+        // 如果数据点不足，返回null
+        if (data.values.length < 2) {
+            return { trend: null, direction: null };
+        }
+
+        // 计算变化
+        const totalChange = data.values[data.values.length - 1] - data.values[0];
+        const duration = data.timestamps[data.timestamps.length - 1] - data.timestamps[0];
+        
+        // 判断方向和趋势状态
+        let direction = totalChange > 0 ? 'up' : 'down';
+        let trend = null;
+
+        if (Math.abs(totalChange) >= THRESHOLDS[metric].change) {
+            if (Math.abs(totalChange) >= THRESHOLDS[metric].danger) {
+                trend = 'danger';
+            } else if (Math.abs(totalChange) >= THRESHOLDS[metric].warning) {
+                trend = 'warning';
+            } else {
+                trend = 'normal';
+            }
+        }
+
+        return { trend, direction };
+    }
+
+    // 危重病人数据模拟配置
+    const CRITICAL_PATTERNS = {
+        spo2: {
+            baseline: 95,
+            deterioration: {
+                rate: -0.5,    // 每秒下降速率
+                threshold: 90,  // 危险阈值
+                fluctuation: 1  // 随机波动范围
+            }
+        },
+        ecg: {
+            baseline: 80,
+            deterioration: {
+                rate: 2,       // 每秒上升速率
+                threshold: 120, // 危险阈值
+                fluctuation: 3  // 随机波动范围
+            }
+        },
+        etco2: {
+            baseline: 35,
+            deterioration: {
+                rate: 1.5,     // 每秒上升速率
+                threshold: 45,  // 危险阈值
+                fluctuation: 2  // 随机波动范围
+            }
+        },
+        temp: {
+            baseline: 37.2,
+            deterioration: {
+                rate: 0.1,     // 每秒上升速率
+                threshold: 39,  // 危险阈值
+                fluctuation: 0.2 // 随机波动范围
+            }
+        }
+    };
+
+    // 记录模拟开始时间
+    let simulationStartTime = Date.now();
+
+    // 生成危重病人的数据
+    function generateCriticalValue(metric) {
+        const pattern = CRITICAL_PATTERNS[metric];
+        const elapsedTime = (Date.now() - simulationStartTime) / 1000; // 转换为秒
+        
+        // 基于时间计算恶化程度
+        let value = pattern.baseline + 
+                    (pattern.deterioration.rate * elapsedTime) +
+                    (Math.random() * pattern.deterioration.fluctuation * 2 - pattern.deterioration.fluctuation);
+
+        // 根据不同指标限制数值范围
+        switch(metric) {
+            case 'spo2':
+                value = Math.max(70, Math.min(100, value));
+                break;
+            case 'ecg':
+                value = Math.max(60, Math.min(180, value));
+                break;
+            case 'etco2':
+                value = Math.max(20, Math.min(60, value));
+                break;
+            case 'temp':
+                value = Math.max(35, Math.min(41, value));
+                break;
+        }
+
+        return parseFloat(value.toFixed(1));
+    }
+
+    // 更新数据函数
+    function updateData() {
+        Object.keys(trendData).forEach(metric => {
+            const newValue = generateCriticalValue(metric);
+            
+            // 更新数据和时间戳
+            trendData[metric].values.push(newValue);
+            trendData[metric].timestamps.push(Date.now());
+            
+            // 更新显示值
+            const valueElement = document.querySelector(`.${metric} .value`);
+            if (valueElement) {
+                valueElement.textContent = newValue.toFixed(1);
+            }
+
+            // 使用防抖检查趋势并更新箭头
+            const { trend, direction } = checkTrendWithDebounce(metric);
+            if (trend && direction) {
+                updateArrow(metric, trend, direction);
+            }
+        });
+    }
+
+    // 每5分钟重置模拟
+    setInterval(() => {
+        simulationStartTime = Date.now();
+        console.log('重置危重病人模拟...');
+    }, 300000);
+
+    // 页面加载时初始化
+    window.onload = function() {
+        console.log('初始化箭头元素...');
+        initializeArrows();
+        console.log('开始数据更新...');
+        simulationStartTime = Date.now();
+        updateData();
+        setInterval(updateData, 1000);
+    };
+
+    function calculateECG(data) {
+        if (!data || typeof data !== 'number' || isNaN(data)) {
+            console.error('无效的ECG数据:', data);
+            return 0; // 或者返回一个默认值
+        }
+        // 进行ECG计算
+        return data * 2; // 示例计算
+    }
+    </script>
+</body>
+</html> 

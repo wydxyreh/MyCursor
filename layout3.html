@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Layout 1</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000000;
+            width: 1280px;
+            height: 880px;
+            position: relative;
+        }
+
+        .container {
+            position: absolute;
+            left: 32px;
+            top: 32px;
+            width: 1200px;
+            height: 800px;
+        }
+
+        .panel {
+            position: absolute;
+            background: #3F3F3F;
+            overflow: hidden;
+        }
+
+        .bottom-panel {
+            width: 1300px;
+            height: 180px;
+        }
+
+        .bottom-panel-1 { top: 200px; }
+        .bottom-panel-2 { top: 400px; }
+        .bottom-panel-3 { top: 600px; }
+
+        .top-panel {
+            width: 200px;
+            height: 180px;
+        }
+
+        .top-panel-1 { left: 0px; }
+        .top-panel-2 { left: 220px; }
+        .top-panel-3 { left: 440px; }
+        .top-panel-4 { left: 660px; }
+        .top-panel-5 { left: 880px; }
+        .top-panel-6 { left: 1100px; }
+
+        .dot-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            gap: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        /* 顶部面板的网格 */
+        .top-panel .dot-grid {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+        }
+
+        /* 底部面板的网格 */
+        .bottom-panel .dot-grid {
+            grid-template-columns: repeat(28, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+        }
+
+        .dot {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dot::before {
+            content: '';
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #828282;
+            opacity: 0.5;
+        }
+
+        .triangle::before {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 30px solid #828282;
+            opacity: 0.5;
+            transform-origin: center;
+            transform: rotate(0deg);
+            position: relative;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 底部面板 -->
+        <div class="panel bottom-panel bottom-panel-1">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel bottom-panel bottom-panel-2">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel bottom-panel bottom-panel-3">
+            <div class="dot-grid"></div>
+        </div>
+
+        <!-- 顶部面板 -->
+        <div class="panel top-panel top-panel-1">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel top-panel top-panel-2">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel top-panel top-panel-3">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel top-panel top-panel-4">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel top-panel top-panel-5">
+            <div class="dot-grid"></div>
+        </div>
+        <div class="panel top-panel top-panel-6">
+            <div class="dot-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // 为每个网格生成固定数量的点
+        document.querySelectorAll('.dot-grid').forEach(grid => {
+            const isBottomPanel = grid.parentElement.classList.contains('bottom-panel');
+            const columns = isBottomPanel ? 28 : 4;
+            const rows = 4;
+            const total = columns * rows;
+            
+            for (let i = 0; i < total; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                grid.appendChild(dot);
+            }
+        });
+
+        // 页面加载时随机替换 numberOfTriangles 个圆为三角形
+        window.addEventListener('load', () => {
+            // 定义需要转换为三角形的圆点数量
+            const numberOfTriangles = 10; // 此处可以设置为你希望的数量
+
+            const allDots = Array.from(document.querySelectorAll('.dot'));
+            // 随机打乱数组顺序
+            const shuffled = allDots.sort(() => Math.random() - 0.5);
+            
+            // 使用变量numberOfTriangles来决定替换多少个圆点为三角形
+            shuffled.slice(0, numberOfTriangles).forEach(dot => {
+                dot.classList.remove('dot');
+                dot.classList.add('triangle');
+            });
+        });
+    </script>
+</body>
+</html> 

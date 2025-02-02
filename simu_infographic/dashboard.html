@@ -88,7 +88,7 @@
 
         .scale-text {
             fill: white;
-            font-size: 12px;
+            font-size: 16px;
             font-family: Arial, sans-serif;
         }
 
@@ -290,39 +290,35 @@
                     <!-- 背景 -->
                     <path class="gauge-background" d="M20,130 A90,90 0 0,1 180,130"/>
                     <!-- 红色区域1 -->
-                    <path class="gauge-red" d="M20,130 A90,90 0 0,1 25,90"/>
+                    <path id="red1" class="gauge-red" d="M20,115 A90,90 0 0,1 31,78"/>
                     <!-- 黄色区域1 -->
-                    <path class="gauge-yellow" d="M27,85 A90,90 0 0,1 50,55"/>
+                    <path id="yellow1" class="gauge-yellow" d="M32,77 A90,90 0 0,1 60,45"/>
                     <!-- 绿色区域 -->
-                    <path class="gauge-green" d="M55,50 A90,90 0 0,1 145,50"/>
+                    <path id="green" class="gauge-green" d="M61,44 A90,90 0 0,1 139,44"/>
                     <!-- 黄色区域2 -->
-                    <path class="gauge-yellow" d="M150,55 A90,90 0 0,1 173,85"/>
+                    <path id="yellow2" class="gauge-yellow" d="M140,45 A90,90 0 0,1 168,77"/>
                     <!-- 红色区域2 -->
-                    <path class="gauge-red" d="M175,90 A90,90 0 0,1 180,130"/>
-            
+                    <path id="red2" class="gauge-red" d="M169,78 A90,90 0 0,1 180,115"/>
+                
                     <!-- 指针 -->
-                    <g id="hr-pointer" style="transform-box: fill-box; transform-origin: center bottom;">
-                        <path class="pointer" d="M97,65 L103,65 L100,40 Z" style="transform-origin: 100px 130px;"/>
-                        <circle class="pointer-base" cx="100" cy="130" r="3"/>
+                    <defs>
+                        <clipPath id="clip-pointer">
+                            <rect x="97" y="20" width="6" height="35"/>
+                        </clipPath>
+                    </defs>
+                    <g id="hr-pointer" style="transform-box: fill-box; transform-origin: center bottom;" clip-path="url(#clip-pointer)">
+                        <path class="pointer" d="M97,65 L103,65 L100,20 Z" style="transform-origin: 100px 145px;"/> <!-- 修改这里的y坐标来增加长度，并相应地调整transform-origin -->
+                        <circle class="pointer-base" cx="100" cy="100" r="15"/>
                     </g>
                     
                     <!-- 当前心率显示 -->
-                    <text class="value" id="hr-value" x="100" y="100">0</text>
-                    <text class="unit" x="100" y="115">bpm</text>
-            
+                    <text class="value" id="hr-value" x="100" y="120">0</text>
+                
                     <!-- 刻度 -->
                     <g>
-                        <!-- 红色段刻度 -->
-                        <!-- <text class="scale-text" x="0" y="145">60</text>
-                        <text class="scale-text" x="180" y="145">120</text> -->
-
                         <!-- 黄色段刻度 -->
-                        <text class="scale-text" x="5" y="90">70</text>
-                        <text class="scale-text" x="180" y="90">110</text>
-
-                        <!-- 绿色段刻度 -->
-                        <text class="scale-text" x="35" y="50">80</text>
-                        <text class="scale-text" x="150" y="50">100</text>
+                        <text class="scale-text" x="0" y="80">70</text>
+                        <text class="scale-text" x="180" y="80">110</text>
                     </g>
                 </svg>
             </div>
@@ -516,16 +512,39 @@
             }
         }
 
+        function updateGaugeHR(value) {
+            const pointer = document.getElementById('hr-pointer');
+            const valueText = document.getElementById('hr-value');
+
+            if (pointer && valueText) {
+                const angle = valueToAngle(value, 60, 120);
+                pointer.style.transform = `rotate(${angle}deg)`;
+                valueText.textContent = typeof value === 'number' ? value.toFixed(1) : value;
+
+                // 高亮对应的区域
+                const regions = {
+                    red1: { min: 60, max: 70 },
+                    yellow1: { min: 70, max: 80 },
+                    green: { min: 80, max: 100 },
+                    yellow2: { min: 100, max: 110 },
+                    red2: { min: 110, max: 120 }
+                };
+
+                for (let region in regions) {
+                    const element = document.getElementById(region);
+                    if (value >= regions[region].min && value <= regions[region].max) {
+                        element.classList.add('highlight');
+                    } else {
+                        element.classList.remove('highlight');
+                    }
+                }
+            }
+        }
+
         // 初始化显示
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化心率
-            updateGauge(
-                document.getElementById('hr-pointer'),
-                document.getElementById('hr-value'),
-                generateHeartRate(),
-                60,
-                120
-            );
+            updateGaugeHR(generateHeartRate());
 
             // 初始化体温
             updateGauge(
@@ -547,13 +566,7 @@
         // 定时更新所有数据
         setInterval(() => {
             // 更新心率
-            updateGauge(
-                document.getElementById('hr-pointer'),
-                document.getElementById('hr-value'),
-                generateHeartRate(),
-                60,
-                120
-            );
+            updateGaugeHR(generateHeartRate());
 
             // 更新体温
             updateGauge(

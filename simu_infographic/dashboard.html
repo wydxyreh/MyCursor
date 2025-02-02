@@ -15,6 +15,11 @@
             padding: 20px;
         }
 
+        .semi-circle {
+            transform: rotate(-90deg);
+            transform-origin: 50% 25%;
+        }
+
         .dashboard {
             position: relative;
             width: 300px;
@@ -247,12 +252,12 @@
         <div class="dashboard spo2-dashboard">
             <div class="dashboard-title">SpO2</div>
             <svg class="gauge" viewBox="0 0 200 150">
-                <!-- 背景 -->
-                <path class="gauge-background" d="M10,130 A100,100 0 0,1 190,130"/>
-                <!-- 黄色区域 (0-90) -->
-                <path class="gauge-red" d="M10,130 A100,100 0 0,1 148,88"/>
-                <!-- 绿色区域 (90-100) -->
-                <path class="gauge-green" d="M152,91 A100,100 0 0,1 190,130"/>
+                <!-- First segment (Red) -->
+                <circle class="semi-circle" cx="5" cy="40" r="90" stroke="red" fill="none" stroke-width="10"
+                stroke-dasharray="253.47 311.017" stroke-dashoffset="141.37"/>
+                <!-- Second segment (Green) -->
+                <circle class="semi-circle" cx="5" cy="40" r="90" stroke="green" fill="none" stroke-width="10"
+                stroke-dasharray="27.27 537.217" stroke-dashoffset="-114.101"/>
 
                 <!-- 指针 -->
                 <defs>
@@ -262,7 +267,7 @@
                 </defs>
                 <g id="spo2-pointer" style="transform-box: fill-box; transform-origin: center bottom;" clip-path="url(#clip-pointer)">
                     <path class="pointer" d="M97,65 L103,65 L100,40 Z" style="transform-origin: 100px 130px;"/>
-                    <circle class="pointer-base" cx="100" cy="130" r="3"/>
+                    <circle class="pointer-base" cx="100" cy="100" r="15"/>
                 </g>
                 
                 <!-- 当前值显示 -->

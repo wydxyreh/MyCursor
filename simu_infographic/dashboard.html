@@ -401,7 +401,6 @@
                     </g>
                     
                     <text class="value" id="temp-value" x="100" y="100">0</text>
-                    <text class="unit" x="100" y="115">°C</text>
                     
                     <!-- 刻度 -->
                     <g>
@@ -520,42 +519,78 @@
         }
 
         function updateGaugeHR(value) {
-            const pointer = document.getElementById('hr-pointer');
-            const valueText = document.getElementById('hr-value');
+            // 通过传递的dashboardClass参数来定位具体的dashboard
+            dashboardClass = 'hr-dashboard'
+            const dashboard = document.querySelector(`.${dashboardClass}`);
+            if (!dashboard) return; // 如果没有找到对应的dashboard，则返回
 
+            const pointer = dashboard.querySelector('#hr-pointer');
+            const valueText = dashboard.querySelector('#hr-value');
+            const regions = ['red1', 'yellow1', 'green', 'yellow2', 'red2'];
+            
             if (pointer && valueText) {
+                // 计算角度
                 const angle = valueToAngle(value, 60, 120);
                 pointer.style.transform = `rotate(${angle}deg)`;
                 valueText.textContent = typeof value === 'number' ? value.toFixed(1) : value;
 
-                // 高亮对应的区域
-                const regions = {
-                    red1: { min: 60, max: 70 },
-                    yellow1: { min: 70, max: 80 },
-                    green: { min: 80, max: 100 },
-                    yellow2: { min: 100, max: 110 },
-                    red2: { min: 110, max: 120 }
-                };
+                // 根据温度值确定哪个区域应被高亮显示
+                let highlightRegion;
+                if (value >= 60 && value < 70) highlightRegion = 'red1';
+                else if (value >= 70 && value < 80) highlightRegion = 'yellow1';
+                else if (value >= 80 && value < 100) highlightRegion = 'green';
+                else if (value >= 100 && value < 110) highlightRegion = 'yellow2';
+                else if (value >= 110 && value <= 120) highlightRegion = 'red2';
 
-                for (let region in regions) {
-                    const element = document.getElementById(region);
-                    if (value >= regions[region].min && value <= regions[region].max) {
-                        element.classList.add('highlight');
-                    } else {
-                        element.classList.remove('highlight');
+                // 更新各区域的透明度
+                regions.forEach(region => {
+                    const regionElement = dashboard.querySelector(`#${region}`);
+                    if (regionElement) { // 确保找到了元素
+                        if (region === highlightRegion) {
+                            regionElement.style.opacity = '1.0'; // 高亮
+                        } else {
+                            regionElement.style.opacity = '0.3'; // 暗淡
+                        }
                     }
-                }
+                });
             }
         }
 
         function updateGaugeTEMP(value) {
-            const pointer = document.getElementById('temp-pointer');
-            const valueText = document.getElementById('temp-value');
+            // 通过传递的dashboardClass参数来定位具体的dashboard
+            dashboardClass = 'temp-dashboard'
+            const dashboard = document.querySelector(`.${dashboardClass}`);
+            if (!dashboard) return; // 如果没有找到对应的dashboard，则返回
 
+            const pointer = dashboard.querySelector('#temp-pointer');
+            const valueText = dashboard.querySelector('#temp-value');
+            const regions = ['red1', 'yellow1', 'green', 'yellow2', 'red2'];
+            
             if (pointer && valueText) {
+                // 计算角度
                 const angle = valueToAngle(value, 35, 38);
                 pointer.style.transform = `rotate(${angle}deg)`;
                 valueText.textContent = typeof value === 'number' ? value.toFixed(1) : value;
+
+                // 根据温度值确定哪个区域应被高亮显示
+                let highlightRegion;
+                if (value >= 35 && value < 35.5) highlightRegion = 'red1';
+                else if (value >= 35.5 && value < 36) highlightRegion = 'yellow1';
+                else if (value >= 36 && value < 37) highlightRegion = 'green';
+                else if (value >= 37 && value < 37.5) highlightRegion = 'yellow2';
+                else if (value >= 37.5 && value <= 38) highlightRegion = 'red2';
+
+                // 更新各区域的透明度
+                regions.forEach(region => {
+                    const regionElement = dashboard.querySelector(`#${region}`);
+                    if (regionElement) { // 确保找到了元素
+                        if (region === highlightRegion) {
+                            regionElement.style.opacity = '1.0'; // 高亮
+                        } else {
+                            regionElement.style.opacity = '0.3'; // 暗淡
+                        }
+                    }
+                });
             }
         }
 

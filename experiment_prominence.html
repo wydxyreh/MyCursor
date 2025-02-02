@@ -105,7 +105,7 @@
     <script>
         // 基本变量
         let currentPhase = 'instruction';  // 当前阶段
-        let currentLayout = 1;             // 当前变量（1-4）
+        let currentLayout = 1;             // 当前变量（1-5）
         let practiceCount = 0;             // 练习计数（0-3）
         let formalCount = 0;               // 正式实验计数（0-2）
         let startTime;
@@ -116,7 +116,7 @@
 
         // 定义实验问题和正确答案
         const questions = {
-            layout1: {
+            prominence1: {
                 practice: [
                     { question: "变量1-练习1：图中三角形的数量是否大于10？", correctAnswer: "a" },
                     { question: "变量1-练习2：图中三角形是否都在左侧？", correctAnswer: "l" },
@@ -129,7 +129,7 @@
                     { question: "变量1-正式3：图中是否有蓝色三角形？", correctAnswer: "a" }
                 ]
             },
-            layout2: {
+            prominence2: {
                 practice: [
                     { question: "变量2-练习1：图中三角形是否呈对称分布？", correctAnswer: "a" },
                     { question: "变量2-练习2：图中三角形数量是否大于8？", correctAnswer: "a" },
@@ -142,7 +142,7 @@
                     { question: "变量2-正式3：图中是否有黄色三角形？", correctAnswer: "a" }
                 ]
             },
-            layout3: {
+            prominence3: {
                 practice: [
                     { question: "变量3-练习1：图中三角形是否集中在中心？", correctAnswer: "a" },
                     { question: "变量3-练习2：图中三角形数量是否大于15？", correctAnswer: "a" },
@@ -155,7 +155,7 @@
                     { question: "变量3-正式3：图中是否有橙色三角形？", correctAnswer: "a" }
                 ]
             },
-            layout4: {
+            prominence4: {
                 practice: [
                     { question: "变量4-练习1：图中三角形是否均匀分布？", correctAnswer: "a" },
                     { question: "变量4-练习2：图中三角形数量是否大于20？", correctAnswer: "a" },
@@ -167,21 +167,34 @@
                     { question: "变量4-正式2：图中三角形数量是否小于30？", correctAnswer: "a" },
                     { question: "变量4-正式3：图中是否有黑色三角形？", correctAnswer: "a" }
                 ]
+            },
+            prominence5: {
+                practice: [
+                    { question: "变量5-练习1：图中三角形是否均匀分布？", correctAnswer: "a" },
+                    { question: "变量5-练习2：图中三角形数量是否大于20？", correctAnswer: "a" },
+                    { question: "变量5-练习3：图中是否有白色三角形？", correctAnswer: "a" },
+                    { question: "变量5-练习4：图中三角形是否都在边缘？", correctAnswer: "a" }
+                ],
+                formal: [
+                    { question: "变量5-正式1：图中三角形是否呈三角形分布？", correctAnswer: "a" },
+                    { question: "变量5-正式2：图中三角形数量是否小于30？", correctAnswer: "a" },
+                    { question: "变量5-正式3：图中是否有黑色三角形？", correctAnswer: "a" }
+                ]
             }
         };
 
         // 修改记录结果函数
         function recordResult(reactionTime) {
             const currentQuestion = practiceCount < 4 ? 
-                questions[`layout${currentLayout}`].practice[practiceCount] : 
-                questions[`layout${currentLayout}`].formal[formalCount];
+                questions[`prominence${currentLayout}`].practice[practiceCount] : 
+                questions[`prominence${currentLayout}`].formal[formalCount];
             
             const isCorrect = lastResponse === currentQuestion.correctAnswer;
             
             // 构建当前试次的图片路径
             const imagePath = practiceCount < 4 ? 
-                `layout${currentLayout}/excise${practiceCount + 1}.png` : 
-                `layout${currentLayout}/test${formalCount + 1}.png`;
+                `prominence${currentLayout}/excise${practiceCount + 1}.png` : 
+                `prominence${currentLayout}/test${formalCount + 1}.png`;
             
             results.push({
                 layout: currentLayout,
@@ -253,11 +266,11 @@
             // 构建图片路径
             let imagePath;
             if (practiceCount < 4) {
-                // 练习阶段：layout1/excise1.png, layout2/excise1.png 等
-                imagePath = `images/layout${currentLayout}/excise${practiceCount + 1}.png`;
+                // 练习阶段：prominence1/excise1.png, prominence2/excise1.png 等
+                imagePath = `images/prominence${currentLayout}/excise${practiceCount + 1}.png`;
             } else {
-                // 正式实验：layout1/test1.png, layout2/test1.png 等
-                imagePath = `images/layout${currentLayout}/test${formalCount + 1}.png`;
+                // 正式实验：prominence1/test1.png, prominence2/test1.png 等
+                imagePath = `images/prominence${currentLayout}/test${formalCount + 1}.png`;
             }
             
             console.log('加载图片:', imagePath);
@@ -288,8 +301,8 @@
         function showQuestion() {
             // 根据当前变量和阶段选择问题
             const questionText = practiceCount < 4 ? 
-                questions[`layout${currentLayout}`].practice[practiceCount].question : 
-                questions[`layout${currentLayout}`].formal[formalCount].question;
+                questions[`prominence${currentLayout}`].practice[practiceCount].question : 
+                questions[`prominence${currentLayout}`].formal[formalCount].question;
             
             document.querySelector('.question').innerHTML = `
                 ${questionText}
@@ -312,14 +325,14 @@
                 trialType: practiceCount < 4 ? '练习' : '正式',
                 trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
                 imagePath: practiceCount < 4 ? 
-                    `layout${currentLayout}/excise${practiceCount + 1}.png` : 
-                    `layout${currentLayout}/test${formalCount + 1}.png`,
+                    `prominence${currentLayout}/excise${practiceCount + 1}.png` : 
+                    `prominence${currentLayout}/test${formalCount + 1}.png`,
                 question: practiceCount < 4 ? 
-                    questions[`layout${currentLayout}`].practice[practiceCount].question : 
-                    questions[`layout${currentLayout}`].formal[formalCount].question,
+                    questions[`prominence${currentLayout}`].practice[practiceCount].question : 
+                    questions[`prominence${currentLayout}`].formal[formalCount].question,
                 correctAnswer: practiceCount < 4 ? 
-                    questions[`layout${currentLayout}`].practice[practiceCount].correctAnswer.toUpperCase() : 
-                    questions[`layout${currentLayout}`].formal[formalCount].correctAnswer.toUpperCase(),
+                    questions[`prominence${currentLayout}`].practice[practiceCount].correctAnswer.toUpperCase() : 
+                    questions[`prominence${currentLayout}`].formal[formalCount].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
                 isCorrect: '错误',
                 reactionTime: 10000
@@ -336,7 +349,7 @@
             } else if (formalCount < 3) {
                 formalCount++;
                 if (formalCount === 3) {
-                    if (currentLayout < 4) {
+                    if (currentLayout < 5) {
                         // 进入下一个变量
                         currentLayout++;
                         practiceCount = 0;
@@ -375,7 +388,7 @@
                 } else if (formalCount < 3) {
                     formalCount++;
                     if (formalCount === 3) {
-                        if (currentLayout < 4) {
+                        if (currentLayout < 5) {
                             // 进入下一个变量
                             currentLayout++;
                             practiceCount = 0;

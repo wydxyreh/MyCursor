@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>治疗模拟</title>
+    <style>
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #000;
+            color: #fff;
+            margin: 0;
+            padding: 1%;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 10px;
+        }
+
+        .top-section {
+            display: flex;
+            gap: 100px;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100px; /* 小长方形的宽度 */
+        }
+
+        .middle-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .top-blank-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .right-section .blank-rectangle {
+            width: 630px; /* 300+300+30间隙 */
+            height: 100px;
+            background-color: #333;
+        }
+
+
+        .small-rectangle {
+            width: 190px; /* 小长方形的宽度 */
+            height: 100px;
+            background-color: #333;
+        }
+
+        .cpr-defibrillation {
+            background-color: #808080; /* 灰色背景 */
+            position: relative; /* 使该div相对于正常文档流定位 */
+            z-index: 10; /* 确保它覆盖在其他元素之上 */
+            padding: 10px; /* 可选：根据需要调整内边距 */
+            display: flex;
+            flex-direction: column; /* 将主轴设置为垂直方向 */
+            gap: 10px;
+            top: -60px;
+        }
+
+        /* CPR模块 */
+        .monitor-container {
+            width: 610px;
+            height: 120px;
+            background-color: #4d4b4b;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .monitor-content {
+            width: 300px;
+            height: 225px;
+            position: absolute;
+            top: 3px;
+            left: 6px;
+        }
+
+        .title {
+            position: absolute;
+            width: 100%;
+            top: 5px;
+            left: 5px;
+            color: #fff;
+            font-size: 18px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 10px;
+            left: 320px;
+            width: 270px;
+            height: 22.5px;
+            background: #323232;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 100%;
+            height: 24px;
+            background: #E4E4E4;
+            transition: width 1s linear;
+        }
+
+        .ratio {
+            position: absolute;
+            right: 3px;
+            top: 1.5px;
+            color: #fff;
+            font-size: 15px;
+            z-index: 1;
+        }
+
+        .metrics {
+            position: absolute;
+            top: 70px;
+            left: 5px;
+            width: calc(100% - 30px);
+            height: 27px;
+            display: flex;
+            flex-direction: column; /* 将主轴设置为垂直方向 */
+            justify-content: flex-start;
+            gap: 1px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .metric {
+            display: flex;
+            gap: 6px;
+            white-space: nowrap;
+            align-items: center;
+        }
+
+        .metric span {
+            white-space: nowrap;
+        }
+
+        .metric-value {
+            min-width: max-content;
+        }
+
+        .chart-container {
+            position: absolute;
+            top: 40px;
+            left: 300px;
+            width: 100%;
+            height: 82.5px;
+            transform: scale(0.95);
+            transform-origin: top left; /* 设置缩放的原点，默认是元素的中心，这里设置为左上角 */
+        }
+
+        .chart {
+            position: absolute;
+            top: 0;
+            left: 30px;
+            right: 30px;
+            height: 50px;
+            display: flex;
+            gap: 9px;
+        }
+
+        .bar {
+            width: 12px;
+            transition: height 0.3s ease;
+        }
+
+        .bar.success {
+            background: #00C764;
+        }
+
+        .bar.warning {
+            background: #FFCD05;
+        }
+
+        .bar.danger {
+            background: #FF5757;
+        }
+
+        .scale-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1.5px;
+            background: none;
+            border-top: 0.5px dashed #fff;
+        }
+
+        .scale-line-1 {
+            top: 50px;
+        }
+
+        .scale-line-2 {
+            top: 60px;
+        }
+
+        .scale-value {
+            position: absolute;
+            left: 0;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .scale-value-1 {
+            top: 34px;
+        }
+
+        .scale-value-2 {
+            top: 60px;
+        }
+
+        .warnings {
+            position: absolute;
+            top: 35px;
+            left: 5px;
+            right: 30px;
+            height: 10px;
+            display: flex;
+            gap: 4.5px;
+            color: #fff;
+            font-size: 20px;
+        }
+        
+        /* 除颤模块 */
+        .defibrillation-module {
+            background-color: #4d4b4b;
+            padding: 15px;
+            border-radius: 0;
+            width: 610px;
+            height: 120px;
+            position: relative;
+        }
+
+        .defibrillation-title {
+            position: absolute;
+            width: 100%;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-size: 18px;
+            height: 30px;
+            line-height: 30px;
+        }
+
+        .status {
+            position: absolute;
+            font-size: 16px;
+            left: 300px;
+            top: 70px;
+        }
+
+        .metrics-row {
+            display: flex;
+            flex-direction: column; /* 将主轴设置为垂直方向 */
+            justify-content: space-around;
+            position: absolute;
+            left: 10px;
+            top: 70px;
+        }
+
+        .energy-display {
+            position: absolute;
+            left: 370px;
+            top: 35px;
+            font-size: 60px;
+        }
+
+        .energy-unit {
+            font-size: 24px;
+            margin-left: 5px;
+        }
+
+        .warning-message {
+            position: absolute;
+            color: #FF3B30;
+            font-size: 20px;
+            left: 10px;
+            top: 40px;
+        }
+
+        .waiting-message {
+            position: absolute;
+            color: #00C764;
+            font-size: 20px;
+            left: 10px;
+            top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <!-- 左边的小方块 -->
+            <div class="left-section">
+                <div class="small-rectangle"></div>
+                <div class="small-rectangle"></div>
+                <div class="small-rectangle"></div>
+                <div class="small-rectangle"></div>
+            </div>
+
+            <!-- 右边的CPR和除颤模块 -->
+            <div class="right-section">
+                <div class="top-blank-container">
+                    <div class="blank-rectangle"></div>
+                    <div class="blank-rectangle"></div>
+                </div>
+
+                <div class="cpr-defibrillation">
+                    <div class="monitor-container">
+                        <div class="monitor-content">
+                            <h1 class="title">CPR</h1>
+
+                            <div class="progress-bar">
+                                <div class="progress"></div>
+                                <span class="ratio">1:20</span>
+                            </div>
+
+                            <div class="metrics">
+                                <div class="metric">
+                                    <span>深度</span>
+                                    <span class="metric-value">5.5/cm</span>
+                                </div>
+                                <div class="metric">
+                                    <span>频率</span>
+                                    <span class="metric-value">100/min</span>
+                                </div>
+                            </div>
+
+                            <div class="chart-container">
+                                <div class="chart"></div>
+                                <div class="scale-line scale-line-1"></div>
+                                <div class="scale-line scale-line-2"></div>
+                                <span class="scale-value scale-value-1">5.0</span>
+                                <span class="scale-value scale-value-2">6.0</span>
+                            </div>
+
+                            <div class="warnings">
+                                <span>按压过深！</span>
+                                <span>按压过快！</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 除颤模块 -->
+                    <div class="defibrillation-module">
+                        <div class="defibrillation-title">除颤</div>
+                        <div class="waiting-message">等待除颤信号...</div>
+                        <div class="warning-message" style="display: none;">检测到可除颤信号！</div>
+                        <div class="metrics-row">
+                            <div class="metric">
+                                <span>电击</span>
+                                <span class="shock-count">0次</span>
+                            </div>
+                            <div class="metric">
+                                <span>能量</span>
+                                <span class="energy-value">0J</span>
+                            </div>
+                        </div>
+                        <div class="status">等待中</div>
+                        <div class="energy-display">
+                            <span class="energy-display-value">0</span><span class="energy-unit">J</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript部分
+        class CPRMonitor {
+            constructor() {
+                this.chart = document.querySelector('.chart');
+                this.maxBars = 12;
+                this.pressData = [];
+                this.updateInterval = 1000;
+                this.scaleMin = 5.0;
+                this.scaleMax = 6.0;
+                this.chartHeight = 100;
+                this.line1Height = 50;
+                this.line2Height = 60;
+                this.totalTime = 120;
+                this.remainingTime = this.totalTime;
+                this.progressBar = document.querySelector('.progress');
+                this.timeDisplay = document.querySelector('.ratio');
+                this.pressTimes = [];
+                this.frequencyThresholdHigh = 110;
+                this.frequencyThresholdLow = 90;
+                this.startMonitoring();
+                this.startCountdown();
+            }
+    
+            depthToHeight(depth) {
+                const heightRange = this.chartHeight;
+                const depthRange = this.scaleMax - this.scaleMin;
+                const scaleFactor = heightRange / depthRange;
+                return depth * (this.line1Height / this.scaleMin);
+            }
+    
+            getPressType(depth) {
+                if (depth > this.scaleMax) return 'danger';
+                if (depth < this.scaleMin) return 'warning';
+                return 'success';
+            }
+    
+            updateChart() {
+                const depth = this.generatePressDepth();
+                const type = this.getPressType(depth);
+                const height = this.depthToHeight(depth);
+                this.pressData.unshift({ depth: depth, type: type, height: height });
+                if (this.pressData.length > this.maxBars) {
+                    this.pressData.pop();
+                }
+                this.chart.innerHTML = '';
+                this.pressData.forEach(press => {
+                    const bar = document.createElement('div');
+                    bar.className = `bar ${press.type}`;
+                    bar.style.height = `${press.height}px`;
+                    this.chart.appendChild(bar);
+                });
+                this.updateWarnings();
+            }
+    
+            generatePressDepth() {
+                return 4.5 + Math.random() * 2;
+            }
+    
+            calculateFrequency(interval) {
+                return 60000 / interval;
+            }
+    
+            updateWarnings() {
+                const warningContainer = document.querySelector('.warnings');
+                warningContainer.innerHTML = '';
+                if (this.pressData.length > 0) {
+                    const latestPress = this.pressData[0];
+                    if (latestPress.type === 'danger') {
+                        warningContainer.appendChild(document.createElement('span')).textContent = '按压过深！';
+                    } else if (latestPress.type === 'warning') {
+                        warningContainer.appendChild(document.createElement('span')).textContent = '按压过浅！';
+                    } else {
+                        warningContainer.appendChild(document.createElement('span')).textContent = '按压正常！';
+                    }
+                }
+                const frequency = this.calculateFrequency(this.currentInterval);
+                if (frequency > this.frequencyThresholdHigh) {
+                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率过快！';
+                } else if (frequency < this.frequencyThresholdLow) {
+                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率过慢！';
+                } else {
+                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率正常！';
+                }
+            }
+    
+            startMonitoring() {
+                this.updateChart();
+                const randomIntervals = [666, 1000, 800, 600, 550, 500, 400, 200, 545];
+                const updateFunc = () => {
+                    if (this.remainingTime <= 0) return;
+                    this.updateChart();
+                    this.currentInterval = randomIntervals[Math.floor(Math.random() * randomIntervals.length)];
+                    setTimeout(updateFunc, this.currentInterval);
+                };
+                updateFunc();
+            }
+    
+            startCountdown() {
+                this.updateCountdown();
+                const countdownInterval = setInterval(() => {
+                    this.remainingTime -= 1;
+                    if (this.remainingTime <= 0) {
+                        clearInterval(countdownInterval);
+                        this.remainingTime = 0;
+                        this.updateCountdown();
+                        return;
+                    }
+                    this.updateCountdown();
+                }, 1000);
+            }
+    
+            updateCountdown() {
+                const progress = (this.remainingTime / this.totalTime) * 100;
+                this.progressBar.style.width = `${progress}%`;
+                const minutes = Math.floor(this.remainingTime / 60);
+                const seconds = this.remainingTime % 60;
+                this.timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+    
+            resetCountdown() {
+                this.remainingTime = this.totalTime;
+                this.updateCountdown();
+                this.startCountdown();
+            }
+        }
+    
+        // 除颤模块的随机显示功能
+        class DefibrillationModule {
+            constructor() {
+                this.shockCountElement = document.querySelector('.shock-count');
+                this.energyElement = document.querySelector('.energy-value');
+                this.energyDisplayElement = document.querySelector('.energy-display-value');
+                this.waitingMessage = document.querySelector('.waiting-message');
+                this.warningMessage = document.querySelector('.warning-message');
+                this.setInitialValues();
+                this.startMonitoring();
+            }
+    
+            setInitialValues() {
+                // 随机生成电击次数，范围是1-3次
+                const shockCount = Math.floor(Math.random() * 3) + 1; // 修改这里，使范围变为1-3
+
+                // 能量值在60J和150J之间二选一
+                const energyOptions = [60, 150];
+                const energyIndex = Math.floor(Math.random() * energyOptions.length); // 生成0或1的索引
+                const energy = energyOptions[energyIndex]; // 根据索引选择能量值
+
+                // 设置元素内容
+                this.shockCountElement.textContent = `${shockCount}次`;
+                this.energyElement.textContent = `${energy}J`;
+                this.energyDisplayElement.textContent = energy;
+            }
+    
+            startMonitoring() {
+                const randomTime = Math.floor(Math.random() * 120000); // 随机生成一个时间点（0-120秒）
+                setTimeout(() => {
+                    this.generateDefibrillationSignal();
+                }, randomTime);
+            }
+    
+            generateDefibrillationSignal() {
+                const shouldGenerateSignal = Math.random() > 0.5; // 50% 的概率生成信号
+                if (shouldGenerateSignal) {
+                    this.waitingMessage.style.display = 'none';
+                    this.warningMessage.style.display = 'block';
+                }
+            }
+        }
+    
+        window.addEventListener('load', () => {
+            new CPRMonitor();
+            new DefibrillationModule();
+        });
+    </script>
+</body>
+</html>

@@ -103,6 +103,7 @@
         }
 
         .monitor-block {
+            position: relative;
             width: 160px;
             height: 160px;
             background-color: #3F3F3F;
@@ -120,31 +121,62 @@
             top: 0px;
         }
 
-
         .bp-row {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-
+        
         .bp-value {
-            font-size: 24px;
+            position: relative;
+            height: auto;
+        }
+
+        .bp-value-systolic, .bp-value-diastolic {
+            font-size: 40px;
             color: white;
-            min-width: 60px;
+            position: absolute;
+            left: 35%;
+            transform: translateX(-50%);
         }
 
-        .bp-gauge {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+        .bp-value-systolic {
+            top: 30px;
         }
 
-        .gauge-scale {
-            width: 9px;
+        .bp-value-diastolic {
+            top: 110px;
+        }
+
+        .gauge-scale-systolic {
+            width: 10px;
             height: 50px;
             display: flex;
             flex-direction: column;
             gap: 2px;
+            position: absolute;
+            left: 150px;
+            top: 30px;
+        }
+
+        .bp-divider {
+            position: absolute;
+            left: 20px;
+            top: 100px;
+            height: 1px;
+            background-color: white;
+            width: 50%; /* 控制分隔线的长度 */
+        }
+
+        .gauge-scale-diastolic {
+            width: 10px;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            position: absolute;
+            left: 150px;
+            top: 115px;
         }
 
         .gauge-segment {
@@ -165,20 +197,30 @@
             height: 18px;
         }
 
-        .gauge-limits {
+        .gauge-limits-systolic {
             display: flex;
             flex-direction: column;
             color: white;
             font-size: 12px;
+            gap: 25px;
             position: absolute;
-            left: -25px;
+            left: 125px;
+            top: 25px;
+            align-items: flex-end;
+        }
+        
+        .gauge-limits-diastolic {
+            display: flex;
+            flex-direction: column;
+            color: white;
+            font-size: 12px;
+            gap: 25px;
+            position: absolute;
+            left: 132px;
+            top: 112px;
+            align-items: flex-end;
         }
 
-        .bp-divider {
-            height: 1px;
-            background-color: white;
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -297,19 +339,19 @@
             <div class="bp-content">
                 <!-- 收缩压部分 -->
                 <div class="bp-row">
-                    <div class="bp-value">120</div>
-                    <div class="bp-gauge">
-                        <div class="gauge-scale">
-                            <div class="gauge-segment red"></div>
-                            <div class="gauge-segment yellow"></div>
-                            <div class="gauge-segment green"></div>
-                            <div class="gauge-segment yellow"></div>
-                            <div class="gauge-segment red"></div>
-                        </div>
-                        <div class="gauge-limits">
-                            <span>140</span>
-                            <span>90</span>
-                        </div>
+                    <div class="bp-value-systolic">120</div>
+        
+                    <div class="gauge-limits-systolic">
+                        <span>140</span>
+                        <span>90</span>
+                    </div>
+        
+                    <div class="gauge-scale-systolic">
+                        <div id="red1" class="gauge-segment red"></div>
+                        <div id="yellow1" class="gauge-segment yellow"></div>
+                        <div id="green" class="gauge-segment green"></div>
+                        <div id="yellow2" class="gauge-segment yellow"></div>
+                        <div id="red2" class="gauge-segment red"></div>
                     </div>
                 </div>
                 
@@ -318,19 +360,19 @@
                 
                 <!-- 舒张压部分 -->
                 <div class="bp-row">
-                    <div class="bp-value">80</div>
-                    <div class="bp-gauge">
-                        <div class="gauge-scale">
-                            <div class="gauge-segment red"></div>
-                            <div class="gauge-segment yellow"></div>
-                            <div class="gauge-segment green"></div>
-                            <div class="gauge-segment yellow"></div>
-                            <div class="gauge-segment red"></div>
-                        </div>
-                        <div class="gauge-limits">
-                            <span>90</span>
-                            <span>60</span>
-                        </div>
+                    <div class="bp-value-diastolic">80</div>
+        
+                    <div class="gauge-limits-diastolic">
+                        <span>90</span>
+                        <span>60</span>
+                    </div>
+        
+                    <div class="gauge-scale-diastolic">
+                        <div id="red1" class="gauge-segment red"></div>
+                        <div id="yellow1" class="gauge-segment yellow"></div>
+                        <div id="green" class="gauge-segment green"></div>
+                        <div id="yellow2" class="gauge-segment yellow"></div>
+                        <div id="red2" class="gauge-segment red"></div>
                     </div>
                 </div>
             </div>
@@ -384,45 +426,55 @@
         }
 
         function generateBPData() {
-            const baseSystolic = 120;
-            const baseDiastolic = 80;
+            // 设置systolic和diastolic的基础值以及它们的范围
+            const minSystolic = 90;
+            const maxSystolic = 140;
+            const minDiastolic = 60;
+            const maxDiastolic = 90;
+
             return {
-                systolic: Math.round(baseSystolic + (Math.random() - 0.5) * 30),
-                diastolic: Math.round(baseDiastolic + (Math.random() - 0.5) * 20)
+                systolic: Math.round(minSystolic + Math.random() * (maxSystolic - minSystolic)),
+                diastolic: Math.round(minDiastolic + Math.random() * (maxDiastolic - minDiastolic))
             };
         }
 
         // 各模块更新函数
         function updateBP(systolic, diastolic) {
-            const bpValues = document.querySelectorAll('.bp-block .bp-value');
-            if (bpValues.length >= 2) {
-                bpValues[0].textContent = systolic;
-                bpValues[1].textContent = diastolic;
-                updateBPGauge(systolic, 90, 140, 0);
-                updateBPGauge(diastolic, 60, 90, 1);
-            }
+            document.querySelector('.bp-value-systolic').textContent = systolic;
+            document.querySelector('.bp-value-diastolic').textContent = diastolic;
+            updateBPGauge(systolic, 'systolic');
+            updateBPGauge(diastolic, 'diastolic');
         }
 
-        function updateBPGauge(value, lowLimit, highLimit, index) {
-            const gaugeScales = document.querySelectorAll('.bp-block .gauge-scale');
-            if (gaugeScales.length > index) {
-                const gaugeSegments = gaugeScales[index].children;
-                Array.from(gaugeSegments).forEach(segment => {
-                    segment.style.opacity = '0.3';
-                });
-                
-                if (value > highLimit + 15) {
-                    gaugeSegments[0].style.opacity = '1';
-                } else if (value > highLimit) {
-                    gaugeSegments[1].style.opacity = '1';
-                } else if (value >= lowLimit) {
-                    gaugeSegments[2].style.opacity = '1';
-                } else if (value >= lowLimit - 15) {
-                    gaugeSegments[3].style.opacity = '1';
-                } else {
-                    gaugeSegments[4].style.opacity = '1';
-                }
+        function updateBPGauge(value, type) {
+            let gaugeSegments, thresholds;
+            
+            if (type === 'systolic') {
+                gaugeSegments = document.querySelectorAll('.gauge-scale-systolic .gauge-segment');
+                thresholds = [
+                    {max: 100, segment: 4}, // red2
+                    {min: 100, max: 110, segment: 3}, // yellow2
+                    {min: 110, max: 120, segment: 2}, // green
+                    {min: 120, max: 130, segment: 1}, // yellow1
+                    {min: 130, segment: 0} // red1
+                ];
+            } else { // for diastolic
+                gaugeSegments = document.querySelectorAll('.gauge-scale-diastolic .gauge-segment');
+                thresholds = [
+                    {max: 65, segment: 4}, // red2
+                    {min: 65, max: 70, segment: 3}, // yellow2
+                    {min: 70, max: 80, segment: 2}, // green
+                    {min: 80, max: 85, segment: 2}, // yellow1
+                    {min: 85, segment: 0} // red1
+                ];
             }
+
+            Array.from(gaugeSegments).forEach((segment, index) => {
+                segment.style.opacity = index === thresholds.find(threshold => 
+                    (threshold.min === undefined || value >= threshold.min) && 
+                    (threshold.max === undefined || value < threshold.max)
+                ).segment ? '1' : '0.3';
+            });
         }
 
         function updateSpO2(value) {

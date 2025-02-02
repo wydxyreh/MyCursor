@@ -151,7 +151,7 @@
         .monitor-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 20px;
         }
 
         .monitor-row {
@@ -160,24 +160,10 @@
         }
 
         .dashboard, .monitor-block {
-            width: 190px;
+            width: 190px;  /* 保持原有宽度 */
             background-color: #3F3F3F;
             padding: 15px;
             border-radius: 4px;
-        }
-
-        /* HR、SpO2、TEMP模块高度 */
-        .hr-dashboard,
-        .spo2-dashboard,
-        .temp-dashboard {
-            height: 120px;
-            box-sizing: border-box;
-        }
-
-        /* BP模块高度 */
-        .bp-block {
-            height: 180px;
-            box-sizing: border-box;
         }
 
         .bp-content {

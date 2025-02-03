@@ -380,6 +380,24 @@
     </div>
 
     <script>
+        // 实验数据
+        var simu_data = {
+            "patient1": [
+                {"name": "心率", "unit": "bpm", "initial_value": 110, "target_value": 130, "rate_of_change": 0.1818},
+                {"name": "氧饱和度", "unit": "%", "initial_value": 94, "target_value": 88, "rate_of_change": -6.38},
+                {"name": "收缩压", "unit": "mmHg", "initial_value": 100, "target_value": 85, "rate_of_change": -15.00},
+                {"name": "舒张压", "unit": "mmHg", "initial_value": 60, "target_value": 50, "rate_of_change": -16.67},
+                {"name": "体温", "unit": "°C", "initial_value": 37, "target_value": 37.2, "rate_of_change": 0.0054},
+                {"name": "EtCO2", "unit": "mmHg", "initial_value": 35, "target_value": 30, "rate_of_change": -14.29}
+            ]
+        };
+
+        // 提取心率信息
+        let currentHeartRate = simu_data.patient1[0].initial_value;
+        const targetHeartRate = simu_data.patient1[0].target_value;
+        const totalSteps = 120;
+        let stepCount = 0;
+
         // 通用函数
         function valueToAngle(value, min, max) {
             const minAngle = -90;
@@ -398,8 +416,27 @@
 
         // 各模块数据生成函数
         function generateHeartRate() {
-            return 60 + Math.random() * (120 - 60);
+            if (stepCount >= totalSteps) {
+                return targetHeartRate; // 如果已经达到120次调用，返回目标值
+            }
+
+            const remainingSteps = totalSteps - stepCount;
+            const remainingChange = targetHeartRate - currentHeartRate;
+
+            // 计算每次变化的最大值，确保不会超过目标值
+            const maxChange = remainingChange / remainingSteps;
+
+            // 生成一个随机的变化值，确保单调增加或减少
+            const randomChange = Math.random() * maxChange;
+
+            // 更新当前心率值
+            currentHeartRate += randomChange;
+
+            stepCount++;
+
+            return currentHeartRate;
         }
+
 
         function generateTemp() {
             // 80%概率生成36-37
@@ -531,7 +568,7 @@
                 });
             }
         }
-
+        
         function updateGaugeTEMP(value) {
             // 通过传递的dashboardClass参数来定位具体的dashboard
             dashboardClass = 'temp-dashboard'

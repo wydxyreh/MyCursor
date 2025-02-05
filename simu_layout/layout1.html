@@ -113,6 +113,34 @@
             display: block;
             margin: auto;
         }
+
+        .question-panel {
+            position: fixed;
+            left: 32px;
+            top: 850px;
+            background: rgba(63, 63, 63, 0.9);
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            z-index: 1000;
+            width: 1200px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            line-height: 1.5;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .question-panel .label {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .question-panel .value {
+            color: #fff;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -169,21 +197,141 @@
             }
         });
 
-        // 页面加载时随机替换 numberOfTriangles 个圆为三角形
-        window.addEventListener('load', () => {
-            // 定义需要转换为三角形的圆点数量
-            const numberOfTriangles = 10; // 此处可以设置为你希望的数量
+        // 添加样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .question-panel {
+                position: fixed;
+                left: 50%;
+                bottom: 20px;
+                transform: translateX(-50%);
+                background: rgba(63, 63, 63, 0.9);
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-size: 16px;
+                z-index: 1000;
+            }
+        `;
+        document.head.appendChild(style);
 
-            const allDots = Array.from(document.querySelectorAll('.dot'));
-            // 随机打乱数组顺序
-            const shuffled = allDots.sort(() => Math.random() - 0.5);
-            
-            // 使用变量numberOfTriangles来决定替换多少个圆点为三角形
-            shuffled.slice(0, numberOfTriangles).forEach(dot => {
-                dot.classList.remove('dot');
-                dot.classList.add('triangle');
+        // 创建问题面板
+        const questionPanel = document.createElement('div');
+        questionPanel.className = 'question-panel';
+        document.body.appendChild(questionPanel);
+
+        // 更新三角形和问题的函数
+        function generateTrianglesAndQuestion() {
+            // 清除现有三角形
+            document.querySelectorAll('.triangle').forEach(triangle => {
+                triangle.classList.remove('triangle');
+                triangle.classList.add('dot');
             });
-        });
+
+            // 获取所有点
+            const allDots = Array.from(document.querySelectorAll('.dot'));
+            const gridCells = {};
+
+            // 将点按网格分类
+            allDots.forEach(dot => {
+                const grid = dot.parentElement;
+                const gridId = grid.parentElement.className;
+                if (!gridCells[gridId]) {
+                    gridCells[gridId] = [];
+                }
+                gridCells[gridId].push(dot);
+            });
+
+            // 生成5-10个随机数量的三角形
+            const numberOfTriangles = Math.floor(Math.random() * 6) + 5;
+
+            // 从每个网格中选择点转换为三角形
+            const grids = Object.values(gridCells);
+            let remainingTriangles = numberOfTriangles;
+            let currentGridIndex = 0;
+
+            while (remainingTriangles > 0 && grids.length > 0) {
+                const currentGrid = grids[currentGridIndex];
+                if (currentGrid && currentGrid.length > 0) {
+                    // 从当前网格随机选择一个点
+                    const randomIndex = Math.floor(Math.random() * currentGrid.length);
+                    const selectedDot = currentGrid[randomIndex];
+                    
+                    // 转换为三角形
+                    selectedDot.classList.remove('dot');
+                    selectedDot.classList.add('triangle');
+                    
+                    // 从数组中移除已使用的点
+                    currentGrid.splice(randomIndex, 1);
+                    remainingTriangles--;
+                }
+                
+                // 移动到下一个网格
+                currentGridIndex = (currentGridIndex + 1) % grids.length;
+            }
+
+            // 生成问题和答案
+            const actualTriangleCount = document.querySelectorAll('.triangle').length;
+            
+            // 随机生成问题类型
+            const questionTypes = [
+                {
+                    text: '>',
+                    value: 5,
+                    check: (count) => count > 5
+                },
+                {
+                    text: '<',
+                    value: 8,
+                    check: (count) => count < 8
+                },
+                {
+                    text: '=',
+                    value: 7,
+                    check: (count) => count === 7
+                },
+                {
+                    text: '>=',
+                    value: 6,
+                    check: (count) => count >= 6
+                },
+                {
+                    text: '<=',
+                    value: 7,
+                    check: (count) => count <= 7
+                }
+            ];
+            
+            // 随机选择一个问题类型
+            const selectedQuestion = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+            
+            // 判断实际答案
+            const actualAnswer = selectedQuestion.check(actualTriangleCount);
+            const randomAnswer = Math.random() < 0.5;  // 50%概率回答正确或错误
+            
+            // 更新问题面板
+            questionPanel.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <span class="label">问题：</span>
+                    <span class="value">三角形数量${selectedQuestion.text}${selectedQuestion.value}个？</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="label">实际答案：</span>
+                    <span class="value" style="color: ${actualAnswer ? '#00C764' : '#FF5555'}">${actualAnswer ? "是" : "否"}</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="label">随机回答：</span>
+                    <span class="value" style="color: ${randomAnswer === actualAnswer ? '#00C764' : '#FF5555'}">${randomAnswer ? "是" : "否"}</span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="label">三角形数量：</span>
+                    <span class="value">${actualTriangleCount}</span>
+                </div>
+            `;
+        }
+
+        // 页面加载时生成一次
+        window.addEventListener('load', generateTrianglesAndQuestion);
     </script>
 </body>
 </html> 

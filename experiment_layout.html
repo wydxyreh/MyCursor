@@ -275,13 +275,13 @@
             
             img.src = imagePath;
 
-            // 5秒后显示黑屏，再等500ms显示问题
+            // 10秒后显示黑屏，再等500ms显示问题
             setTimeout(() => {
                 stimulusContainer.innerHTML = '';
                 setTimeout(() => {
                     showQuestion();
                 }, 500);
-            }, 5000);
+            }, 10000);
         }
 
         // 显示问题

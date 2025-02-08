@@ -443,7 +443,7 @@
             return initial + (target - initial) * progress;
         }
 
-        // 修改生成随机数据的函数
+        // 生成随机数据的函数
         function generateRandomData() {
             if (!trendControl.isTransitioning) {
                 return {
@@ -463,16 +463,28 @@
                 const initial = trendControl.initialValues[metric];
                 const target = trendControl.targetValues[metric];
                 const baseValue = calculateTransitionValue(initial, target, progress);
-                
-                // 添加小幅度随机波动
-                const fluctuation = metric === 'temp' ? 0.1 : 10;
-                result[metric] = baseValue + (Math.random()) * fluctuation;
-                
-                // 确保温度保留一位小数
-                if (metric === 'temp') {
-                    result[metric] = parseFloat(result[metric].toFixed(1));
+
+                // 根据当前值和目标值之间的差值来决定波动范围
+                let fluctuation;
+                if (progress < 1) { // 如果还未完成过渡
+                    fluctuation = Math.abs(baseValue - target) * 0.1; // 波动范围为差值的10%
                 } else {
-                    result[metric] = Math.floor(result[metric]);
+                    fluctuation = 0; // 最后一次更新直接设置为目标值
+                }
+
+                // 计算新值
+                let newValue = baseValue + (Math.random() * 2 - 1) * fluctuation; // 随机增加或减少
+                
+                // 确保温度保留一位小数，其他指标取整
+                if (metric === 'temp') {
+                    result[metric] = parseFloat(newValue.toFixed(1));
+                } else {
+                    result[metric] = Math.floor(newValue);
+                }
+                
+                // 当过渡结束时，确保值为目标值
+                if (progress >= 1) {
+                    result[metric] = target;
                 }
             });
 
@@ -649,66 +661,13 @@
             updateTrendLines();
         }
 
-        // 使用两个独立的定时器
-        setInterval(updateMetricValues, 1000);  // 每秒更新显示值
-        setInterval(updateTrendData, 5000);     // 每5秒更新趋势图
-
-        // 初始化：填充初始数据
-        // for (let i = 0; i < 5; i++) {
-        //     const initialData = generateRandomData();
-        //     Object.keys(initialData).forEach(metric => {
-        //         dataQueue[metric].unshift(initialData[metric]);
-        //     });
-        // }
         updateTrendLines();
-
-        function updateTrendPoints(metric, value, min, max) {
-            const container = document.getElementById(`${metric}-trend`);
-            if (!container) return;
-
-            const point = document.createElement('div');
-            point.className = 'trend-point';
-            
-            const range = max - min;
-            const percentage = ((value - min) / range) * 100;
-            point.style.bottom = `${percentage}%`;
-            
-            // 根据警报值设置颜色
-            switch(metric) {
-                case 'spo2':
-                    point.style.backgroundColor = (value < 90) ? '#FF5555' : '#00C764';
-                    break;
-                case 'ecg':
-                    point.style.backgroundColor = (value < 60 || value > 120) ? '#FF5555' : '#00C764';
-                    break;
-                case 'bpv1':
-                    point.style.backgroundColor = (value < 35 || value > 45) ? '#FF5555' : '#00C764';
-                    break;
-                case 'bpv2':
-                    point.style.backgroundColor = (value < 75 || value > 85) ? '#FF5555' : '#00C764';
-                    break;
-                case 'temp':
-                    point.style.backgroundColor = (value < 36 || value > 39) ? '#FF5555' : '#00C764';
-                    break;
-            }
-            
-            container.appendChild(point);
-            
-            const points = container.getElementsByClassName('trend-point');
-            if (points.length > 5) {
-                container.removeChild(points[0]);
-            }
-        }
-
-        // 更新CSS样式以适应新的高度
-        const style = document.createElement('style');
-        document.head.appendChild(style);
 
         // 添加录制相关的变量
         let mediaRecorder;
         let recordedChunks = [];
         
-        // 修改startTransition函数，添加录制功能
+        // 添加录制功能
         async function startTransition() {
             try {
                 // 开始录制屏幕
@@ -748,9 +707,14 @@
                 // 开始录制
                 mediaRecorder.start();
                 
-                // 开始趋势变化
-                trendControl.startTime = Date.now();
-                trendControl.isTransitioning = true;
+                // 添加3秒延迟
+                setTimeout(function() {
+                    // 开始趋势变化
+                    trendControl.startTime = Date.now();
+                    trendControl.isTransitioning = true;
+                    setInterval(updateMetricValues, 1000);  // 每秒更新显示值
+                    setInterval(updateTrendData, 5000);     // 每5秒更新趋势图
+                }, 1000);
 
                 // 两分钟后自动停止录制
                 setTimeout(() => {
@@ -796,12 +760,12 @@
             container.innerHTML = `
                 <div style="color: white; margin-bottom: 5px;">${metric.toUpperCase()}</div>
                 <div style="display: flex; gap: 10px;">
-                    <input type="number" step="${metric === 'temp' ? '0.1' : '1'}" 
+                    <input type="number" step="${metric === 'temp' ? '0.1' : '10'}" 
                            value="${trendControl.initialValues[metric]}"
                            onchange="updateValue('${metric}', 'initial', this.value)"
                            style="width: 60px;">
                     →
-                    <input type="number" step="${metric === 'temp' ? '0.1' : '1'}" 
+                    <input type="number" step="${metric === 'temp' ? '0.1' : '10'}" 
                            value="${trendControl.targetValues[metric]}"
                            onchange="updateValue('${metric}', 'target', this.value)"
                            style="width: 60px;">

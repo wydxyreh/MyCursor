@@ -202,8 +202,6 @@
                     </div>
                     <div class="trend-line trend-line-ECG" id="ecg-trend"></div>
                 </div>
-                <!-- 分割线 -->
-                <div class="line-divider"></div>
             </div>
         </div>
 
@@ -263,7 +261,7 @@
             } else if (containerId.includes('bp-trend2')) {
                 metric = 'bpv2';
             }
-            
+
             // 添加基线
             switch(metric) {
                 case 'spo2':
@@ -300,9 +298,9 @@
                     addBaseline(container, 'red', 0.67, 1);    // 37.5-38.5
                     break;
             }
-            
+
             // 创建点和线
-            points.forEach((point, index) => {
+            points.forEach((point, index) => {              
                 const dot = document.createElement('div');
                 dot.className = 'trend-dot';
                 dot.style.left = `${point.x}px`;
@@ -378,7 +376,7 @@
                     segment.style.width = `${length}px`;
                     segment.style.transform = `rotate(${angle}deg)`;
                     segment.style.left = `${point.x}px`;
-                    segment.style.top = `${point.y + dot.offsetHeight/2}px`;
+                    segment.style.top = `${point.y + dot.offsetHeight / 2}px`;
                     
                     // 设置线段颜色与点的颜色相同
                     segment.style.background = dot.style.background;
@@ -525,7 +523,7 @@
                 container.innerHTML = '';
                 
                 const points = dataQueue[metric].map((value, index) => {
-                    const x = (index / (dataQueue[metric].length - 1)) * 240;
+                    const x = (index / 5) * 240;
                     let y;
                     
                     switch(metric) {

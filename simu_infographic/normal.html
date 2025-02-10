@@ -55,37 +55,6 @@
             font-size: 36px;
         }
 
-        .arrow {
-            width: 0;
-            height: 0;
-            border-left: 11.22px solid transparent;
-            border-right: 11.22px solid transparent;
-            border-bottom: 29.93px solid transparent;
-            transform: rotate(180deg);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .arrow.show {
-            opacity: 1;
-        }
-
-        .arrow.up {
-            transform: rotate(0deg);
-        }
-
-        .arrow.down {
-            transform: rotate(180deg);
-        }
-
-        .arrow.red {
-            border-bottom-color: #FF5555;
-        }
-
-        .arrow.yellow {
-            border-bottom-color: #FFCD05;
-        }
-
         .divider {
             width: 166.44px;
             height: 1px;
@@ -124,10 +93,7 @@
                 <div>100</div>
                 <div>90</div>
             </div>
-            <div class="value-display">
-                <div class="value">98</div>
-                <div class="arrow"></div>
-            </div>
+            <div class="value">98</div>
         </div>
     </div>
 
@@ -139,10 +105,7 @@
                 <div>120</div>
                 <div>60</div>
             </div>
-            <div class="value-display">
-                <div class="value">72</div>
-                <div class="arrow"></div>
-            </div>
+            <div class="value">72</div>
         </div>
     </div>
 
@@ -156,7 +119,6 @@
             </div>
             <div class="value-display">
                 <div class="value bp1">120</div>
-                <div class="arrow"></div>
             </div>
         </div>
         <div class="divider"></div>
@@ -167,7 +129,6 @@
             </div>
             <div class="value-display">
                 <div class="value bp2">75</div>
-                <div class="arrow"></div>
             </div>
         </div>
     </div>
@@ -214,68 +175,6 @@
                 green: { min: 36, max: 37.3 }
             }
         };
-
-        // 存储历史数据
-        const history = {
-            SpO2: [],
-            HR: [],
-            Pleth_bp1: [],
-            Pleth_bp2: [],
-            Temp: []
-        };
-
-        // 判断值所在的区间
-        function getValueZone(value, ranges) {
-            for (const [zone, range] of Object.entries(ranges)) {
-                if (range.min2 !== undefined) {
-                    if ((value >= range.min && value <= range.max) || 
-                        (value >= range.min2 && value <= range.max2)) {
-                        return zone;
-                    }
-                } else {
-                    if (value >= range.min && value <= range.max) {
-                        return zone;
-                    }
-                }
-            }
-            return null;
-        }
-
-        // 更新箭头状态
-        function updateArrow(param, value, arrowElement) {
-            const paramHistory = history[param];
-            
-            paramHistory.push({value, time: Date.now()});
-            
-            // 只保留最近4秒的数据
-            const fourSecondsAgo = Date.now() - 4000;
-            while (paramHistory.length > 0 && 
-                    paramHistory[0].time < fourSecondsAgo) {
-                paramHistory.shift();
-            }
-
-            // 获取2秒前的值
-            const twoSecondsAgo = Date.now() - 2000;
-            const oldValue = paramHistory.find(h => h.time <= twoSecondsAgo)?.value;
-
-            if (!oldValue) return;
-            const zone = getValueZone(value, param.startsWith('Pleth_') ? 
-                RANGES['Pleth'][param.split('_')[1]] : RANGES[param]);
-            if (zone === 'green') {
-                arrowElement.className = 'arrow';
-                return;
-            }
-
-            const trend = value > oldValue ? 'up' : 
-                         value < oldValue ? 'down' : '';
-            
-            if (trend) {
-                arrowElement.className = 
-                    `arrow show ${trend} ${zone.toLowerCase()}`;
-            } else {
-                arrowElement.className = 'arrow';
-            }
-        }
 
         // 当前值存储
         let currentValues = {
@@ -366,17 +265,13 @@
         function simulateDataUpdates() {
             // SpO2模拟
             const spo2Value = document.querySelector('.spo2-panel .value');
-            const spo2Arrow = document.querySelector('.spo2-panel .arrow');
             
             // HR模拟
             const hrValue = document.querySelector('.hr-panel .value');
-            const hrArrow = document.querySelector('.hr-panel .arrow');
             
             // Pleth模拟
             const plethBP1Value = document.querySelector('.pleth-panel .bp1');
-            const plethBP1Arrow = document.querySelector('.pleth-panel .value-container:first-of-type .arrow');
             const plethBP2Value = document.querySelector('.pleth-panel .bp2');
-            const plethBP2Arrow = document.querySelector('.pleth-panel .value-container:last-of-type .arrow');
             
             // Temp模拟
             const tempValue = document.querySelector('.temp-panel .value');
@@ -394,12 +289,6 @@
                 plethBP1Value.textContent = newPlethBP1;
                 plethBP2Value.textContent = newPlethBP2;
                 tempValue.textContent = newTemp;
-
-                // 更新箭头状态
-                updateArrow('SpO2', newSpo2, spo2Arrow);
-                updateArrow('HR', newHR, hrArrow);
-                updateArrow('Pleth_bp1', newPlethBP1, plethBP1Arrow);
-                updateArrow('Pleth_bp2', newPlethBP2, plethBP2Arrow);
             }, 1000);  // 每秒更新一次
         }
 

@@ -184,17 +184,46 @@
             width: 100%;
         }
 
-        .gauge-segment.red {
+        /* BP1: 50-90红色, 90-120绿色, 120-140黄色, 140-180红色 */
+        .gauge-segment.red-systolic-2 {   
             background-color: #FF5757;
+            height: 40px;
         }
 
-        .gauge-segment.yellow {
+        .gauge-segment.yellow-systolic {
             background-color: #FFCD05;
+            height: 20px;
         }
 
-        .gauge-segment.green {
+        .gauge-segment.green-systolic {
             background-color: #00C764;
-            height: 18px;
+            height: 30px;
+        }
+
+        .gauge-segment.red-systolic-1 {   
+            background-color: #FF5757;
+            height: 40px;
+        }
+
+        /* BP2: 50-60红色, 60-80绿色, 80-90黄色, 90-130红色 */
+        .gauge-segment.red-diastolic-2 {
+            background-color: #FF5757;
+            height: 40px;
+        }
+
+        .gauge-segment.yellow-diastolic {
+            background-color: #FFCD05;
+            height: 10px;
+        }
+
+        .gauge-segment.green-diastolic {
+            background-color: #00C764;
+            height: 20px;
+        }
+
+        .gauge-segment.red-diastolic-1 {
+            background-color: #FF5757;
+            height: 10px;
         }
 
         .gauge-limits-systolic {
@@ -202,10 +231,10 @@
             flex-direction: column;
             color: white;
             font-size: 12px;
-            gap: 25px;
+            gap: 35px;
             position: absolute;
             left: 125px;
-            top: 25px;
+            top: 20px;
             align-items: flex-end;
         }
         
@@ -214,10 +243,10 @@
             flex-direction: column;
             color: white;
             font-size: 12px;
-            gap: 25px;
+            gap: 35px;
             position: absolute;
-            left: 132px;
-            top: 112px;
+            left: 125px;
+            top: 106px;
             align-items: flex-end;
         }
 
@@ -231,10 +260,12 @@
             <svg class="gauge" viewBox="0 0 200 150">
                 <!-- First segment (Red) -->
                 <circle class="semi-circle gauge-red" cx="5" cy="40" r="90" stroke="red" fill="none" stroke-width="10"
-                stroke-dasharray="213.47 351.017" stroke-dashoffset="121.37"/>
+                stroke-dasharray="216.61 347.877" stroke-dashoffset="122.94"/>
+                <!-- stroke-dashoffset 表示起始偏移量，为0时在圆心正上方，加数值的时候起始角度逆时针转，减数值的时候起始角度逆时针转；
+                stroke-dasharray 第一个值表示弧度长度，顺时针增长，第二个值表示间隔，固定用 564.487 减去第一个值得到； -->
                 <!-- Second segment (Green) -->
                 <circle class="semi-circle gauge-green" cx="5" cy="40" r="90" stroke="green" fill="none" stroke-width="10"
-                stroke-dasharray="27.27 537.217" stroke-dashoffset="-94.101"/>
+                stroke-dasharray="28.84 535.647" stroke-dashoffset="-95.24"/>
         
                 <!-- 指针 -->
                 <defs>
@@ -253,7 +284,9 @@
                 <!-- 刻度 -->
                 <g>
                     <!-- 刻度值 -->
+                    <text class="scale-text" x="0" y="120">0</text>
                     <text class="scale-text" x="185" y="85">90</text>
+                    <text class="scale-text" x="195" y="120">100</text>
                 </g>
             </svg>
         </div>
@@ -263,16 +296,21 @@
             <div class="dashboard-title">HR</div>
             <svg class="gauge" viewBox="0 0 200 150">
                 <!-- 红色区域1 -->
-                <path id="red1" class="gauge-red" d="M20,115 A90,90 0 0,1 31,78"/>
+                <circle id="red1" class="semi-circle gauge-red" cx="5" cy="40" r="90" stroke="red" fill="none" stroke-width="10"
+                stroke-dasharray="86.43 478.057" stroke-dashoffset="122.94"/>
                 <!-- 黄色区域1 -->
-                <path id="yellow1" class="gauge-yellow" d="M32,77 A90,90 0 0,1 60,45"/>
+                <circle id="yellow1" class="semi-circle gauge-yellow" cx="5" cy="40" r="90" stroke="yellow" fill="none" stroke-width="10"
+                stroke-dasharray="16.03 548.457" stroke-dashoffset="34.94"/>
                 <!-- 绿色区域 -->
-                <path id="green" class="gauge-green" d="M61,44 A90,90 0 0,1 139,44"/>
+                <circle id="green" class="semi-circle gauge-green" cx="5" cy="40" r="90" stroke="green" fill="none" stroke-width="10"
+                stroke-dasharray="65.69 498.797" stroke-dashoffset="17.34"/>
                 <!-- 黄色区域2 -->
-                <path id="yellow2" class="gauge-yellow" d="M140,45 A90,90 0 0,1 168,77"/>
+                <circle id="yellow2" class="semi-circle gauge-yellow" cx="5" cy="40" r="90" stroke="yellow" fill="none" stroke-width="10"
+                stroke-dasharray="35.2 529.287" stroke-dashoffset="-49.92"/>
                 <!-- 红色区域2 -->
-                <path id="red2" class="gauge-red" d="M169,78 A90,90 0 0,1 180,115"/>
-            
+                <circle id="red2" class="semi-circle gauge-red" cx="5" cy="40" r="90" stroke="red" fill="none" stroke-width="10"
+                stroke-dasharray="36.77 527.717" stroke-dashoffset="-86.69"/>
+
                 <!-- 指针 -->
                 <defs>
                     <clipPath id="clip-pointer">
@@ -290,8 +328,12 @@
                 <!-- 刻度 -->
                 <g>
                     <!-- 黄色段刻度 -->
-                    <text class="scale-text" x="5" y="75">70</text>
-                    <text class="scale-text" x="175" y="75">110</text>
+                    <text class="scale-text" x="0" y="120">0</text>
+                    <text class="scale-text" x="50" y="43">50</text>
+                    <text class="scale-text" x="75" y="36">60</text>
+                    <text class="scale-text" x="145" y="50">100</text>
+                    <text class="scale-text" x="175" y="75">120</text>
+                    <text class="scale-text" x="195" y="120">140</text>
                 </g>
             </svg>
         </div>
@@ -301,16 +343,15 @@
             <div class="dashboard-title">TEMP</div>
             <svg class="gauge" viewBox="0 0 200 150">
                 <!-- 红色区域1 -->
-                <path id="red1" class="gauge-red" d="M20,115 A90,90 0 0,1 31,78"/>
-                <!-- 黄色区域1 -->
-                <path id="yellow1" class="gauge-yellow" d="M32,77 A90,90 0 0,1 60,45"/>
+                <circle id="red1" class="semi-circle gauge-red" cx="5" cy="40" r="90" stroke="red" fill="none" stroke-width="10"
+                stroke-dasharray="49.38 515.107" stroke-dashoffset="122.94"/>
                 <!-- 绿色区域 -->
-                <path id="green" class="gauge-green" d="M61,44 A90,90 0 0,1 139,44"/>
-                <!-- 黄色区域2 -->
-                <path id="yellow2" class="gauge-yellow" d="M140,45 A90,90 0 0,1 168,77"/>
+                <circle id="green" class="semi-circle gauge-green" cx="5" cy="40" r="90" stroke="green" fill="none" stroke-width="10"
+                stroke-dasharray="122.1 442.387" stroke-dashoffset="71.99"/>
                 <!-- 红色区域2 -->
-                <path id="red2" class="gauge-red" d="M169,78 A90,90 0 0,1 180,115"/>
-            
+                <circle id="red2" class="semi-circle gauge-red" cx="5" cy="40" r="90" stroke="red" fill="none" stroke-width="10"
+                stroke-dasharray="72.28 492.207" stroke-dashoffset="-51.68"/>
+
                 <!-- 指针 -->
                 <defs>
                     <clipPath id="clip-pointer">
@@ -327,8 +368,10 @@
                 <!-- 刻度 -->
                 <g>
                     <!-- 黄色段刻度 -->
-                    <text class="scale-text" x="-5" y="75">35.5</text>
-                    <text class="scale-text" x="175" y="75">37.5</text>
+                    <text class="scale-text" x="-25" y="120">35.5</text>
+                    <text class="scale-text" x="15" y="65">36</text>
+                    <text class="scale-text" x="150" y="50">37.3</text>
+                    <text class="scale-text" x="200" y="120">38</text>
                 </g>
             </svg>
         </div>
@@ -342,16 +385,15 @@
                     <div class="bp-value-systolic">120</div>
         
                     <div class="gauge-limits-systolic">
-                        <span>140</span>
-                        <span>90</span>
+                        <span>180</span>
+                        <span>50</span>
                     </div>
         
                     <div class="gauge-scale-systolic">
-                        <div id="red1" class="gauge-segment red"></div>
-                        <div id="yellow1" class="gauge-segment yellow"></div>
-                        <div id="green" class="gauge-segment green"></div>
-                        <div id="yellow2" class="gauge-segment yellow"></div>
-                        <div id="red2" class="gauge-segment red"></div>
+                        <div id="red1" class="gauge-segment red-systolic-2"></div>
+                        <div id="yellow" class="gauge-segment yellow-systolic"></div>
+                        <div id="green" class="gauge-segment green-systolic"></div>
+                        <div id="red2" class="gauge-segment red-systolic-1"></div>
                     </div>
                 </div>
                 
@@ -363,16 +405,15 @@
                     <div class="bp-value-diastolic">80</div>
         
                     <div class="gauge-limits-diastolic">
-                        <span>90</span>
-                        <span>60</span>
+                        <span>130</span>
+                        <span>50</span>
                     </div>
         
                     <div class="gauge-scale-diastolic">
-                        <div id="red1" class="gauge-segment red"></div>
-                        <div id="yellow1" class="gauge-segment yellow"></div>
-                        <div id="green" class="gauge-segment green"></div>
-                        <div id="yellow2" class="gauge-segment yellow"></div>
-                        <div id="red2" class="gauge-segment red"></div>
+                        <div id="red1" class="gauge-segment red-diastolic-2"></div>
+                        <div id="yellow" class="gauge-segment yellow-diastolic"></div>
+                        <div id="green" class="gauge-segment green-diastolic"></div>
+                        <div id="red2" class="gauge-segment red-diastolic-1"></div>
                     </div>
                 </div>
             </div>
@@ -380,23 +421,77 @@
     </div>
 
     <script>
-        // 实验数据
-        var simu_data = {
-            "patient1": [
-                {"name": "心率", "unit": "bpm", "initial_value": 110, "target_value": 130, "rate_of_change": 0.1818},
-                {"name": "氧饱和度", "unit": "%", "initial_value": 94, "target_value": 88, "rate_of_change": -6.38},
-                {"name": "收缩压", "unit": "mmHg", "initial_value": 100, "target_value": 85, "rate_of_change": -15.00},
-                {"name": "舒张压", "unit": "mmHg", "initial_value": 60, "target_value": 50, "rate_of_change": -16.67},
-                {"name": "体温", "unit": "°C", "initial_value": 37, "target_value": 37.2, "rate_of_change": 0.0054},
-                {"name": "EtCO2", "unit": "mmHg", "initial_value": 35, "target_value": 30, "rate_of_change": -14.29}
-            ]
+        // 添加趋势控制系统
+        const trendControl = {
+            duration: 120,  // 2分钟 = 120秒
+            startTime: null,
+            initialValues: {
+                spo2: 80,
+                hr: 40,
+                bpv1: 70,
+                bpv2: 50,
+                temp: 35.5
+            },
+            targetValues: {
+                spo2: 90,
+                hr: 130,
+                bpv1: 160,
+                bpv2: 100,
+                temp: 38.0
+            },
+            isTransitioning: false
         };
 
-        // 提取心率信息
-        let currentHeartRate = simu_data.patient1[0].initial_value;
-        const targetHeartRate = simu_data.patient1[0].target_value;
-        const totalSteps = 120;
-        let stepCount = 0;
+        function generateRandomData() {
+            if (!trendControl.isTransitioning) {
+                return {
+                    spo2: trendControl.initialValues.spo2,
+                    hr: trendControl.initialValues.hr,
+                    bpv1: trendControl.initialValues.bpv1,
+                    bpv2: trendControl.initialValues.bpv2,
+                    temp: trendControl.initialValues.temp
+                };
+            }
+
+            const currentTime = Date.now();
+            const progress = Math.min((currentTime - trendControl.startTime) / (trendControl.duration * 1000), 1);
+
+            const result = {};
+            Object.keys(trendControl.initialValues).forEach(metric => {
+                const initial = trendControl.initialValues[metric];
+                const target = trendControl.targetValues[metric];
+                const baseValue = calculateTransitionValue(initial, target, progress);
+
+                // 根据当前值和目标值之间的差值来决定波动范围
+                let fluctuation;
+                if (progress < 1) { // 如果还未完成过渡
+                    fluctuation = Math.abs(baseValue - target) * 0.1; // 波动范围为差值的10%
+                } else {
+                    fluctuation = 0; // 最后一次更新直接设置为目标值
+                }
+
+                // 计算新值
+                let newValue = baseValue + (Math.random() * 2 - 1) * fluctuation; // 随机增加或减少
+                
+                // 确保温度保留一位小数，其他指标取整
+                if (metric === 'temp') {
+                    result[metric] = parseFloat(newValue.toFixed(1));
+                } else {
+                    result[metric] = Math.floor(newValue);
+                }
+                
+                // 当过渡结束时，确保值为目标值
+                if (progress >= 1) {
+                    result[metric] = target;
+                }
+            });
+
+            if (progress >= 1) {
+                trendControl.isTransitioning = false;
+            }
+
+            return result;
+        }
 
         // 通用函数
         function valueToAngle(value, min, max) {
@@ -416,58 +511,25 @@
 
         // 各模块数据生成函数
         function generateHeartRate() {
-            if (stepCount >= totalSteps) {
-                return targetHeartRate; // 如果已经达到120次调用，返回目标值
-            }
-
-            const remainingSteps = totalSteps - stepCount;
-            const remainingChange = targetHeartRate - currentHeartRate;
-
-            // 计算每次变化的最大值，确保不会超过目标值
-            const maxChange = remainingChange / remainingSteps;
-
-            // 生成一个随机的变化值，确保单调增加或减少
-            const randomChange = Math.random() * maxChange;
-
-            // 更新当前心率值
-            currentHeartRate += randomChange;
-
-            stepCount++;
-
-            return currentHeartRate;
+            return Math.random() * 140;
         }
 
-
         function generateTemp() {
-            // 80%概率生成36-37
-            if (Math.random() < 0.8) {
-                return 36 + Math.random(); // 注意这里直接使用Math.random()因为默认范围是[0,1)，所以加上36后范围变为[36,37)
-            } else {
-                // 剩下20%的情况，进一步区分是生成35-36还是37-38
-                if (Math.random() < 0.5) {
-                    // 10%的概率（相对于总概率）生成35-36
-                    return 35 + Math.random();
-                } else {
-                    // 10%的概率（相对于总概率）生成37-38
-                    return 37 + Math.random();
-                }
-            }
+            // 生成一个从35.5到38（不包括38）的随机数
+            return 35.5 + Math.random() * (38 - 35.5);
         }
 
         function generateSpO2() {
-            // 80%概率生成80-100，20%概率生成0-80
-            if (Math.random() < 0.8) {
-                return Math.min(100, 80 + Math.random() * 20);
-            }
-            return Math.max(0, Math.random() * 80);
+            // 生成一个从0到100（包括0，但不包括100）的随机数
+            return Math.random() * 100;
         }
 
         function generateBPData() {
             // 设置systolic和diastolic的基础值以及它们的范围
-            const minSystolic = 90;
-            const maxSystolic = 140;
-            const minDiastolic = 60;
-            const maxDiastolic = 90;
+            const minSystolic = 50;
+            const maxSystolic = 180;
+            const minDiastolic = 50;
+            const maxDiastolic = 130;
 
             return {
                 systolic: Math.round(minSystolic + Math.random() * (maxSystolic - minSystolic)),
@@ -489,20 +551,18 @@
             if (type === 'systolic') {
                 gaugeSegments = document.querySelectorAll('.gauge-scale-systolic .gauge-segment');
                 thresholds = [
-                    {max: 100, segment: 4}, // red2
-                    {min: 100, max: 110, segment: 3}, // yellow2
-                    {min: 110, max: 120, segment: 2}, // green
-                    {min: 120, max: 130, segment: 1}, // yellow1
-                    {min: 130, segment: 0} // red1
+                    {min: 140, max: 180, segment: 0}, // red1
+                    {min: 120, max: 140, segment: 1}, // yellow
+                    {min: 90, max: 120, segment: 2}, // green
+                    {min: 50, max: 90, segment: 3} // red2
                 ];
             } else { // for diastolic
                 gaugeSegments = document.querySelectorAll('.gauge-scale-diastolic .gauge-segment');
                 thresholds = [
-                    {max: 65, segment: 4}, // red2
-                    {min: 65, max: 70, segment: 3}, // yellow2
-                    {min: 70, max: 80, segment: 2}, // green
-                    {min: 80, max: 85, segment: 2}, // yellow1
-                    {min: 85, segment: 0} // red1
+                    {min: 90, max: 130, segment: 0}, // red1
+                    {min: 80, max: 90, segment: 1}, // yellow
+                    {min: 60, max: 80, segment: 2}, // green
+                    {min: 50, max: 60, segment: 3} // red2
                 ];
             }
 
@@ -543,17 +603,17 @@
             
             if (pointer && valueText) {
                 // 计算角度
-                const angle = valueToAngle(value, 60, 120);
+                const angle = valueToAngle(value, 0, 140);
                 pointer.style.transform = `rotate(${angle}deg)`;
                 valueText.textContent = typeof value === 'number' ? value.toFixed(1) : value;
 
                 // 根据温度值确定哪个区域应被高亮显示
                 let highlightRegion;
-                if (value >= 60 && value < 70) highlightRegion = 'red1';
-                else if (value >= 70 && value < 80) highlightRegion = 'yellow1';
-                else if (value >= 80 && value < 100) highlightRegion = 'green';
-                else if (value >= 100 && value < 110) highlightRegion = 'yellow2';
-                else if (value >= 110 && value <= 120) highlightRegion = 'red2';
+                if (value >= 0 && value < 50) highlightRegion = 'red1';
+                else if (value >= 50 && value < 60) highlightRegion = 'yellow1';
+                else if (value >= 60 && value <= 100) highlightRegion = 'green';
+                else if (value > 100 && value <= 120) highlightRegion = 'yellow2';
+                else if (value > 120 && value <= 140) highlightRegion = 'red2';
 
                 // 更新各区域的透明度
                 regions.forEach(region => {
@@ -577,21 +637,19 @@
 
             const pointer = dashboard.querySelector('#temp-pointer');
             const valueText = dashboard.querySelector('#temp-value');
-            const regions = ['red1', 'yellow1', 'green', 'yellow2', 'red2'];
+            const regions = ['red1', 'green', 'red2'];
             
             if (pointer && valueText) {
                 // 计算角度
-                const angle = valueToAngle(value, 35, 38);
+                const angle = valueToAngle(value, 35.5, 38);
                 pointer.style.transform = `rotate(${angle}deg)`;
                 valueText.textContent = typeof value === 'number' ? value.toFixed(1) : value;
 
                 // 根据温度值确定哪个区域应被高亮显示
                 let highlightRegion;
-                if (value >= 35 && value < 35.5) highlightRegion = 'red1';
-                else if (value >= 35.5 && value < 36) highlightRegion = 'yellow1';
-                else if (value >= 36 && value < 37) highlightRegion = 'green';
-                else if (value >= 37 && value < 37.5) highlightRegion = 'yellow2';
-                else if (value >= 37.5 && value <= 38) highlightRegion = 'red2';
+                if (value >= 35.5 && value < 36) highlightRegion = 'red1';
+                else if (value >= 36 && value <= 37.3) highlightRegion = 'green';
+                else if (value > 37.3 && value <= 38) highlightRegion = 'red2';
 
                 // 更新各区域的透明度
                 regions.forEach(region => {

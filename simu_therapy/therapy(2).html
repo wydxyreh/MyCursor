@@ -347,7 +347,7 @@
 
                             <div class="progress-bar">
                                 <div class="progress"></div>
-                                <span class="ratio">1:20</span>
+                                <span class="ratio">2:00</span>
                             </div>
 
                             <div class="metrics">
@@ -408,7 +408,6 @@
         <button class="patient-button" onclick="selectStyle(3)">Style 3</button>
         <button class="patient-button" onclick="selectStyle(4)">Style 4</button>
         <button class="patient-button" onclick="selectStyle(5)">Style 5</button>
-        <button class="patient-button" onclick="selectStyle(6)">Style 6</button>
     </div>
 
     <script>
@@ -494,7 +493,8 @@
                 this.startTime = Date.now();
                 this.startMonitoring();
                 this.startCountdown();
-                this.timerId = null;
+                this.MonitorId = null;
+                this.countdownIntervalId = null;
             }
 
             depthToHeight(depth) {
@@ -576,9 +576,8 @@
             }
 
             startMonitoring() {
-                // 假设在这里初始化 this.timerId 为 null 或者在构造函数中进行初始化
-                if (this.timerId !== undefined) {
-                    clearTimeout(this.timerId); // 清除旧的定时器
+                if (this.MonitorId !== undefined) {
+                    clearTimeout(this.MonitorId); // 清除旧的定时器
                 }
 
                 this.updateChart();
@@ -587,28 +586,39 @@
                     this.updateChart();
                     this.currentInterval = this.generatePressInterval();
                     
-                    // 设置新的定时器，并更新 timerId
-                    this.timerId = setTimeout(() => {
+                    // 设置新的定时器，并更新 MonitorId
+                    this.MonitorId = setTimeout(() => {
                         updateFunc();
                     }, this.currentInterval);
                 };
                 
                 // 首次调用 updateFunc，启动循环
-                this.timerId = setTimeout(updateFunc, this.currentInterval);
+                this.MonitorId = setTimeout(updateFunc, this.currentInterval);
             }
 
             startCountdown() {
-                this.updateCountdown();
-                const countdownInterval = setInterval(() => {
-                    this.remainingTime -= 1;
+                // 清除旧的定时器，如果有的话
+                if (this.countdownIntervalId !== undefined) {
+                    clearTimeout(this.countdownIntervalId); // 清除旧的定时器
+                }
+
+                this.updateCountdown(); // 更新倒计时显示
+
+                const countdownFunc = () => {
                     if (this.remainingTime <= 0) {
-                        clearInterval(countdownInterval);
                         this.remainingTime = 0;
                         this.updateCountdown();
-                        return;
+                        return; // 结束执行
                     }
-                    this.updateCountdown();
-                }, 1000);
+                    this.remainingTime -= 1;
+                    this.updateCountdown(); // 更新倒计时显示
+
+                    // 设置新的定时器，并更新 countdownIntervalId
+                    this.countdownIntervalId = setTimeout(countdownFunc, 1000);
+                };
+
+                // 首次调用 countdownFunc，启动循环
+                this.countdownIntervalId = setTimeout(countdownFunc, 1000);
             }
 
             updateCountdown() {
@@ -673,6 +683,8 @@
         function selectStyle(patientNumber) {
             const style = compressionStyles[`style${patientNumber}`];
             if (cprMonitorInstance) {
+                clearTimeout(cprMonitorInstance.MonitorId); // 清除旧的定时器
+                clearTimeout(cprMonitorInstance.countdownIntervalId); // 清除旧的定时器
                 cprMonitorInstance = null; // 清空旧的CPRMonitor实例
             }
             cprMonitorInstance = new CPRMonitor(style);

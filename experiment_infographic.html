@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行为实验</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .screen {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            max-width: 800px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .instruction {
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .fixation {
+            font-size: 48px;
+            color: white;
+        }
+
+        .practice-instruction {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .stimulus img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .question {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        .question-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <!-- 指导语界面 -->
+    <div id="instruction" class="screen active">
+        <div class="instruction">
+            <h2>实验指导语</h2>
+            <p>欢迎参加本次实验。</p>
+            <p>在实验中，你会看到一系列填充圆形阵列的视频。</p>
+            <p>请观看完整个视频，并尽可能记住视频中的内容。</p>
+            <p>之后会出现一个问题，请根据记忆回答。</p>
+            <p>回答规则：</p>
+            <ul>
+                <li>正确请按 A 键</li>
+                <li>错误请按 L 键</li>
+            </ul>
+            <p>按任意键继续...</p>
+        </div>
+    </div>
+
+    <!-- 练习提示语界面 -->
+    <div id="practiceInstruction" class="screen">
+        <div class="practice-instruction">
+            现在进入实验的练习，你会看到一张填充圆形阵列的图片，
+            中间有些圆形被替换成了三角形，你需要在5秒内尽可能记住图片上的内容然后回答问题，
+            正确按A，错误按L
+        </div>
+    </div>
+
+    <!-- 注视点界面 -->
+    <div id="fixation" class="screen">
+        <div class="fixation">+</div>
+    </div>
+
+    <!-- 刺激呈现界面 -->
+    <div id="stimulus" class="screen">
+        <div class="stimulus">
+            <!-- 视频将在这里动态插入 -->
+        </div>
+        <div class="question-container" style="display: none;">
+            <div class="question"></div>
+        </div>
+    </div>
+
+    <script>
+        // 基本变量
+        let currentPhase = 'instruction';  // 当前阶段
+        let currentLayout = 1;             // 当前变量（1-5）
+        let practiceCount = 0;             // 练习计数（0-3）
+        let formalCount = 0;               // 正式实验计数（0-2）
+        let startTime;
+        let lastResponse = '';
+        let questionTimeout;
+        let isProcessingResponse = false;
+        const results = [];
+
+        // 添加当前问题相关变量
+        let currentQuestionIndex = 0;
+        let currentQuestions = [];
+
+        // 修改问题数据结构，每个试次包含9个问题
+        const questions = {
+            prominence1: {
+                practice: [
+                    {
+                        questions: [
+                            { text: "变量1-练习1-问题1：图中三角形的数量是否大于10？", correctAnswer: "a" },
+                            { text: "变量1-练习1-问题2：图中是否有红色三角形？", correctAnswer: "l" },
+                            { text: "变量1-练习1-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
+                            { text: "变量1-练习1-问题4：图中三角形数量是否小于20？", correctAnswer: "l" },
+                            { text: "变量1-练习1-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习1-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-练习1-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习1-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-练习1-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
+                        ]
+                    },
+                    {
+                        questions: [
+                            { text: "变量1-练习2-问题1：图中三角形是否都在左侧？", correctAnswer: "l" },
+                            { text: "变量1-练习2-问题2：图中是否有红色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习2-问题3：图中三角形是否都在右侧？", correctAnswer: "l" },
+                            { text: "变量1-练习2-问题4：图中三角形数量是否小于15？", correctAnswer: "l" },
+                            { text: "变量1-练习2-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习2-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-练习2-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习2-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-练习2-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
+                        ]
+                    },
+                    {
+                        questions: [
+                            { text: "变量1-练习3-问题1：图中是否有红色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习3-问题2：图中三角形是否都在左侧？", correctAnswer: "a" },
+                            { text: "变量1-练习3-问题3：图中三角形数量是否小于15？", correctAnswer: "l" },
+                            { text: "变量1-练习3-问题4：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习3-问题5：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-练习3-问题6：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习3-问题7：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-练习3-问题8：图中是否有绿色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习3-问题9：图中三角形数量是否大于10？", correctAnswer: "a" }
+                        ]
+                    },
+                    {
+                        questions: [
+                            { text: "变量1-练习4-问题1：图中三角形数量是否小于15？", correctAnswer: "l" },
+                            { text: "变量1-练习4-问题2：图中是否有红色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习4-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
+                            { text: "变量1-练习4-问题4：图中三角形数量是否大于10？", correctAnswer: "a" },
+                            { text: "变量1-练习4-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习4-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-练习4-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-练习4-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-练习4-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
+                        ]
+                    }
+                ],
+                formal: [
+                    {
+                        questions: [
+                            { text: "变量1-正式1-问题1：图中三角形的数量是否大于12？", correctAnswer: "a" },
+                            { text: "变量1-正式1-问题2：图中是否有红色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式1-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
+                            { text: "变量1-正式1-问题4：图中三角形数量是否小于15？", correctAnswer: "l" },
+                            { text: "变量1-正式1-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式1-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-正式1-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式1-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-正式1-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
+                        ]
+                    },
+                    {
+                        questions: [
+                            { text: "变量1-正式2-问题1：图中三角形是否都在右侧？", correctAnswer: "l" },
+                            { text: "变量1-正式2-问题2：图中是否有红色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式2-问题3：图中三角形数量是否小于15？", correctAnswer: "l" },
+                            { text: "变量1-正式2-问题4：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式2-问题5：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-正式2-问题6：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式2-问题7：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-正式2-问题8：图中是否有绿色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式2-问题9：图中三角形数量是否大于10？", correctAnswer: "a" }
+                        ]
+                    },
+                    {
+                        questions: [
+                            { text: "变量1-正式3-问题1：图中是否有红色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式3-问题2：图中三角形是否都在左侧？", correctAnswer: "a" },
+                            { text: "变量1-正式3-问题3：图中三角形数量是否小于15？", correctAnswer: "l" },
+                            { text: "变量1-正式3-问题4：图中是否有蓝色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式3-问题5：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                            { text: "变量1-正式3-问题6：图中是否有黄色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式3-问题7：图中三角形是否集中在中心？", correctAnswer: "l" },
+                            { text: "变量1-正式3-问题8：图中是否有绿色三角形？", correctAnswer: "a" },
+                            { text: "变量1-正式3-问题9：图中三角形数量是否大于10？", correctAnswer: "a" }
+                        ]
+                    }
+                ]
+            },
+            // ... 其他变量的问题结构类似
+        };
+
+        // 显示屏幕函数
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            console.log('显示屏幕:', screenId);
+        }
+
+        // 显示注视点
+        function showFixation() {
+            showScreen('fixation');
+            updateDebugInfo();
+            setTimeout(() => {
+                showStimulus();
+            }, 1000);
+        }
+
+        // 显示练习提示语
+        function showPracticeInstruction() {
+            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
+                你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
+                你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+            
+            document.querySelector('.practice-instruction').textContent = practiceInstructionText;
+            showScreen('practiceInstruction');
+            currentPhase = 'practiceInstruction';
+            updateDebugInfo();
+        }
+
+        // 显示刺激
+        function showStimulus() {
+            console.log('显示刺激', {currentLayout, practiceCount, formalCount});
+            const stimulusContainer = document.querySelector('.stimulus');
+            const video = document.createElement('video');
+            video.style.width = '100%';
+            video.style.height = 'auto';
+            video.autoplay = true;
+            video.muted = true;
+            
+            let videoPath;
+            if (practiceCount < 4) {
+                videoPath = `images/infographic${currentLayout}/excise${practiceCount + 1}.mp4`;
+            } else {
+                videoPath = `images/infographic${currentLayout}/test${formalCount + 1}.mp4`;
+            }
+            
+            console.log('加载视频:', videoPath);
+            
+            video.onloadeddata = () => {
+                stimulusContainer.innerHTML = '';
+                stimulusContainer.appendChild(video);
+                showScreen('stimulus');
+                video.play();
+            };
+            
+            video.onended = () => {
+                // 保持最后一帧但不清空容器
+                video.pause();
+                
+                currentQuestionIndex = 0;
+                currentQuestions = practiceCount < 4 ? 
+                    questions[`prominence${currentLayout}`].practice[practiceCount].questions :
+                    questions[`prominence${currentLayout}`].formal[formalCount].questions;
+                
+                console.log('视频结束，准备显示问题:', currentQuestions);
+                
+                setTimeout(() => {
+                    showNextQuestion();
+                }, 500);
+            };
+            
+            video.onerror = () => {
+                console.error('视频加载失败:', videoPath);
+                alert(`视频加载失败: ${videoPath}\n请检查视频文件是否存在`);
+            };
+            
+            video.src = videoPath;
+        }
+
+        // 显示下一个问题
+        function showNextQuestion() {
+            console.log('显示下一个问题', {
+                currentQuestionIndex,
+                totalQuestions: currentQuestions.length,
+                currentQuestions
+            });
+            
+            if (currentQuestionIndex >= currentQuestions.length) {
+                handleTrialComplete();
+                return;
+            }
+
+            const questionContainer = document.querySelector('.question-container');
+            const questionElement = document.querySelector('.question');
+            
+            // 显示当前问题编号和总问题数
+            questionElement.innerHTML = `
+                <div style="font-size: 16px; margin-bottom: 10px;">
+                    问题 ${currentQuestionIndex + 1}/9
+                </div>
+                ${currentQuestions[currentQuestionIndex].text}
+                <p>正确按A，错误按L</p>
+            `;
+            
+            questionContainer.style.display = 'block';
+            startTime = Date.now();
+
+            // 设置10秒超时
+            questionTimeout = setTimeout(() => {
+                handleTimeout();
+            }, 10000);
+        }
+
+        // 处理问题超时
+        function handleTimeout() {
+            clearTimeout(questionTimeout);
+            
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < 4 ? '练习' : '正式',
+                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `infographic${currentLayout}/${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: 'TIMEOUT',
+                isCorrect: '错误',
+                reactionTime: 10000
+            });
+
+            currentQuestionIndex++;
+            showNextQuestion();
+        }
+
+        // 处理试次完成
+        function handleTrialComplete() {
+            const questionContainer = document.querySelector('.question-container');
+            questionContainer.style.display = 'none';
+
+            console.log('试次完成', {practiceCount, formalCount, currentLayout});
+            
+            if (practiceCount < 3) {
+                practiceCount++;
+                showFixation();
+                updateDebugInfo();
+                console.log('进入下一个练习:', practiceCount + 1);
+            } else if (practiceCount === 3) {
+                practiceCount++;
+                alert('练习结束，即将进入正式实验');
+                showFixation();
+                updateDebugInfo();
+            } else if (formalCount < 2) {
+                formalCount++;
+                showFixation();
+                updateDebugInfo();
+                console.log('进入下一个正式实验:', formalCount + 1);
+            } else if (formalCount === 2) {
+                formalCount++;
+                if (currentLayout < 5) {
+                    currentLayout++;
+                    practiceCount = 0;
+                    formalCount = 0;
+                    alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
+                    showPracticeInstruction();
+                } else {
+                    alert('实验结束！即将导出结果文件。');
+                    exportToCSV();
+                }
+                updateDebugInfo();
+            }
+        }
+
+        // 处理响应
+        function handleResponse(key) {
+            if (isProcessingResponse) return;
+            isProcessingResponse = true;
+
+            clearTimeout(questionTimeout);
+            const reactionTime = Date.now() - startTime;
+            lastResponse = key;
+
+            // 记录结果
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < 4 ? '练习' : '正式',
+                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `infographic${currentLayout}/${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: key.toUpperCase(),
+                isCorrect: key === currentQuestions[currentQuestionIndex].correctAnswer ? "正确" : "错误",
+                reactionTime: reactionTime
+            });
+
+            currentQuestionIndex++;
+            isProcessingResponse = false;
+            showNextQuestion();
+            updateDebugInfo();
+        }
+
+        // 修改按键事件处理
+        window.onkeydown = function(event) {
+            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
+            
+            if (currentPhase === 'instruction') {
+                currentPhase = 'practiceInstruction';
+                showPracticeInstruction();
+                return;
+            }
+            
+            if (currentPhase === 'practiceInstruction') {
+                currentPhase = 'experiment';
+                showFixation();
+                return;
+            }
+            
+            if (currentPhase === 'experiment' && 
+                document.querySelector('.question-container').style.display === 'block') {
+                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
+                    handleResponse(event.key.toLowerCase());
+                }
+            }
+        };
+
+        // 修改初始化函数
+        window.onload = function() {
+            currentPhase = 'instruction';
+            currentLayout = 1;
+            practiceCount = 0;
+            formalCount = 0;
+            
+            showScreen('instruction');
+            console.log('实验初始化完成，当前阶段:', currentPhase);
+            updateDebugInfo();
+        };
+
+        // 在HTML中添加调试信息显示（可选）
+        const debugInfo = document.createElement('div');
+        debugInfo.style.position = 'fixed';
+        debugInfo.style.bottom = '10px';
+        debugInfo.style.right = '10px';
+        debugInfo.style.background = 'rgba(0,0,0,0.7)';
+        debugInfo.style.color = 'white';
+        debugInfo.style.padding = '5px';
+        debugInfo.style.fontSize = '12px';
+        document.body.appendChild(debugInfo);
+
+        // 更新调试信息
+        function updateDebugInfo() {
+            let trialType = practiceCount < 4 ? '练习' : '正式';
+            let trialNumber = practiceCount < 4 ? practiceCount + 1 : formalCount + 1;
+            debugInfo.textContent = `变量${currentLayout} | ${trialType}${trialNumber}`;
+        }
+
+        // 修改CSV导出函数
+        function exportToCSV() {
+            let csvContent = "\ufeff变量,试次类型,试次编号,问题编号,视频路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
+            
+            results.forEach(result => {
+                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
+                            `${result.questionNumber},${result.videoPath},${result.question},` +
+                            `${result.correctAnswer},${result.userResponse},${result.isCorrect},` +
+                            `${result.reactionTime}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

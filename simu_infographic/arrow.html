@@ -56,34 +56,33 @@
         }
 
         .arrow {
-            width: 0;
-            height: 0;
-            border-left: 11.22px solid transparent;
-            border-right: 11.22px solid transparent;
-            border-bottom: 29.93px solid transparent;
-            transform: rotate(180deg);
+            width: 22.44px;
+            height: 29.93px;
             opacity: 0;
             transition: opacity 0.3s;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .arrow.show {
             opacity: 1;
         }
 
-        .arrow.up {
-            transform: rotate(0deg);
+        .arrow.red.up {
+            background-image: url('../arrow/red-up.png');
         }
 
-        .arrow.down {
-            transform: rotate(180deg);
+        .arrow.red.down {
+            background-image: url('../arrow/red-down.png');
         }
 
-        .arrow.red {
-            border-bottom-color: #FF5555;
+        .arrow.yellow.up {
+            background-image: url('arrow/yellow-up.png');
         }
 
-        .arrow.yellow {
-            border-bottom-color: #FFCD05;
+        .arrow.yellow.down {
+            background-image: url('arrow/yellow-down.png');
         }
 
         .divider {
@@ -242,38 +241,45 @@
         }
 
         // 更新箭头状态
-        function updateArrow(param, value, arrowElement) {
-            const paramHistory = history[param];
-            
-            paramHistory.push({value, time: Date.now()});
-            
-            // 只保留最近4秒的数据
-            const fourSecondsAgo = Date.now() - 4000;
-            while (paramHistory.length > 0 && 
-                    paramHistory[0].time < fourSecondsAgo) {
-                paramHistory.shift();
-            }
+        function updateArrow(param, value, arrow) {
+            // 获取历史数据
+            const history = param === 'SpO2' ? spo2History :
+                          param === 'HR' ? hrHistory :
+                          param === 'Pleth_bp1' ? plethBP1History :
+                          param === 'Pleth_bp2' ? plethBP2History :
+                          tempHistory;
 
-            // 获取2秒前的值
-            const twoSecondsAgo = Date.now() - 2000;
-            const oldValue = paramHistory.find(h => h.time <= twoSecondsAgo)?.value;
-
-            if (!oldValue) return;
-            const zone = getValueZone(value, param.startsWith('Pleth_') ? 
-                RANGES['Pleth'][param.split('_')[1]] : RANGES[param]);
-            if (zone === 'green') {
-                arrowElement.className = 'arrow';
+            if (history.length < 2) {
+                arrow.classList.remove('show', 'up', 'down', 'red', 'yellow');
                 return;
             }
 
-            const trend = value > oldValue ? 'up' : 
-                         value < oldValue ? 'down' : '';
+            const lastValue = history[history.length - 2];
+            const diff = value - lastValue;
+
+            if (Math.abs(diff) < 0.01) {
+                arrow.classList.remove('show', 'up', 'down', 'red', 'yellow');
+                return;
+            }
+
+            arrow.classList.add('show');
             
-            if (trend) {
-                arrowElement.className = 
-                    `arrow show ${trend} ${zone.toLowerCase()}`;
+            // 根据变化方向设置箭头方向
+            if (diff > 0) {
+                arrow.classList.add('up');
+                arrow.classList.remove('down');
             } else {
-                arrowElement.className = 'arrow';
+                arrow.classList.add('down');
+                arrow.classList.remove('up');
+            }
+
+            // 根据变化幅度设置箭头颜色
+            if (Math.abs(diff) >= getThreshold(param)) {
+                arrow.classList.add('red');
+                arrow.classList.remove('yellow');
+            } else {
+                arrow.classList.add('yellow');
+                arrow.classList.remove('red');
             }
         }
 

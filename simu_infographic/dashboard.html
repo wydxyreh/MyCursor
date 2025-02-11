@@ -260,6 +260,27 @@
             align-items: flex-end;
         }
 
+        .patient-buttons {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .patient-button {
+            padding: 5px 10px;
+            background: #3F3F3F;
+            color: white;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+        .patient-button:hover {
+            background: #4F4F4F;
+        }
+
     </style>
 </head>
 <body>
@@ -379,7 +400,7 @@
                     <circle class="pointer-base" cx="100" cy="100" r="15"/>
                 </g>
                 
-                <text class="value" id="temp-value" x="100" y="130">0</text>
+                <text class="value" id="temp-value" x="100" y="130">0.0/text>
                 
                 <!-- 刻度 -->
                 <g>
@@ -440,6 +461,16 @@
         </div>
     </div>
 
+    <!-- 添加病人选择按钮 -->
+    <div class="patient-buttons">
+        <button class="patient-button" onclick="selectPatient(1)">Patient 1</button>
+        <button class="patient-button" onclick="selectPatient(2)">Patient 2</button>
+        <button class="patient-button" onclick="selectPatient(3)">Patient 3</button>
+        <button class="patient-button" onclick="selectPatient(4)">Patient 4</button>
+        <button class="patient-button" onclick="selectPatient(5)">Patient 5</button>
+        <button class="patient-button" onclick="selectPatient(6)">Patient 6</button>
+    </div>
+
     <script>
         // 添加趋势控制系统
         const trendControl = {
@@ -448,15 +479,15 @@
             initialValues: {
                 spo2: 90,
                 hr: 120,
-                bpv1: 120,
-                bpv2: 80,
-                temp: 38
+                Pleth_bp1: 120,
+                Pleth_bp2: 80,
+                temp: 38.0
             },
             targetValues: {
                 spo2: 90,
                 hr: 130,
-                bpv1: 160,
-                bpv2: 100,
+                Pleth_bp1: 160,
+                Pleth_bp2: 100,
                 temp: 38.0
             },
             isTransitioning: false
@@ -475,8 +506,8 @@
                 return {
                     spo2: trendControl.initialValues.spo2,
                     hr: trendControl.initialValues.hr,
-                    bpv1: trendControl.initialValues.bpv1,
-                    bpv2: trendControl.initialValues.bpv2,
+                    Pleth_bp1: trendControl.initialValues.Pleth_bp1,
+                    Pleth_bp2: trendControl.initialValues.Pleth_bp2,
                     temp: trendControl.initialValues.temp
                 };
             }
@@ -530,7 +561,7 @@
             // 更新SpO2
             updateSpO2(data.spo2);
             // 更新BP
-            updateBP(data.bpv1, data.bpv2);
+            updateBP(data.Pleth_bp1, data.Pleth_bp2);
         }
 
         // 更新显示数据
@@ -538,126 +569,6 @@
             const newData = generateRandomData();
             // 只更新显示值
             updatePanelValues(newData);
-        }
-        
-        // 添加录制相关的变量
-        let mediaRecorder;
-        let recordedChunks = [];
-        
-        // 添加录制功能
-        async function startTransition() {
-            try {
-                // 开始录制屏幕
-                const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { 
-                        displaySurface: "browser",
-                        frameRate: 30
-                    }
-                });
-                
-                recordedChunks = [];
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'video/webm;codecs=vp9',
-                    videoBitsPerSecond: 5000000 // 5Mbps
-                });
-
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    // 创建视频文件并下载
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'trend_changes.webm';
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    
-                    // 停止所有轨道
-                    stream.getTracks().forEach(track => track.stop());
-                };
-
-                // 开始录制
-                mediaRecorder.start();
-                
-                // 添加3秒延迟
-                setTimeout(function() {
-                    // 开始趋势变化
-                    trendControl.startTime = Date.now();
-                    trendControl.isTransitioning = true;
-                    setInterval(updateMetricValues, 1000);
-                }, 1000);
-
-                // 两分钟后自动停止录制
-                setTimeout(() => {
-                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                        mediaRecorder.stop();
-                    }
-                }, trendControl.duration * 1000);
-
-            } catch (err) {
-                console.error("录制出错:", err);
-                // 如果录制失败，仍然开始趋势变化
-                trendControl.startTime = Date.now();
-                trendControl.isTransitioning = true;
-            }
-        }
-
-        // 添加一个停止录制的函数
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-            }
-        }
-
-        // 修改控制面板HTML，添加录制状态指示
-        const controlPanel = document.createElement('div');
-        controlPanel.innerHTML = `
-            <div style="position: fixed; top: 20px; right: 20px; background: #3F3F3F; padding: 20px; border-radius: 5px;">
-                <h3 style="color: white; margin-top: 0;">趋势控制</h3>
-                <div id="valueInputs"></div>
-                <button onclick="startTransition()" style="margin-top: 10px; padding: 5px 10px;">开始变化并录制</button>
-                <div id="recordingStatus" style="color: white; margin-top: 10px; display: none;">
-                    正在录制...
-                </div>
-            </div>
-        `;
-        document.body.appendChild(controlPanel);
-
-        // 创建输入字段
-        const valueInputs = document.getElementById('valueInputs');
-        Object.keys(trendControl.initialValues).forEach(metric => {
-            const container = document.createElement('div');
-            container.style.marginBottom = '10px';
-            container.innerHTML = `
-                <div style="color: white; margin-bottom: 5px;">${metric.toUpperCase()}</div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" step="${metric === 'temp' ? '0.1' : '10'}" 
-                           value="${trendControl.initialValues[metric]}"
-                           onchange="updateValue('${metric}', 'initial', this.value)"
-                           style="width: 60px;">
-                    →
-                    <input type="number" step="${metric === 'temp' ? '0.1' : '10'}" 
-                           value="${trendControl.targetValues[metric]}"
-                           onchange="updateValue('${metric}', 'target', this.value)"
-                           style="width: 60px;">
-                </div>
-            `;
-            valueInputs.appendChild(container);
-        });
-
-        // 更新值的函数
-        function updateValue(metric, type, value) {
-            value = parseFloat(value);
-            if (type === 'initial') {
-                trendControl.initialValues[metric] = value;
-            } else {
-                trendControl.targetValues[metric] = value;
-            }
         }
 
         // 通用函数
@@ -880,7 +791,7 @@
             updateSpO2(trendControl.initialValues.spo2);
 
             // 初始化BP
-            updateBP(trendControl.initialValues.bpv1, trendControl.initialValues.bpv2);
+            updateBP(trendControl.initialValues.Pleth_bp1, trendControl.initialValues.Pleth_bp2);
         });
 
         // 添加过渡效果
@@ -900,6 +811,135 @@
                 }
             </style>
         `);
+
+        // 用于存储定时器的 ID
+        let metricIntervalId = null;
+        let trendIntervalId = null;
+
+        // 病人数据
+        const patientData = {
+            patient1: {
+                initial: {
+                    hr: 110,
+                    spo2: 94,
+                    Pleth_bp1: 100,
+                    Pleth_bp2: 60,
+                    temp: 37.0
+                },
+                target: {
+                    hr: 130,
+                    spo2: 88,
+                    Pleth_bp1: 85,
+                    Pleth_bp2: 50,
+                    temp: 37.2
+                }
+            },
+            patient2: {
+                initial: {
+                    hr: 95,
+                    spo2: 88,
+                    Pleth_bp1: 110,
+                    Pleth_bp2: 65,
+                    temp: 37.5
+                },
+                target: {
+                    hr: 105,
+                    spo2: 80,
+                    Pleth_bp1: 105,
+                    Pleth_bp2: 60,
+                    temp: 37.8
+                }
+            },
+            patient3: {
+                initial: {
+                    hr: 100,
+                    spo2: 92,
+                    Pleth_bp1: 90,
+                    Pleth_bp2: 55,
+                    temp: 38.5
+                },
+                target: {
+                    hr: 120,
+                    spo2: 88,
+                    Pleth_bp1: 75,
+                    Pleth_bp2: 45,
+                    temp: 39.0
+                }
+            },
+            patient4: {
+                initial: {
+                    hr: 85,
+                    spo2: 96,
+                    Pleth_bp1: 140,
+                    Pleth_bp2: 85,
+                    temp: 36.8
+                },
+                target: {
+                    hr: 90,
+                    spo2: 95,
+                    Pleth_bp1: 150,
+                    Pleth_bp2: 90,
+                    temp: 37.2
+                }
+            },
+            patient5: {
+                initial: {
+                    hr: 75,
+                    spo2: 98,
+                    Pleth_bp1: 120,
+                    Pleth_bp2: 70,
+                    temp: 36.5
+                },
+                target: {
+                    hr: 110,
+                    spo2: 90,
+                    Pleth_bp1: 90,
+                    Pleth_bp2: 50,
+                    temp: 37.0
+                }
+            },
+            patient6: {
+                initial: {
+                    hr: 80,
+                    spo2: 97,
+                    Pleth_bp1: 110,
+                    Pleth_bp2: 70,
+                    temp: 37.0
+                },
+                target: {
+                    hr: 90,
+                    spo2: 96,
+                    Pleth_bp1: 100,
+                    Pleth_bp2: 65,
+                    temp: 38.0
+                }
+            }
+        };
+
+        // 选择病人函数
+        function selectPatient(patientNumber) {
+            const patient = patientData[`patient${patientNumber}`];
+            
+            // 2. 重置 trendControl 参数并导入 patient.initial 和 patient.target 的数据
+            trendControl.initialValues = {...patient.initial};
+            trendControl.targetValues = {...patient.target};
+            trendControl.startTime = Date.now();
+            trendControl.isTransitioning = true;
+            trendControl.duration = 120;
+
+            // 清除之前的定时器
+            if (metricIntervalId !== null) {
+                clearInterval(metricIntervalId);
+            }
+            if (trendIntervalId !== null) {
+                clearInterval(trendIntervalId);
+            }
+
+            updateMetricValues()
+            
+            // 开始新的定时器
+            metricIntervalId = setInterval(updateMetricValues, 1000);  // 每秒更新显示值
+        }
     </script>
 </body>
 </html> 

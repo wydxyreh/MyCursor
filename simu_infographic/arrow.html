@@ -86,6 +86,80 @@
             border-bottom-color: #FFCD05;
         }
 
+        .arrow.green {
+            border-bottom-color: green;
+        }
+        
+        .arrow-pleth-1 {
+            width: 0;
+            height: 0;
+            border-left: 11.22px solid transparent;
+            border-right: 11.22px solid transparent;
+            border-bottom: 29.93px solid transparent;
+            transform: rotate(180deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .arrow-pleth-1.show {
+            opacity: 1;
+        }
+
+        .arrow-pleth-1.up {
+            transform: rotate(0deg);
+        }
+
+        .arrow-pleth-1.down {
+            transform: rotate(180deg);
+        }
+
+        .arrow-pleth-1.red {
+            border-bottom-color: #FF5555;
+        }
+
+        .arrow-pleth-1.yellow {
+            border-bottom-color: #FFCD05;
+        }
+
+        .arrow-pleth-1.green {
+            border-bottom-color: green;
+        }
+
+        .arrow-pleth-2 {
+            width: 0;
+            height: 0;
+            border-left: 11.22px solid transparent;
+            border-right: 11.22px solid transparent;
+            border-bottom: 29.93px solid transparent;
+            transform: rotate(180deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .arrow-pleth-2.show {
+            opacity: 1;
+        }
+
+        .arrow-pleth-2.up {
+            transform: rotate(0deg);
+        }
+
+        .arrow-pleth-2.down {
+            transform: rotate(180deg);
+        }
+
+        .arrow-pleth-2.red {
+            border-bottom-color: #FF5555;
+        }
+
+        .arrow-pleth-2.yellow {
+            border-bottom-color: #FFCD05;
+        }
+
+        .arrow-pleth-2.green {
+            border-bottom-color: green;
+        }
+
         .divider {
             width: 166.44px;
             height: 1px;
@@ -170,6 +244,7 @@
     <!-- Pleth Panel -->
     <div class="panel pleth-panel">
         <div class="panel-title">Pleth</div>
+
         <div class="value-container">
             <div class="scale">
                 <div>140</div>
@@ -177,10 +252,12 @@
             </div>
             <div class="value-display">
                 <div class="value bp1">120</div>
-                <div class="arrow"></div>
+                <div class="arrow-pleth-1"></div>
             </div>
         </div>
+        
         <div class="divider"></div>
+
         <div class="value-container">
             <div class="scale">
                 <div>90</div>
@@ -188,9 +265,10 @@
             </div>
             <div class="value-display">
                 <div class="value bp2">75</div>
-                <div class="arrow"></div>
+                <div class="arrow-pleth-2"></div>
             </div>
         </div>
+
     </div>
 
     <!-- Temp Panel -->
@@ -201,7 +279,10 @@
                 <div>37.3</div>
                 <div>36.0</div>
             </div>
-            <div class="value">36.8</div>
+            <div class="value-display">
+                <div class="value temp">36.8</div>
+                <div class="arrow"></div>
+            </div>
         </div>
     </div>
 
@@ -223,22 +304,22 @@
                 green: { min: 90, max: 100 }
             },
             HR: {
-                red: { min: 0, max: 50, min2: 120, max2: Infinity },
+                red: { min: 0, max: 50, min2: 120, max2: 140 },
                 yellow: { min: 50, max: 60, min2: 100, max2: 120 },
                 green: { min: 60, max: 100 }
             },
             Pleth_bp1: {
-                red: { min: 0, max: 90, min2: 140, max2: Infinity },
+                red: { min: 50, max: 90, min2: 140, max2: 180 },
                 yellow: { min: 90, max: 100, min2: 120, max2: 140 },
-                green: { min: 90, max: 120 }    
+                green: { min: 100, max: 120 }    
             },
             Pleth_bp2: {
-                red: { min: 0, max: 60, min2: 90, max2: Infinity },
+                red: { min: 50, max: 60, min2: 90, max2: 130 },
                 yellow: { min: 60, max: 70, min2: 80, max2: 90 },
-                green: { min: 60, max: 80 }
+                green: { min: 70, max: 80 }
             },
             Temp: {
-                red: { min: 0, max: 35.5, min2: 38, max2: Infinity },
+                red: { min: 33, max: 35.5, min2: 38, max2: 42 },
                 yellow: { min: 35.5, max: 36, min2: 37.3, max2: 38 },
                 green: { min: 36, max: 37.3 }
             }
@@ -255,11 +336,10 @@
 
         // 判断值所在的区间
         function getValueZone(value, ranges) {
-            // 先检查红色区间
-            const redRange = ranges.red;
-            if ((value >= redRange.min && value <= redRange.max) || 
-                (redRange.min2 && value >= redRange.min2 && value <= redRange.max2)) {
-                return 'red';
+            // 先检查绿色区间
+            const greenRange = ranges.green;
+            if (value >= greenRange.min && value <= greenRange.max) {
+                return 'green';
             }
             
             // 再检查黄色区间
@@ -269,10 +349,11 @@
                 return 'yellow';
             }
             
-            // 最后检查绿色区间
-            const greenRange = ranges.green;
-            if (value >= greenRange.min && value <= greenRange.max) {
-                return 'green';
+            // 最后检查红色区间
+            const redRange = ranges.red;
+            if ((value >= redRange.min && value <= redRange.max) || 
+                (redRange.min2 && value >= redRange.min2 && value <= redRange.max2)) {
+                return 'red';
             }
             
             // 如果不在任何定义的区间内，返回红色
@@ -282,7 +363,7 @@
         // 更新箭头状态
         function updateArrow(param, value, arrowElement) {
             console.log('Checking value:', value, 'for param:', param);
-            console.log('Current ranges:', param === 'Pleth_bp2' ? RANGES.Pleth.bp2 : 'other');
+            console.log('Current ranges:', param === 'Pleth_bp2' ? RANGES.Pleth_bp2 : 'other');
             console.log(`${param} value: ${value}, history:`, history[param]);
             const paramHistory = history[param];
             
@@ -301,16 +382,15 @@
 
             if (!oldValue) return;
 
-            // 修正参数名称匹配
             let ranges;
             if (param === 'SpO2') {
                 ranges = RANGES.SpO2;
             } else if (param === 'HR') {
                 ranges = RANGES.HR;
-            } else if (param === 'bp1' || param === 'Pleth_bp1') {
-                ranges = RANGES.Pleth.bp1;
-            } else if (param === 'bp2' || param === 'Pleth_bp2') {
-                ranges = RANGES.Pleth.bp2;
+            } else if (param === 'Pleth_bp1') {
+                ranges = RANGES.Pleth_bp1;
+            } else if (param === 'Pleth_bp2') {
+                ranges = RANGES.Pleth_bp2;
             } else if (param === 'Temp') {
                 ranges = RANGES.Temp;
             }
@@ -335,7 +415,7 @@
                 arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
             } else if (zone !== 'green') {
                 // 在非绿色区间时，即使没有趋势也显示对应颜色
-                arrowElement.className = `arrow show ${zone.toLowerCase()}`;
+                arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
             } else {
                 arrowElement.className = 'arrow';
             }
@@ -573,12 +653,13 @@
             
             // Pleth模拟
             const plethBP1Value = document.querySelector('.pleth-panel .bp1');
-            const plethBP1Arrow = document.querySelector('.pleth-panel .value-container:first-of-type .arrow');
+            const plethBP1Arrow = document.querySelector('.pleth-panel .arrow-pleth-1');
             const plethBP2Value = document.querySelector('.pleth-panel .bp2');
-            const plethBP2Arrow = document.querySelector('.pleth-panel .value-container:last-of-type .arrow');
+            const plethBP2Arrow = document.querySelector('.pleth-panel .arrow-pleth-2');
             
             // Temp模拟
             const tempValue = document.querySelector('.temp-panel .value');
+            const tempArrow = document.querySelector('.temp-panel .arrow');
 
             setInterval(() => {
                 // 平滑更新所有参数
@@ -596,6 +677,7 @@
                 updateArrow('HR', newHR, hrArrow);
                 updateArrow('Pleth_bp1', newPlethBP1, plethBP1Arrow);
                 updateArrow('Pleth_bp2', newPlethBP2, plethBP2Arrow);
+                updateArrow('Temp', newTemp, tempArrow);
             }, 1000);  // 每1秒更新一次
         }
 

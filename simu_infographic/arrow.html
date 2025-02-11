@@ -56,33 +56,34 @@
         }
 
         .arrow {
-            width: 22.44px;
-            height: 29.93px;
+            width: 0;
+            height: 0;
+            border-left: 11.22px solid transparent;
+            border-right: 11.22px solid transparent;
+            border-bottom: 29.93px solid transparent;
+            transform: rotate(180deg);
             opacity: 0;
             transition: opacity 0.3s;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
         }
 
         .arrow.show {
             opacity: 1;
         }
 
-        .arrow.red.up {
-            background-image: url('../arrow/red-up.png');
+        .arrow.up {
+            transform: rotate(0deg);
         }
 
-        .arrow.red.down {
-            background-image: url('../arrow/red-down.png');
+        .arrow.down {
+            transform: rotate(180deg);
         }
 
-        .arrow.yellow.up {
-            background-image: url('arrow/yellow-up.png');
+        .arrow.red {
+            border-bottom-color: #FF5555;
         }
 
-        .arrow.yellow.down {
-            background-image: url('arrow/yellow-down.png');
+        .arrow.yellow {
+            border-bottom-color: #FFCD05;
         }
 
         .divider {
@@ -112,6 +113,27 @@
             top: 475.27px;
             height: 124.24px;
         }
+
+        .patient-buttons {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .patient-button {
+            padding: 5px 10px;
+            background: #3F3F3F;
+            color: white;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+        .patient-button:hover {
+            background: #4F4F4F;
+        }
     </style>
 </head>
 <body>
@@ -136,7 +158,7 @@
         <div class="value-container">
             <div class="scale">
                 <div>120</div>
-                <div>60</div>
+                <div>50</div>
             </div>
             <div class="value-display">
                 <div class="value">72</div>
@@ -183,6 +205,16 @@
         </div>
     </div>
 
+    <!-- 添加病人选择按钮 -->
+    <div class="patient-buttons">
+        <button class="patient-button" onclick="selectPatient(1)">Patient 1</button>
+        <button class="patient-button" onclick="selectPatient(2)">Patient 2</button>
+        <button class="patient-button" onclick="selectPatient(3)">Patient 3</button>
+        <button class="patient-button" onclick="selectPatient(4)">Patient 4</button>
+        <button class="patient-button" onclick="selectPatient(5)">Patient 5</button>
+        <button class="patient-button" onclick="selectPatient(6)">Patient 6</button>
+    </div>
+
     <script>
         // 定义参数范围
         const RANGES = {
@@ -195,17 +227,15 @@
                 yellow: { min: 50, max: 60, min2: 100, max2: 120 },
                 green: { min: 60, max: 100 }
             },
-            Pleth: {
-                bp1: {
-                    red: { min: 0, max: 90, min2: 140, max2: Infinity },
-                    yellow: { min: 120, max: 140 },
-                    green: { min: 90, max: 120 }
-                },
-                bp2: {
-                    red: { min: 0, max: 60, min2: 90, max2: Infinity },
-                    yellow: { min: 80, max: 90 },
-                    green: { min: 60, max: 80 }
-                }
+            Pleth_bp1: {
+                red: { min: 0, max: 90, min2: 140, max2: Infinity },
+                yellow: { min: 90, max: 100, min2: 120, max2: 140 },
+                green: { min: 90, max: 120 }    
+            },
+            Pleth_bp2: {
+                red: { min: 0, max: 60, min2: 90, max2: Infinity },
+                yellow: { min: 60, max: 70, min2: 80, max2: 90 },
+                green: { min: 60, max: 80 }
             },
             Temp: {
                 red: { min: 0, max: 35.5, min2: 38, max2: Infinity },
@@ -225,61 +255,89 @@
 
         // 判断值所在的区间
         function getValueZone(value, ranges) {
-            for (const [zone, range] of Object.entries(ranges)) {
-                if (range.min2 !== undefined) {
-                    if ((value >= range.min && value <= range.max) || 
-                        (value >= range.min2 && value <= range.max2)) {
-                        return zone;
-                    }
-                } else {
-                    if (value >= range.min && value <= range.max) {
-                        return zone;
-                    }
-                }
+            // 先检查红色区间
+            const redRange = ranges.red;
+            if ((value >= redRange.min && value <= redRange.max) || 
+                (redRange.min2 && value >= redRange.min2 && value <= redRange.max2)) {
+                return 'red';
             }
-            return null;
+            
+            // 再检查黄色区间
+            const yellowRange = ranges.yellow;
+            if (yellowRange && ((value >= yellowRange.min && value <= yellowRange.max) || 
+                (yellowRange.min2 && value >= yellowRange.min2 && value <= yellowRange.max2))) {
+                return 'yellow';
+            }
+            
+            // 最后检查绿色区间
+            const greenRange = ranges.green;
+            if (value >= greenRange.min && value <= greenRange.max) {
+                return 'green';
+            }
+            
+            // 如果不在任何定义的区间内，返回红色
+            return 'red';
         }
 
         // 更新箭头状态
-        function updateArrow(param, value, arrow) {
-            // 获取历史数据
-            const history = param === 'SpO2' ? spo2History :
-                          param === 'HR' ? hrHistory :
-                          param === 'Pleth_bp1' ? plethBP1History :
-                          param === 'Pleth_bp2' ? plethBP2History :
-                          tempHistory;
-
-            if (history.length < 2) {
-                arrow.classList.remove('show', 'up', 'down', 'red', 'yellow');
-                return;
-            }
-
-            const lastValue = history[history.length - 2];
-            const diff = value - lastValue;
-
-            if (Math.abs(diff) < 0.01) {
-                arrow.classList.remove('show', 'up', 'down', 'red', 'yellow');
-                return;
-            }
-
-            arrow.classList.add('show');
+        function updateArrow(param, value, arrowElement) {
+            console.log('Checking value:', value, 'for param:', param);
+            console.log('Current ranges:', param === 'Pleth_bp2' ? RANGES.Pleth.bp2 : 'other');
+            console.log(`${param} value: ${value}, history:`, history[param]);
+            const paramHistory = history[param];
             
-            // 根据变化方向设置箭头方向
-            if (diff > 0) {
-                arrow.classList.add('up');
-                arrow.classList.remove('down');
-            } else {
-                arrow.classList.add('down');
-                arrow.classList.remove('up');
+            paramHistory.push({value, time: Date.now()});
+            
+            // 只保留最近4秒的数据
+            const fourSecondsAgo = Date.now() - 4000;
+            while (paramHistory.length > 0 && 
+                    paramHistory[0].time < fourSecondsAgo) {
+                paramHistory.shift();
             }
 
-            // 根据变化幅度设置箭头颜色
-            if (Math.abs(diff) >= getThreshold(param)) {
-                arrow.classList.add('red');
-                arrow.classList.remove('yellow');
+            // 获取2秒前的值
+            const twoSecondsAgo = Date.now() - 2000;
+            const oldValue = paramHistory.find(h => h.time <= twoSecondsAgo)?.value;
+
+            if (!oldValue) return;
+
+            // 修正参数名称匹配
+            let ranges;
+            if (param === 'SpO2') {
+                ranges = RANGES.SpO2;
+            } else if (param === 'HR') {
+                ranges = RANGES.HR;
+            } else if (param === 'bp1' || param === 'Pleth_bp1') {
+                ranges = RANGES.Pleth.bp1;
+            } else if (param === 'bp2' || param === 'Pleth_bp2') {
+                ranges = RANGES.Pleth.bp2;
+            } else if (param === 'Temp') {
+                ranges = RANGES.Temp;
+            }
+            
+            const zone = getValueZone(value, ranges);
+            console.log(`${param} zone: ${zone}`);
+
+            // 判断变化趋势
+            const trend = value > oldValue ? 'up' : 
+                         value < oldValue ? 'down' : '';
+            console.log(`${param} trend: ${trend}`);
+            
+            // 修改箭头显示逻辑
+            if (zone === 'red' && trend) {
+                // 在红色区间且有变化趋势时，显示红色箭头
+                arrowElement.className = `arrow show ${trend} red`;
+            } else if (zone === 'yellow' && trend) {
+                // 在黄色区间且有变化趋势时，显示黄色箭头
+                arrowElement.className = `arrow show ${trend} yellow`;
+            } else if (zone === 'green' && trend) {
+                // 在绿色区间且有变化趋势时，显示箭头
+                arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
+            } else if (zone !== 'green') {
+                // 在非绿色区间时，即使没有趋势也显示对应颜色
+                arrowElement.className = `arrow show ${zone.toLowerCase()}`;
             } else {
-                arrow.classList.add('yellow');
-                arrow.classList.remove('red');
+                arrowElement.className = 'arrow';
             }
         }
 
@@ -287,8 +345,8 @@
         let currentValues = {
             spo2: 98,
             hr: 72,
-            plethBP1: 120,
-            plethBP2: 75,
+            Pleth_bp1: 120,
+            Pleth_bp2: 75,
             temp: 36.8
         };
 
@@ -296,8 +354,8 @@
         let targetValues = {
             spo2: 98,
             hr: 72,
-            plethBP1: 120,
-            plethBP2: 75,
+            Pleth_bp1: 120,
+            Pleth_bp2: 75,
             temp: 36.8
         };
 
@@ -305,8 +363,8 @@
         const MAX_CHANGE = {
             spo2: 1,      // 血氧饱和度变化缓慢
             hr: 2,        // 心率可以相对快速变化
-            plethBP1: 1.5, // 收缩压变化适中
-            plethBP2: 1,   // 舒张压变化较慢
+            Pleth_bp1: 1.5, // 收缩压变化适中
+            Pleth_bp2: 1,   // 舒张压变化较慢
             temp: 0.1     // 体温变化非常缓慢
         };
 
@@ -328,14 +386,14 @@
                             100 + Math.random() * 30 :  // 100-130
                             45 + Math.random() * 15;    // 45-60
                     break;
-                case 'plethBP1':
+                case 'Pleth_bp1':
                     newTarget = Math.random() < 0.8 ?
                         95 + Math.random() * 20 :  // 95-115
                         Math.random() < 0.5 ?
                             125 + Math.random() * 25 :  // 125-150
                             75 + Math.random() * 15;    // 75-90
                     break;
-                case 'plethBP2':
+                case 'Pleth_bp2':
                     newTarget = Math.random() < 0.8 ?
                         65 + Math.random() * 10 :  // 65-75
                         Math.random() < 0.5 ?
@@ -355,20 +413,155 @@
 
         // 平滑更新当前值向目标值过渡
         function updateValue(param) {
-            if (Math.abs(currentValues[param] - targetValues[param]) < 0.01) {
-                targetValues[param] = generateNewTarget(param, currentValues[param]);
-            }
-            
             const diff = targetValues[param] - currentValues[param];
-            const change = Math.min(Math.abs(diff), MAX_CHANGE[param]) * Math.sign(diff);
+            // 计算每秒的变化量，确保10秒内完成变化
+            const change = diff / 10;  // 每秒变化总差值的1/10
             currentValues[param] += change;
+            
+            // 如果非常接近目标值，直接设为目标值
+            if (Math.abs(currentValues[param] - targetValues[param]) < 0.01) {
+                currentValues[param] = targetValues[param];
+            }
             
             return param === 'temp' ? 
                 currentValues[param].toFixed(1) : 
                 Math.round(currentValues[param]);
         }
 
-        // 模拟数据更新
+        // 病人数据
+        const patientData = {
+            patient1: {
+                initial: {
+                    hr: 110,
+                    spo2: 94,
+                    Pleth_bp1: 100,
+                    Pleth_bp2: 60,
+                    temp: 37.0
+                },
+                target: {
+                    hr: 130,
+                    spo2: 88,
+                    Pleth_bp1: 85,
+                    Pleth_bp2: 50,
+                    temp: 37.2
+                }
+            },
+            patient2: {
+                initial: {
+                    hr: 95,
+                    spo2: 88,
+                    Pleth_bp1: 110,
+                    Pleth_bp2: 65,
+                    temp: 37.5
+                },
+                target: {
+                    hr: 105,
+                    spo2: 80,
+                    Pleth_bp1: 105,
+                    Pleth_bp2: 60,
+                    temp: 37.8
+                }
+            },
+            patient3: {
+                initial: {
+                    hr: 100,
+                    spo2: 92,
+                    Pleth_bp1: 90,
+                    Pleth_bp2: 55,
+                    temp: 38.5
+                },
+                target: {
+                    hr: 120,
+                    spo2: 88,
+                    Pleth_bp1: 75,
+                    Pleth_bp2: 45,
+                    temp: 39.0
+                }
+            },
+            patient4: {
+                initial: {
+                    hr: 85,
+                    spo2: 96,
+                    Pleth_bp1: 140,
+                    Pleth_bp2: 85,
+                    temp: 36.8
+                },
+                target: {
+                    hr: 90,
+                    spo2: 95,
+                    Pleth_bp1: 150,
+                    Pleth_bp2: 90,
+                    temp: 37.2
+                }
+            },
+            patient5: {
+                initial: {
+                    hr: 75,
+                    spo2: 98,
+                    Pleth_bp1: 120,
+                    Pleth_bp2: 70,
+                    temp: 36.5
+                },
+                target: {
+                    hr: 110,
+                    spo2: 90,
+                    Pleth_bp1: 90,
+                    Pleth_bp2: 50,
+                    temp: 37.0
+                }
+            },
+            patient6: {
+                initial: {
+                    hr: 80,
+                    spo2: 97,
+                    Pleth_bp1: 110,
+                    Pleth_bp2: 70,
+                    temp: 37.0
+                },
+                target: {
+                    hr: 90,
+                    spo2: 96,
+                    Pleth_bp1: 100,
+                    Pleth_bp2: 65,
+                    temp: 38.0
+                }
+            }
+        };
+
+        // 选择病人函数
+        function selectPatient(patientNumber) {
+            const patient = patientData[`patient${patientNumber}`];
+            
+            // 设置初始值
+            currentValues = {...patient.initial};
+            // 设置目标值
+            targetValues = {...patient.target};
+            
+            // 清空历史数据
+            Object.keys(history).forEach(key => {
+                history[key] = [];
+            });
+            
+            // 立即更新显示
+            updateDisplay();
+        }
+
+        // 更新显示函数
+        function updateDisplay() {
+            const spo2Value = document.querySelector('.spo2-panel .value');
+            const hrValue = document.querySelector('.hr-panel .value');
+            const plethBP1Value = document.querySelector('.pleth-panel .bp1');
+            const plethBP2Value = document.querySelector('.pleth-panel .bp2');
+            const tempValue = document.querySelector('.temp-panel .value');
+
+            spo2Value.textContent = Math.round(currentValues.spo2);
+            hrValue.textContent = Math.round(currentValues.hr);
+            plethBP1Value.textContent = Math.round(currentValues.Pleth_bp1);
+            plethBP2Value.textContent = Math.round(currentValues.Pleth_bp2);
+            tempValue.textContent = currentValues.temp.toFixed(1);
+        }
+
+        // 修改模拟数据更新函数
         function simulateDataUpdates() {
             // SpO2模拟
             const spo2Value = document.querySelector('.spo2-panel .value');
@@ -391,22 +584,19 @@
                 // 平滑更新所有参数
                 const newSpo2 = updateValue('spo2');
                 const newHR = updateValue('hr');
-                const newPlethBP1 = updateValue('plethBP1');
-                const newPlethBP2 = updateValue('plethBP2');
+                const newPlethBP1 = updateValue('Pleth_bp1');
+                const newPlethBP2 = updateValue('Pleth_bp2');
                 const newTemp = updateValue('temp');
 
-                spo2Value.textContent = newSpo2;
-                hrValue.textContent = newHR;
-                plethBP1Value.textContent = newPlethBP1;
-                plethBP2Value.textContent = newPlethBP2;
-                tempValue.textContent = newTemp;
+                // 更新显示
+                updateDisplay();
 
-                // 更新箭头状态
+                // 更新历史数据和箭头
                 updateArrow('SpO2', newSpo2, spo2Arrow);
                 updateArrow('HR', newHR, hrArrow);
                 updateArrow('Pleth_bp1', newPlethBP1, plethBP1Arrow);
                 updateArrow('Pleth_bp2', newPlethBP2, plethBP2Arrow);
-            }, 1000);  // 每秒更新一次
+            }, 1000);  // 每1秒更新一次
         }
 
         // 启动模拟

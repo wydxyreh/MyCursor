@@ -207,7 +207,7 @@
         .scale-value-temp-4 {
             top: 50px;
         }
-        
+
         .trend-line {
             position: relative;
             width: 300px;
@@ -332,7 +332,7 @@
                         <div class="scale-value scale-value-bp1-4">90</div>
                         <div class="scale-value scale-value-bp1-5">50</div>
                     </div>
-                    
+                   
                     <div class="trend-line" id="bp-trend1"></div>
                 </div>
 
@@ -431,7 +431,7 @@
             }
 
             // 创建点和线
-            points.forEach((point, index) => {              
+            points.forEach((point, index) => {
                 const dot = document.createElement('div');
                 dot.className = 'trend-dot';
                 dot.style.left = `${point.x}px`;
@@ -575,7 +575,7 @@
         // 生成随机数据的函数
         function generateRandomData() {
             if (!trendControl.isTransitioning) {
-                return {
+            return {
                     spo2: trendControl.initialValues.spo2,
                     hr: trendControl.initialValues.hr,
                     bpv1: trendControl.initialValues.bpv1,

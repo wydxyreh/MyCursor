@@ -362,23 +362,16 @@
 
         // 更新箭头状态
         function updateArrow(param, value, arrowElement) {
-            console.log('Checking value:', value, 'for param:', param);
-            console.log('Current ranges:', param === 'Pleth_bp2' ? RANGES.Pleth_bp2 : 'other');
-            console.log(`${param} value: ${value}, history:`, history[param]);
             const paramHistory = history[param];
-            
-            paramHistory.push({value, time: Date.now()});
-            
-            // 只保留最近4秒的数据
-            const fourSecondsAgo = Date.now() - 4000;
-            while (paramHistory.length > 0 && 
-                    paramHistory[0].time < fourSecondsAgo) {
-                paramHistory.shift();
+
+            // 添加新数据，并确保数组长度不超过4
+            paramHistory.push({ time: Date.now(), value });
+            if (paramHistory.length > 4) {
+                paramHistory.shift(); // 移除最旧的数据
             }
 
-            // 获取2秒前的值
-            const twoSecondsAgo = Date.now() - 2000;
-            const oldValue = paramHistory.find(h => h.time <= twoSecondsAgo)?.value;
+            // 获取上一次的数据（倒数第二个元素）
+            const oldValue = paramHistory.length >= 2 ? paramHistory[paramHistory.length - 2].value : null;
 
             if (!oldValue) return;
 
@@ -394,15 +387,13 @@
             } else if (param === 'Temp') {
                 ranges = RANGES.Temp;
             }
-            
+
             const zone = getValueZone(value, ranges);
-            console.log(`${param} zone: ${zone}`);
 
             // 判断变化趋势
             const trend = value > oldValue ? 'up' : 
-                         value < oldValue ? 'down' : '';
-            console.log(`${param} trend: ${trend}`);
-            
+                        value < oldValue ? 'down' : '';
+
             // 修改箭头显示逻辑
             if (zone === 'red' && trend) {
                 // 在红色区间且有变化趋势时，显示红色箭头
@@ -410,13 +401,6 @@
             } else if (zone === 'yellow' && trend) {
                 // 在黄色区间且有变化趋势时，显示黄色箭头
                 arrowElement.className = `arrow show ${trend} yellow`;
-            } else if (zone === 'green' && trend) {
-                // 在绿色区间且有变化趋势时，显示箭头
-                // arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
-                arrowElement.className = `arrow`
-            } else if (zone !== 'green') {
-                // 在非绿色区间时，即使没有趋势也显示对应颜色
-                arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
             } else {
                 arrowElement.className = 'arrow';
             }

@@ -73,3 +73,14 @@ stroke-dasharray="213.47 351.017" stroke-dashoffset="121.37"/>
 在 value 为 90-100 时 angle_after_convert 对应度数均匀转变为 80-120 度，
 在 value 小于 0 时 angle_after_convert 对应度数为 0 度，
 在 value 大于 100 时 angle_after_convert 对应度数为 120 度
+
+
+
+
+
+修改上述代码，要求：
+1.修改 CPRMonitor 使其能够通过 selectStyle 函数调整其 depth 生成，不再依赖于 generatePressDepth 函数随机生成，而是根据 compressionStyles 的不同 style ，
+在 transitionTime 内，从 initial 的 depth 的 min 到 max 之间随机生成，逐渐变为在 target 的 depth 的 min 到 max 之间随机生成；
+2. CPRMonitor 的 randomIntervals 也不再是固定的，而是和 depth 一样，读取 compressionStyles 的不同 style ，
+在 transitionTime 内，从 initial 的 interval 的 min 到 max 之间随机生成，逐渐变为在 target 的 interval 的 min 到 max 之间随机生成；
+3.每次点击按钮，触发 selectStyle 函数调用时，都需要清空所有旧信息、重新生成 CPRMonitor ，并根据对应的 style 进行数据变化

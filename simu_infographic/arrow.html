@@ -412,7 +412,8 @@
                 arrowElement.className = `arrow show ${trend} yellow`;
             } else if (zone === 'green' && trend) {
                 // 在绿色区间且有变化趋势时，显示箭头
-                arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
+                // arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;
+                arrowElement.className = `arrow`
             } else if (zone !== 'green') {
                 // 在非绿色区间时，即使没有趋势也显示对应颜色
                 arrowElement.className = `arrow show ${trend} ${zone.toLowerCase()}`;

@@ -442,6 +442,14 @@
             isTransitioning: false
         };
 
+        // 计算平滑过渡值的函数
+        function calculateTransitionValue(initial, target, progress) {
+            // 使用缓动函数使变化更自然
+            progress = Math.sin(progress * Math.PI / 2);
+            return initial + (target - initial) * progress;
+        }
+
+        // 生成随机数据的函数
         function generateRandomData() {
             if (!trendControl.isTransitioning) {
                 return {
@@ -493,6 +501,145 @@
             return result;
         }
 
+        // 更新数据面板显示值
+        function updatePanelValues(data) {
+            // 更新心率
+            updateGaugeHR(data.hr);
+            // 更新体温
+            updateGaugeTEMP(data.temp);
+            // 更新SpO2
+            updateSpO2(data.spo2);
+            // 更新BP
+            updateBP(data.bpv1, data.bpv2);
+        }
+
+        // 更新显示数据
+        function updateMetricValues() {
+            const newData = generateRandomData();
+            // 只更新显示值
+            updatePanelValues(newData);
+        }
+        
+        // 添加录制相关的变量
+        let mediaRecorder;
+        let recordedChunks = [];
+        
+        // 添加录制功能
+        async function startTransition() {
+            try {
+                // 开始录制屏幕
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { 
+                        displaySurface: "browser",
+                        frameRate: 30
+                    }
+                });
+                
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'video/webm;codecs=vp9',
+                    videoBitsPerSecond: 5000000 // 5Mbps
+                });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    // 创建视频文件并下载
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'trend_changes.webm';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    // 停止所有轨道
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                // 开始录制
+                mediaRecorder.start();
+                
+                // 添加3秒延迟
+                setTimeout(function() {
+                    // 开始趋势变化
+                    trendControl.startTime = Date.now();
+                    trendControl.isTransitioning = true;
+                    setInterval(updateMetricValues, 1000);
+                }, 1000);
+
+                // 两分钟后自动停止录制
+                setTimeout(() => {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                }, trendControl.duration * 1000);
+
+            } catch (err) {
+                console.error("录制出错:", err);
+                // 如果录制失败，仍然开始趋势变化
+                trendControl.startTime = Date.now();
+                trendControl.isTransitioning = true;
+            }
+        }
+
+        // 添加一个停止录制的函数
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        }
+
+        // 修改控制面板HTML，添加录制状态指示
+        const controlPanel = document.createElement('div');
+        controlPanel.innerHTML = `
+            <div style="position: fixed; top: 20px; right: 20px; background: #3F3F3F; padding: 20px; border-radius: 5px;">
+                <h3 style="color: white; margin-top: 0;">趋势控制</h3>
+                <div id="valueInputs"></div>
+                <button onclick="startTransition()" style="margin-top: 10px; padding: 5px 10px;">开始变化并录制</button>
+                <div id="recordingStatus" style="color: white; margin-top: 10px; display: none;">
+                    正在录制...
+                </div>
+            </div>
+        `;
+        document.body.appendChild(controlPanel);
+
+        // 创建输入字段
+        const valueInputs = document.getElementById('valueInputs');
+        Object.keys(trendControl.initialValues).forEach(metric => {
+            const container = document.createElement('div');
+            container.style.marginBottom = '10px';
+            container.innerHTML = `
+                <div style="color: white; margin-bottom: 5px;">${metric.toUpperCase()}</div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" step="${metric === 'temp' ? '0.1' : '10'}" 
+                           value="${trendControl.initialValues[metric]}"
+                           onchange="updateValue('${metric}', 'initial', this.value)"
+                           style="width: 60px;">
+                    →
+                    <input type="number" step="${metric === 'temp' ? '0.1' : '10'}" 
+                           value="${trendControl.targetValues[metric]}"
+                           onchange="updateValue('${metric}', 'target', this.value)"
+                           style="width: 60px;">
+                </div>
+            `;
+            valueInputs.appendChild(container);
+        });
+
+        // 更新值的函数
+        function updateValue(metric, type, value) {
+            value = parseFloat(value);
+            if (type === 'initial') {
+                trendControl.initialValues[metric] = value;
+            } else {
+                trendControl.targetValues[metric] = value;
+            }
+        }
+
         // 通用函数
         function valueToAngle(value, min, max) {
             const minAngle = -90;
@@ -507,34 +654,6 @@
                 pointer.style.transform = `rotate(${angle}deg)`;
                 valueText.textContent = typeof value === 'number' ? value.toFixed(1) : value;
             }
-        }
-
-        // 各模块数据生成函数
-        function generateHeartRate() {
-            return Math.random() * 140;
-        }
-
-        function generateTemp() {
-            // 生成一个从35.5到38（不包括38）的随机数
-            return 35.5 + Math.random() * (38 - 35.5);
-        }
-
-        function generateSpO2() {
-            // 生成一个从0到100（包括0，但不包括100）的随机数
-            return Math.random() * 100;
-        }
-
-        function generateBPData() {
-            // 设置systolic和diastolic的基础值以及它们的范围
-            const minSystolic = 50;
-            const maxSystolic = 180;
-            const minDiastolic = 50;
-            const maxDiastolic = 130;
-
-            return {
-                systolic: Math.round(minSystolic + Math.random() * (maxSystolic - minSystolic)),
-                diastolic: Math.round(minDiastolic + Math.random() * (maxDiastolic - minDiastolic))
-            };
         }
 
         // 各模块更新函数
@@ -668,34 +787,17 @@
         // 初始化显示
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化心率
-            updateGaugeHR(generateHeartRate());
+            updateGaugeHR(trendControl.initialValues.hr);
 
             // 初始化体温
-            updateGaugeTEMP(generateTemp());
+            updateGaugeTEMP(trendControl.initialValues.temp);
 
             // 初始化SpO2
-            updateSpO2(generateSpO2());
+            updateSpO2(trendControl.initialValues.spo2);
 
             // 初始化BP
-            const initialBP = generateBPData();
-            updateBP(initialBP.systolic, initialBP.diastolic);
+            updateBP(trendControl.initialValues.bpv1, trendControl.initialValues.bpv2);
         });
-
-        // 定时更新所有数据
-        setInterval(() => {
-            // 更新心率
-            updateGaugeHR(generateHeartRate());
-
-            // 更新体温
-            updateGaugeTEMP(generateTemp());
-
-            // 更新SpO2
-            updateSpO2(generateSpO2());
-
-            // 更新BP
-            const bpData = generateBPData();
-            updateBP(bpData.systolic, bpData.diastolic);
-        }, 2000);
 
         // 添加过渡效果
         document.head.insertAdjacentHTML('beforeend', `

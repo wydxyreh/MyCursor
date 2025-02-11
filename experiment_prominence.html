@@ -53,6 +53,67 @@
             font-size: 24px;
             margin: 20px 0;
         }
+
+        .question-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .answer-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .position-input, .value-input {
+            padding: 8px;
+            font-size: 16px;
+            width: 100px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .submit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .answer-inputs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .position-input, .value-input {
+            padding: 8px;
+            font-size: 16px;
+            width: 100px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        .submit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            background-color: #1976D2;
+        }
     </style>
 </head>
 <body>
@@ -61,13 +122,13 @@
         <div class="instruction">
             <h2>实验指导语</h2>
             <p>欢迎参加本次实验。</p>
-            <p>在实验中，你会看到一系列填充圆形阵列的图片，其中一些圆形被替换成了三角形。</p>
-            <p>每张图片展示5秒钟，请在这段时间内尽可能记住图片上的内容。</p>
+            <p>在实验中，你会看到一些异常样式的数据块，每张图片展示5秒钟。</p>
+            <p>请在这段时间内尽可能记住异常数据块的【位置】和异常数据块内的【数值】。</p>
             <p>之后会出现一个问题，请根据记忆回答。</p>
             <p>回答规则：</p>
             <ul>
-                <li>正确请按 A 键</li>
-                <li>错误请按 L 键</li>
+                <li>在输入框内输入您认为正确的数字</li>
+                <li>在您输入完成后点击确认提交进入下个问题</li>
             </ul>
             <p>按任意键继续...</p>
         </div>
@@ -96,9 +157,14 @@
 
     <!-- 问题界面 -->
     <div id="question" class="screen">
-        <div class="question">
-            图中三角形的数量是否大于10？
-            <p>正确按A，错误按L</p>
+        <div class="question-container">
+            <img src="images/reference/1.png" alt="参考图" style="max-width: 800px; margin-bottom: 20px;">
+            <div class="question-text"></div>
+            <div class="answer-inputs">
+                <input type="text" class="position-input" placeholder="位置">
+                <input type="text" class="value-input" placeholder="异常值">
+            </div>
+            <button class="submit-btn">确认提交</button>
         </div>
     </div>
 
@@ -118,67 +184,140 @@
         const questions = {
             prominence1: {
                 practice: [
-                    { question: "变量1-练习1：图中三角形的数量是否大于10？", correctAnswer: "a" },
-                    { question: "变量1-练习2：图中三角形是否都在左侧？", correctAnswer: "l" },
-                    { question: "变量1-练习3：图中是否有红色三角形？", correctAnswer: "a" },
-                    { question: "变量1-练习4：图中三角形的数量是否小于15？", correctAnswer: "l" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["5", "78"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["6", "97"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["6", "71"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["3", "57"] }]
+                    }
                 ],
                 formal: [
-                    { question: "变量1-正式1：图中三角形的数量是否大于12？", correctAnswer: "a" },
-                    { question: "变量1-正式2：图中三角形是否都在右侧？", correctAnswer: "l" },
-                    { question: "变量1-正式3：图中是否有蓝色三角形？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["2", "66"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["2", "43"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["4", "46"] }]
+                    }
                 ]
             },
             prominence2: {
                 practice: [
-                    { question: "变量2-练习1：图中三角形是否呈对称分布？", correctAnswer: "a" },
-                    { question: "变量2-练习2：图中三角形数量是否大于8？", correctAnswer: "a" },
-                    { question: "变量2-练习3：图中是否有绿色三角形？", correctAnswer: "a" },
-                    { question: "变量2-练习4：图中三角形是否都在底部？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["5", "78"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["7", "79"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["3", "99"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["5", "86"] }]
+                    }
                 ],
                 formal: [
-                    { question: "变量2-正式1：图中三角形是否呈圆形分布？", correctAnswer: "a" },
-                    { question: "变量2-正式2：图中三角形数量是否小于20？", correctAnswer: "a" },
-                    { question: "变量2-正式3：图中是否有黄色三角形？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["2", "40"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["7", "75"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["4", "47"] }]
+                    }
                 ]
             },
             prominence3: {
                 practice: [
-                    { question: "变量3-练习1：图中三角形是否集中在中心？", correctAnswer: "a" },
-                    { question: "变量3-练习2：图中三角形数量是否大于15？", correctAnswer: "a" },
-                    { question: "变量3-练习3：图中是否有紫色三角形？", correctAnswer: "a" },
-                    { question: "变量3-练习4：图中三角形是否都在顶部？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["7", "69"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["6", "85"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["3", "29"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["6", "87"] }]
+                    }
                 ],
                 formal: [
-                    { question: "变量3-正式1：图中三角形是否呈方形分布？", correctAnswer: "a" },
-                    { question: "变量3-正式2：图中三角形数量是否小于25？", correctAnswer: "a" },
-                    { question: "变量3-正式3：图中是否有橙色三角形？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["5", "62"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["2", "20"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["4", "73"] }]
+                    }
                 ]
             },
             prominence4: {
                 practice: [
-                    { question: "变量4-练习1：图中三角形是否均匀分布？", correctAnswer: "a" },
-                    { question: "变量4-练习2：图中三角形数量是否大于20？", correctAnswer: "a" },
-                    { question: "变量4-练习3：图中是否有白色三角形？", correctAnswer: "a" },
-                    { question: "变量4-练习4：图中三角形是否都在边缘？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["5", "65"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["5", "89"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["4", "49"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["2", "47"] }]
+                    }
                 ],
                 formal: [
-                    { question: "变量4-正式1：图中三角形是否呈三角形分布？", correctAnswer: "a" },
-                    { question: "变量4-正式2：图中三角形数量是否小于30？", correctAnswer: "a" },
-                    { question: "变量4-正式3：图中是否有黑色三角形？", correctAnswer: "a" }
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["3", "57"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["2", "23"] }]
+                    },
+                    {
+                        questions: [{ text: "异常值的位置在【】异常数值是【】", correctAnswer: ["1", "69"] }]
+                    }
                 ]
             },
             prominence5: {
                 practice: [
-                    { question: "变量5-练习1：图中三角形是否均匀分布？", correctAnswer: "a" },
-                    { question: "变量5-练习2：图中三角形数量是否大于20？", correctAnswer: "a" },
-                    { question: "变量5-练习3：图中是否有白色三角形？", correctAnswer: "a" },
-                    { question: "变量5-练习4：图中三角形是否都在边缘？", correctAnswer: "a" }
+                    {
+                        questions: [
+                            { 
+                                text: "异常值的位置在【】异常数值是【】",
+                                correctAnswer: ["5", "92"]
+                            },
+                            { 
+                                text: "异常值的位置在【】异常数值是【】",
+                                correctAnswer: ["3", "86"]
+                            }
+                        ]
+                    }
                 ],
                 formal: [
-                    { question: "变量5-正式1：图中三角形是否呈三角形分布？", correctAnswer: "a" },
-                    { question: "变量5-正式2：图中三角形数量是否小于30？", correctAnswer: "a" },
-                    { question: "变量5-正式3：图中是否有黑色三角形？", correctAnswer: "a" }
+                    {
+                        questions: [
+                            { 
+                                text: "异常值的位置在【】异常数值是【】",
+                                correctAnswer: ["2", "95"]
+                            },
+                            { 
+                                text: "异常值的位置在【】异常数值是【】",
+                                correctAnswer: ["4", "89"]
+                            }
+                        ]
+                    }
                 ]
             }
         };
@@ -186,10 +325,10 @@
         // 修改记录结果函数
         function recordResult(reactionTime) {
             const currentQuestion = practiceCount < 4 ? 
-                questions[`prominence${currentLayout}`].practice[practiceCount] : 
-                questions[`prominence${currentLayout}`].formal[formalCount];
+                questions[`prominence${currentLayout}`].practice[practiceCount].questions[practiceCount] : 
+                questions[`prominence${currentLayout}`].formal[formalCount].questions[formalCount];
             
-            const isCorrect = lastResponse === currentQuestion.correctAnswer;
+            const isCorrect = lastResponse === currentQuestion.correctAnswer.join(',');
             
             // 构建当前试次的图片路径
             const imagePath = practiceCount < 4 ? 
@@ -201,33 +340,40 @@
                 trialType: practiceCount < 4 ? '练习' : '正式',
                 trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
                 imagePath: imagePath,
-                question: currentQuestion.question,
-                correctAnswer: currentQuestion.correctAnswer.toUpperCase(),
-                userResponse: lastResponse.toUpperCase(),
+                question: currentQuestion.text,
+                correctAnswer: currentQuestion.correctAnswer.join(','),
+                userResponse: lastResponse,
                 isCorrect: isCorrect ? "正确" : "错误",
                 reactionTime: reactionTime
             });
         }
 
         // 修改导出CSV函数
-        function exportToCSV() {
-            let csvContent = "\ufeff变量,试次类型,试次编号,图片路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
+        function exportToCSV(filename = 'experiment_results.csv') {
+            console.log('导出结果:', results);
             
-            results.forEach(result => {
-                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
-                            `${result.imagePath},${result.question},${result.correctAnswer},` +
-                            `${result.userResponse},${result.isCorrect},${result.reactionTime}\n`;
-            });
+            const headers = [
+                'trial',
+                'answer-position',
+                'correct-position',
+                'answer-number',
+                'correct-number',
+                'check',
+                'reaction time'
+            ];
+            
+            const csvContent = [
+                headers.join(','),
+                ...results.map(row => 
+                    headers.map(header => row[header]).join(',')
+                )
+            ].join('\n');
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
             link.click();
-            document.body.removeChild(link);
         }
 
         // 显示屏幕函数
@@ -299,45 +445,95 @@
 
         // 显示问题
         function showQuestion() {
-            // 根据当前变量和阶段选择问题
-            const questionText = practiceCount < 4 ? 
-                questions[`prominence${currentLayout}`].practice[practiceCount].question : 
-                questions[`prominence${currentLayout}`].formal[formalCount].question;
+            const questionContainer = document.querySelector('.question-container');
+            const currentQuestion = getCurrentQuestion();
             
-            document.querySelector('.question').innerHTML = `
-                ${questionText}
-                <p>正确按A，错误按L</p>
+            // 清除之前的内容
+            questionContainer.innerHTML = '';
+            
+            // 创建问题界面的HTML结构
+            const questionHTML = `
+                <img src="images/reference/1.png" alt="参考图" style="max-width: 800px; margin-bottom: 20px;">
+                <div class="question-text">${currentQuestion.text}</div>
+                <div class="answer-inputs">
+                    <input type="text" class="position-input" placeholder="位置">
+                    <input type="text" class="value-input" placeholder="异常值">
+                </div>
+                <button class="submit-btn">确认提交</button>
             `;
             
+            // 设置HTML内容
+            questionContainer.innerHTML = questionHTML;
+            
+            // 获取输入框和按钮元素
+            const positionInput = questionContainer.querySelector('.position-input');
+            const valueInput = questionContainer.querySelector('.value-input');
+            const submitBtn = questionContainer.querySelector('.submit-btn');
+            
+            // 添加按钮点击事件
+            submitBtn.addEventListener('click', function() {
+                console.log('提交按钮被点击');
+                const position = positionInput.value.trim();
+                const value = valueInput.value.trim();
+                
+                if (!position || !value) {
+                    alert('请填写完整的答案');
+                    return;
+                }
+                
+                console.log('提交答案:', position, value);
+                handleResponse(position, value);
+            });
+            
+            // 添加键盘事件支持回车提交
+            const handleEnterKey = (e) => {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            };
+            positionInput.addEventListener('keypress', handleEnterKey);
+            valueInput.addEventListener('keypress', handleEnterKey);
+            
+            // 显示问题界面
             showScreen('question');
             startTime = Date.now();
-
-            // 添加10秒超时处理
+            
+            // 问题显示20秒
             questionTimeout = setTimeout(() => {
+                console.log('问题超时');
                 handleTimeout();
-            }, 10000);
+            }, 20000);
+            
+            // 自动聚焦到第一个输入框
+            positionInput.focus();
+        }
+
+        // 获取当前问题
+        function getCurrentQuestion() {
+            const questionSet = questions[`prominence${currentLayout}`];
+            if (practiceCount < 4) {
+                return questionSet.practice[practiceCount].questions[0];
+            } else {
+                return questionSet.formal[formalCount].questions[0];
+            }
         }
 
         // 处理超时
         function handleTimeout() {
+            if (isProcessingResponse) return;
+            
+            const currentQuestion = getCurrentQuestion();
             results.push({
                 layout: currentLayout,
                 trialType: practiceCount < 4 ? '练习' : '正式',
                 trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
-                imagePath: practiceCount < 4 ? 
-                    `prominence${currentLayout}/excise${practiceCount + 1}.png` : 
-                    `prominence${currentLayout}/test${formalCount + 1}.png`,
-                question: practiceCount < 4 ? 
-                    questions[`prominence${currentLayout}`].practice[practiceCount].question : 
-                    questions[`prominence${currentLayout}`].formal[formalCount].question,
-                correctAnswer: practiceCount < 4 ? 
-                    questions[`prominence${currentLayout}`].practice[practiceCount].correctAnswer.toUpperCase() : 
-                    questions[`prominence${currentLayout}`].formal[formalCount].correctAnswer.toUpperCase(),
-                userResponse: 'TIMEOUT',
+                question: currentQuestion.text,
+                correctAnswer: currentQuestion.correctAnswer.join(','),
+                userResponse: '无应答',
                 isCorrect: '错误',
-                reactionTime: 10000
+                reactionTime: 20000  // 记录为最大反应时间
             });
-
+            
             clearTimeout(questionTimeout);
 
             if (practiceCount < 4) {
@@ -369,43 +565,66 @@
         }
 
         // 处理响应
-        function handleResponse(key) {
-            if (isProcessingResponse) return;
+        function handleResponse(position, value) {
+            if (isProcessingResponse) {
+                console.log('正在处理上一个响应，忽略当前响应');
+                return;
+            }
+            
             isProcessingResponse = true;
+            console.log('开始处理响应');
 
             clearTimeout(questionTimeout);
             const reactionTime = Date.now() - startTime;
-            lastResponse = key;
-            recordResult(reactionTime);
+            
+            const currentQuestion = getCurrentQuestion();
+            const isPositionCorrect = position === currentQuestion.correctAnswer[0];
+            const isNumberCorrect = value === currentQuestion.correctAnswer[1];
+            const isAllCorrect = isPositionCorrect && isNumberCorrect;
+
+            // 新的数据记录格式
+            results.push({
+                'trial': `prominence${currentLayout}-${practiceCount < 4 ? 'practice' : 'formal'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
+                'answer-position': position,
+                'correct-position': currentQuestion.correctAnswer[0],
+                'answer-number': value,
+                'correct-number': currentQuestion.correctAnswer[1],
+                'check': isAllCorrect ? '0' : '1',
+                'reaction time': reactionTime
+            });
 
             setTimeout(() => {
+                console.log('准备进入下一个试次');
                 if (practiceCount < 4) {
                     practiceCount++;
+                    
+                    // 在practice2结束后导出中间结果
+                    if (currentLayout === 1 && practiceCount === 2) {
+                        console.log('Practice 2 结束，导出中间结果');
+                        exportToCSV('intermediate_results.csv');
+                    }
+                    
                     if (practiceCount === 4) {
                         alert('练习结束，即将进入正式实验');
                     }
                     showFixation();
-                } else if (formalCount < 3) {
+                } else if (formalCount < 2) {
                     formalCount++;
-                    if (formalCount === 3) {
-                        if (currentLayout < 5) {
-                            // 进入下一个变量
-                            currentLayout++;
-                            practiceCount = 0;
-                            formalCount = 0;
-                            alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
-                            showPracticeInstruction();
-                        } else {
-                            // 所有实验结束
-                            alert('实验结束！即将导出结果文件。');
-                            exportToCSV();
-                        }
+                    showFixation();
+                } else {
+                    if (currentLayout < 5) {
+                        currentLayout++;
+                        practiceCount = 0;
+                        formalCount = 0;
+                        alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
+                        showPracticeInstruction();
                     } else {
-                        showFixation();
+                        alert('实验结束！即将导出结果文件。');
+                        exportToCSV();
                     }
                 }
                 isProcessingResponse = false;
-                updateDebugInfo();
+                console.log('响应处理完成');
             }, 200);
         }
 
@@ -464,6 +683,31 @@
 
         // 在每次状态改变时调用updateDebugInfo
         setInterval(updateDebugInfo, 100);
+
+        // 显示图片
+        function showImage() {
+            const imageContainer = document.getElementById('image');
+            const imagePath = `images/prominence${currentLayout}/${practiceCount < 4 ? 'practice' : 'formal'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.png`;
+            
+            // 获取图片元素
+            const imageElement = imageContainer.querySelector('img');
+            
+            // 确保图片完全加载后再开始计时
+            imageElement.onload = function() {
+                // 显示图片
+                showScreen('image');
+                console.log('图片开始显示：' + new Date().toLocaleTimeString());
+                
+                // 图片展示时间设为10秒 = 10000毫秒
+                setTimeout(() => {
+                    console.log('图片结束显示：' + new Date().toLocaleTimeString());
+                    showQuestion();
+                }, 10000);  // 确保是10000毫秒
+            };
+            
+            // 设置图片路径
+            imageElement.src = imagePath;
+        }
     </script>
 </body>
 </html>

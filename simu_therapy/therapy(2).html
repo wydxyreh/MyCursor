@@ -554,6 +554,468 @@
             new CPRMonitor();
             new DefibrillationModule();
         });
+
+        let currentStyle = null;
+        let styleStartTime = null;
+        let compressionInterval = null;
+        let countdownInterval = null;
+        let remainingTime = 120; // 2分钟 = 120秒
+
+        // 添加倒计时显示
+        function createCountdownDisplay() {
+            const countdownDiv = document.createElement('div');
+            countdownDiv.id = 'countdown';
+            countdownDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 10px 20px;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                border-radius: 5px;
+                font-size: 24px;
+                font-weight: bold;
+                z-index: 1000;
+            `;
+            document.body.appendChild(countdownDiv);
+            updateCountdown(remainingTime);
+        }
+
+        // 更新倒计时显示
+        function updateCountdown(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const display = document.getElementById('countdown');
+            if (display) {
+                display.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // 开始倒计时
+        function startCountdown() {
+            // 清除现有倒计时
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // 重置时间
+            remainingTime = 120;
+            updateCountdown(remainingTime);
+            
+            // 开始新的倒计时
+            countdownInterval = setInterval(() => {
+                remainingTime--;
+                updateCountdown(remainingTime);
+                
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    clearInterval(compressionInterval);
+                    isCompressing = false;
+                    currentDepth = 0;
+                    updateVisualization();
+                }
+            }, 1000);
+        }
+
+        // 修改设置按压风格的函数
+        function setCompressionStyle(styleId) {
+            // 清除现有的定时器
+            if (compressionInterval) {
+                clearInterval(compressionInterval);
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // 重置状态
+            currentStyle = compressionStyles[styleId];
+            styleStartTime = Date.now();
+            isCompressing = false;
+            currentDepth = 0;
+            
+            console.log(`切换到按压风格${styleId}, 转换时间: ${currentStyle.transitionTime/1000}秒`);
+            
+            // 重新开始按压和倒计时
+            startCompression();
+            startCountdown();
+        }
+
+        // 开始按压的函数
+        function startCompression() {
+            // 确保只有一个按压循环在运行
+            if (compressionInterval) {
+                clearInterval(compressionInterval);
+            }
+            
+            // 重置按压状态
+            isCompressing = false;
+            currentDepth = 0;
+            
+            // 开始新的按压循环
+            compress();
+            
+            // 设置新的按压间隔
+            compressionInterval = setInterval(() => {
+                compress();
+            }, getRandomInterval());
+        }
+
+        // 修改compress函数
+        function compress() {
+            if (isCompressing) return;
+            
+            isCompressing = true;
+            const targetDepth = generatePressDepth();
+            
+            // 动画压缩
+            const animation = setInterval(() => {
+                if (currentDepth < targetDepth) {
+                    currentDepth += 0.5;
+                    updateVisualization();
+                } else {
+                    clearInterval(animation);
+                    // 开始释放
+                    release();
+                }
+            }, 20);
+        }
+
+        // 修改release函数
+        function release() {
+            const animation = setInterval(() => {
+                if (currentDepth > 0) {
+                    currentDepth -= 0.5;
+                    updateVisualization();
+                } else {
+                    clearInterval(animation);
+                    isCompressing = false;
+                    
+                    // 更新下一次按压的间隔
+                    if (compressionInterval) {
+                        clearInterval(compressionInterval);
+                        compressionInterval = setInterval(() => {
+                            compress();
+                        }, getRandomInterval());
+                    }
+                }
+            }, 20);
+        }
+
+        // 修改按钮添加函数
+        function addStyleButtons() {
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 1000;
+            `;
+
+            const styles = [
+                { name: "风格1: 浅快→正常 (15s)", id: 1 },
+                { name: "风格2: 深慢→正常 (20s)", id: 2 },
+                { name: "风格3: 正常→浅慢 (15s)", id: 3 },
+                { name: "风格4: 正常→深慢 (15s)", id: 4 },
+                { name: "风格5: 正常→深慢 (20s)", id: 5 }
+            ];
+
+            let activeButton = null;
+
+            styles.forEach(style => {
+                const button = document.createElement('button');
+                button.textContent = style.name;
+                button.style.cssText = `
+                    padding: 10px;
+                    margin: 5px;
+                    cursor: pointer;
+                    background-color: #2196F3;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    width: 200px;
+                    transition: background-color 0.3s;
+                `;
+                
+                button.onclick = () => {
+                    if (activeButton) {
+                        activeButton.style.backgroundColor = '#2196F3';
+                    }
+                    button.style.backgroundColor = '#1565C0';
+                    activeButton = button;
+                    setCompressionStyle(style.id);
+                };
+                
+                buttonContainer.appendChild(button);
+            });
+
+            document.body.appendChild(buttonContainer);
+        }
+
+        // 定义不同的按压参数
+        const compressionStyles = {
+            // 浅快→正常 (15s)
+            1: {
+                initial: {
+                    depth: { min: 3, max: 4 },      // 过浅
+                    interval: { min: 300, max: 400 } // 过快
+                },
+                normal: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                transitionTime: 15000
+            },
+            // 深慢→正常 (20s)
+            2: {
+                initial: {
+                    depth: { min: 6.5, max: 7.5 },  // 过深
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                normal: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                transitionTime: 20000
+            },
+            // 正常→浅慢 (15s)
+            3: {
+                initial: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                normal: {
+                    depth: { min: 3, max: 4 },      // 过浅
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                transitionTime: 15000
+            },
+            // 正常→深慢 (15s)
+            4: {
+                initial: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                normal: {
+                    depth: { min: 6.5, max: 7.5 },  // 过深
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                transitionTime: 15000
+            },
+            // 正常→深慢 (20s)
+            5: {
+                initial: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                normal: {
+                    depth: { min: 6.5, max: 7.5 },  // 过深
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                transitionTime: 20000
+            }
+        };
+
+        // 修改生成按压深度的函数
+        Chart.prototype.generatePressDepth = function() {
+            if (!this.currentStyle) {
+                return 4.5 + Math.random() * 2; // 默认正常深度
+            }
+
+            const elapsed = Date.now() - this.styleStartTime;
+            const style = compressionStyles[this.currentStyle];
+            let depthRange;
+            
+            if (elapsed < style.transitionTime) {
+                depthRange = style.initial.depth;
+            } else {
+                depthRange = style.normal.depth;
+            }
+            
+            // 在范围内生成深度
+            const depth = depthRange.min + Math.random() * (depthRange.max - depthRange.min);
+            console.log(`当前深度: ${depth.toFixed(2)}, 范围: ${depthRange.min}-${depthRange.max}`);
+            return depth;
+        };
+
+        // 修改获取随机间隔的函数
+        Chart.prototype.getRandomInterval = function() {
+            if (!this.currentStyle) {
+                return 500 + Math.random() * 100; // 默认正常频率
+            }
+
+            const style = compressionStyles[this.currentStyle];
+            let intervalRange;
+            
+            if (elapsed < style.transitionTime) {
+                intervalRange = style.initial.interval;
+            } else {
+                intervalRange = style.normal.interval;
+            }
+            
+            return intervalRange.min + Math.random() * (intervalRange.max - intervalRange.min);
+        };
+
+        // 修改Chart类的calculateFrequency方法
+        Chart.prototype.calculateFrequency = function(interval) {
+            return 60000 / interval;
+        };
+
+        // 在初始化时创建倒计时显示
+        document.addEventListener('DOMContentLoaded', () => {
+            addStyleButtons();
+            createCountdownDisplay();
+        });
+
+        // 在Chart类中修改按钮点击事件
+        Chart.prototype.addStyleButtons = function() {
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                z-index: 1000;
+            `;
+
+            const styles = [
+                { name: "风格1: 浅快→正常 (15s)", id: 1 },
+                { name: "风格2: 深慢→正常 (20s)", id: 2 },
+                { name: "风格3: 正常→浅慢 (15s)", id: 3 },
+                { name: "风格4: 正常→深慢 (15s)", id: 4 },
+                { name: "风格5: 正常→深慢 (20s)", id: 5 }
+            ];
+
+            let activeButton = null;
+
+            styles.forEach(style => {
+                const button = document.createElement('button');
+                button.textContent = style.name;
+                button.style.cssText = `
+                    padding: 10px;
+                    margin: 5px;
+                    cursor: pointer;
+                    background-color: #2196F3;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    width: 200px;
+                    transition: background-color 0.3s;
+                    font-size: 14px;
+                `;
+                
+                button.onclick = () => {
+                    // 更新按钮状态
+                    document.querySelectorAll('button').forEach(b => {
+                        b.style.backgroundColor = '#2196F3';
+                    });
+                    button.style.backgroundColor = '#1565C0';
+                    
+                    // 设置新的风格
+                    this.setCompressionStyle(style.id);
+                };
+                
+                buttonContainer.appendChild(button);
+            });
+
+            document.body.appendChild(buttonContainer);
+        };
+
+        // 在Chart类的构造函数中添加风格初始化
+        function Chart(container) {
+            // ... 现有的构造函数代码 ...
+            this.currentStyle = null;
+            this.styleStartTime = null;
+            this.interval = null;
+            this.initialize();
+        }
+
+        // 修改setCompressionStyle方法
+        Chart.prototype.setCompressionStyle = function(styleId) {
+            console.log(`设置按压风格: ${styleId}`);
+            
+            // 停止当前动画
+            this.stop();
+            
+            // 重置状态
+            this.pressData = [];
+            this.chart.innerHTML = '';
+            this.currentStyle = styleId;
+            this.styleStartTime = Date.now();
+            
+            // 重新开始
+            this.startAnimation();
+            this.startCountdown();
+        };
+
+        // 新增startAnimation方法
+        Chart.prototype.startAnimation = function() {
+            if (this.interval) {
+                clearInterval(this.interval);
+            }
+            
+            const updateWithStyle = () => {
+                // 获取当前风格
+                const style = compressionStyles[this.currentStyle];
+                const elapsed = Date.now() - this.styleStartTime;
+                const intervalRange = elapsed < style.transitionTime ? 
+                    style.initial.interval : 
+                    style.normal.interval;
+                    
+                // 更新图表
+                this.updateChart();
+                
+                // 设置下一次更新的间隔
+                const nextInterval = intervalRange.min + 
+                    Math.random() * (intervalRange.max - intervalRange.min);
+                    
+                console.log(`当前间隔: ${nextInterval.toFixed(0)}ms`);
+                
+                this.interval = setTimeout(updateWithStyle, nextInterval);
+            };
+            
+            // 立即开始第一次更新
+            updateWithStyle();
+        };
+
+        // 修改stop方法
+        Chart.prototype.stop = function() {
+            if (this.interval) {
+                clearInterval(this.interval);
+                clearTimeout(this.interval);
+                this.interval = null;
+            }
+            if (this.countdownInterval) {
+                clearInterval(this.countdownInterval);
+                this.countdownInterval = null;
+            }
+        };
+
+        // 修改updateChart方法
+        Chart.prototype.updateChart = function() {
+            const depth = this.generatePressDepth();
+            const type = this.getPressType(depth);
+            const height = this.depthToHeight(depth);
+            
+            this.pressData.unshift({ depth: depth, type: type, height: height });
+            if (this.pressData.length > this.maxBars) {
+                this.pressData.pop();
+            }
+            
+            this.chart.innerHTML = '';
+            this.pressData.forEach(press => {
+                const bar = document.createElement('div');
+                bar.className = `bar ${press.type}`;
+                bar.style.height = `${press.height}px`;
+                this.chart.appendChild(bar);
+            });
+            
+            this.updateWarnings();
+        };
     </script>
 </body>
 </html>

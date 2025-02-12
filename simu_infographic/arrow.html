@@ -208,6 +208,50 @@
         .patient-button:hover {
             background: #4F4F4F;
         }
+
+        .patient-button.selected {
+            background: #5F5F5F;
+            border: 2px solid #00FF00;
+        }
+
+        /* 当前病人信息容器 */
+        .current-patient {
+            position: fixed;
+            top: 250px;
+            right: 10px;
+            background: #3F3F3F;
+            padding: 10px;
+            color: white;
+            border: 1px solid #555;
+            width: 250px; /* 稍微加宽以容纳两列 */
+            display: none; /* 默认隐藏 */
+        }
+
+        .current-patient h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .current-patient .patient-data {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .current-patient .column {
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        .current-patient p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .current-patient .label {
+            font-weight: bold;
+            color: #00FF00;
+        }
     </style>
 </head>
 <body>
@@ -294,6 +338,26 @@
         <button class="patient-button" onclick="selectPatient(4)">Patient 4</button>
         <button class="patient-button" onclick="selectPatient(5)">Patient 5</button>
         <button class="patient-button" onclick="selectPatient(6)">Patient 6</button>
+    </div>
+
+    <div class="current-patient">
+        <h3>Current Patient</h3>
+        <div class="patient-data">
+            <div class="column">
+                <p class="label">Initial Values</p>
+                <p>HR: <span id="initial-hr"></span></p>
+                <p>SpO2: <span id="initial-spo2"></span></p>
+                <p>BP: <span id="initial-bp1"></span>/<span id="initial-bp2"></span></p>
+                <p>Temp: <span id="initial-temp"></span></p>
+            </div>
+            <div class="column">
+                <p class="label">Target Values</p>
+                <p>HR: <span id="target-hr"></span></p>
+                <p>SpO2: <span id="target-spo2"></span></p>
+                <p>BP: <span id="target-bp1"></span>/<span id="target-bp2"></span></p>
+                <p>Temp: <span id="target-temp"></span></p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -597,6 +661,14 @@
         function selectPatient(patientNumber) {
             const patient = patientData[`patient${patientNumber}`];
             
+            // 清除所有按钮的选中状态
+            document.querySelectorAll('.patient-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 设置当前按钮为选中状态
+            event.target.classList.add('selected');
+
             // 设置初始值
             currentValues = {...patient.initial};
             // 设置目标值
@@ -609,6 +681,22 @@
             
             // 立即更新显示
             updateDisplay();
+
+            // 显示当前病人信息
+            document.getElementById('initial-hr').textContent = patient.initial.hr;
+            document.getElementById('initial-spo2').textContent = patient.initial.spo2;
+            document.getElementById('initial-bp1').textContent = patient.initial.Pleth_bp1;
+            document.getElementById('initial-bp2').textContent = patient.initial.Pleth_bp2;
+            document.getElementById('initial-temp').textContent = patient.initial.temp;
+
+            document.getElementById('target-hr').textContent = patient.target.hr;
+            document.getElementById('target-spo2').textContent = patient.target.spo2;
+            document.getElementById('target-bp1').textContent = patient.target.Pleth_bp1;
+            document.getElementById('target-bp2').textContent = patient.target.Pleth_bp2;
+            document.getElementById('target-temp').textContent = patient.target.temp;
+            
+            // 显示当前病人信息容器
+            document.querySelector('.current-patient').style.display = 'block';
         }
 
         // 更新显示函数

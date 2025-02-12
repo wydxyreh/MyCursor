@@ -72,9 +72,10 @@
         <div class="instruction">
             <h2>实验指导语</h2>
             <p>欢迎参加本次实验。</p>
-            <p>在实验中，你会看到一系列填充圆形阵列的视频。</p>
-            <p>请观看完整个视频，并尽可能记住视频中的内容。</p>
-            <p>之后会出现一个问题，请根据记忆回答。</p>
+            <p>在实验中， 你会看到一段使用除颤监护仪进行急救任务的视频
+            <p>界面中有心肺复苏（CPR）和手动除颤两个模块</p>
+            <p>请根据您平时的使用经验仔细观察视频内容，视频会在任意时刻暂停</p>
+            <p>暂停后根据您的记忆和理解回答一系列有关问题</p>
             <p>回答规则：</p>
             <ul>
                 <li>正确请按 A 键</li>
@@ -130,15 +131,13 @@
                 practice: [
                     {
                         questions: [
-                            { text: "变量1-练习1-问题1：图中三角形的数量是否大于10？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题2：图中是否有红色三角形？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题4：图中三角形数量是否小于20？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
+                        { text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },
                         ]
                     },
                     {
@@ -247,8 +246,8 @@
         // 显示练习提示语
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
-                你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
-                你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+                你会看到一段使用除颤监护仪进行急救任务的视频，界面中有心肺复苏（CPR）和手动除颤两个模块，
+                请根据您平时的使用经验仔细观察视频内容，视频会在任意时刻暂停，暂停后回答一系列有关问题。按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
@@ -325,7 +324,7 @@
             // 显示当前问题编号和总问题数
             questionElement.innerHTML = `
                 <div style="font-size: 16px; margin-bottom: 10px;">
-                    问题 ${currentQuestionIndex + 1}/9
+                    问题 ${currentQuestionIndex + 1}/7
                 </div>
                 ${currentQuestions[currentQuestionIndex].text}
                 <p>正确按A，错误按L</p>

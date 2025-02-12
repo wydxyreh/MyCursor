@@ -130,15 +130,15 @@
                 practice: [
                     {
                         questions: [
-                            { text: "变量1-练习1-问题1：图中三角形的数量是否大于10？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题2：图中是否有红色三角形？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题4：图中三角形数量是否小于20？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习1-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-练习1-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
+                        { text: "变量1-练习1-问题1：当前病人的心率过高？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题2：当前病人的血压过低？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前病人的血氧数值低于90？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题4：过去一段时间病人的心率一直在下降？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，病人可能出现了胸痛的症状？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，病人的血压可能会下降？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题8：根据当前的态势变化，需要给病人进行插管？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题9：根据当前的态势变化，需要给病人进行除颤？", correctAnswer: "a" }
                         ]
                     },
                     {
@@ -325,7 +325,7 @@
             // 显示当前问题编号和总问题数
             questionElement.innerHTML = `
                 <div style="font-size: 16px; margin-bottom: 10px;">
-                    问题 ${currentQuestionIndex + 1}/9
+                    问题 ${currentQuestionIndex + 1}/7
                 </div>
                 ${currentQuestions[currentQuestionIndex].text}
                 <p>正确按A，错误按L</p>

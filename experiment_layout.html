@@ -77,8 +77,8 @@
     <div id="practiceInstruction" class="screen">
         <div class="practice-instruction">
             现在进入实验的练习，你会看到一张填充圆形阵列的图片，
-            中间有些圆形被替换成了三角形，你需要在5秒内尽可能记住图片上的内容然后回答问题，
-            正确按A，错误按L
+            中间有些圆形被替换成了三角形，你需要在10秒内尽可能记住图片上的内容然后回答问题，
+            正确按A，错误按L，按任意键继续
         </div>
     </div>
 
@@ -238,7 +238,7 @@
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
                 你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
-                你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+                你需要在10秒内尽可能记住界面中三角形的数量，然后回答问题，正确按A，错误按L，按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');

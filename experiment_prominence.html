@@ -396,8 +396,8 @@
         // 显示练习提示语
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
-                你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
-                你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+                你会看到图中有多个数据块，每张图片中会有一个数据块的样式异常，与其他数据块不同，
+                你需要在3秒内尽可能记住异常数据块的位置和异常数值，按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
@@ -440,7 +440,7 @@
                 setTimeout(() => {
                     showQuestion();
                 }, 500);
-            }, 5000);
+            }, 3000);
         }
 
         // 显示问题
@@ -698,11 +698,11 @@
                 showScreen('image');
                 console.log('图片开始显示：' + new Date().toLocaleTimeString());
                 
-                // 图片展示时间设为10秒 = 10000毫秒
+                // 图片展示时间设为5秒 = 3000毫秒
                 setTimeout(() => {
                     console.log('图片结束显示：' + new Date().toLocaleTimeString());
                     showQuestion();
-                }, 10000);  // 确保是10000毫秒
+                }, 3000);  // 确保是3000毫秒
             };
             
             // 设置图片路径

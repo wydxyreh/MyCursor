@@ -18,7 +18,7 @@
         .monitor-container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 10px;
         }
 
         .dashboard {
@@ -411,7 +411,50 @@
                 </g>
             </svg>
         </div>
+        <!-- BP 血压监测区域 -->
+        <div class="monitor-block bp-block">
+            <div class="block-title">BP</div>
+            <div class="bp-content">
+                <!-- 收缩压部分 -->
+                <div class="bp-row">
+                    <div class="bp-value-systolic">120</div>
 
+                    <div class="gauge-limits-systolic">
+                        <span>180</span>
+                        <span>50</span>
+                    </div>
+
+                    <div class="gauge-scale-systolic">
+                        <div id="red1" class="gauge-segment red-systolic-2"></div>
+                        <div id="yellow" class="gauge-segment yellow-systolic-2"></div>
+                        <div id="green" class="gauge-segment green-systolic"></div>
+                        <div id="yellow" class="gauge-segment yellow-systolic-1"></div>
+                        <div id="red2" class="gauge-segment red-systolic-1"></div>
+                    </div>
+                </div>
+                
+                <!-- 分割线 -->
+                <div class="bp-divider"></div>
+                
+                <!-- 舒张压部分 -->
+                <div class="bp-row">
+                    <div class="bp-value-diastolic">80</div>
+
+                    <div class="gauge-limits-diastolic">
+                        <span>130</span>
+                        <span>50</span>
+                    </div>
+
+                    <div class="gauge-scale-diastolic">
+                        <div id="red1" class="gauge-segment red-diastolic-2"></div>
+                        <div id="yellow" class="gauge-segment yellow-diastolic-2"></div>
+                        <div id="green" class="gauge-segment green-diastolic"></div>
+                        <div id="yellow" class="gauge-segment yellow-diastolic-1"></div>
+                        <div id="red2" class="gauge-segment red-diastolic-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>  
         <!-- TEMP 体温监测区域 -->
         <div class="dashboard temp-dashboard">
             <div class="dashboard-title">TEMP</div>
@@ -456,51 +499,6 @@
                     <text class="scale-text" x="175" y="75">38</text>
                 </g>
             </svg>
-        </div>
-
-        <!-- BP 血压监测区域 -->
-        <div class="monitor-block bp-block">
-            <div class="block-title">BP</div>
-            <div class="bp-content">
-                <!-- 收缩压部分 -->
-                <div class="bp-row">
-                    <div class="bp-value-systolic">120</div>
-        
-                    <div class="gauge-limits-systolic">
-                        <span>180</span>
-                        <span>50</span>
-                    </div>
-        
-                    <div class="gauge-scale-systolic">
-                        <div id="red1" class="gauge-segment red-systolic-2"></div>
-                        <div id="yellow" class="gauge-segment yellow-systolic-2"></div>
-                        <div id="green" class="gauge-segment green-systolic"></div>
-                        <div id="yellow" class="gauge-segment yellow-systolic-1"></div>
-                        <div id="red2" class="gauge-segment red-systolic-1"></div>
-                    </div>
-                </div>
-                
-                <!-- 分割线 -->
-                <div class="bp-divider"></div>
-                
-                <!-- 舒张压部分 -->
-                <div class="bp-row">
-                    <div class="bp-value-diastolic">80</div>
-        
-                    <div class="gauge-limits-diastolic">
-                        <span>130</span>
-                        <span>50</span>
-                    </div>
-        
-                    <div class="gauge-scale-diastolic">
-                        <div id="red1" class="gauge-segment red-diastolic-2"></div>
-                        <div id="yellow" class="gauge-segment yellow-diastolic-2"></div>
-                        <div id="green" class="gauge-segment green-diastolic"></div>
-                        <div id="yellow" class="gauge-segment yellow-diastolic-1"></div>
-                        <div id="red2" class="gauge-segment red-diastolic-1"></div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 

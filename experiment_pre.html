@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>除颤监护仪态势感知实验</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .main-title {
+            font-size: 32px;
+            margin-bottom: 50px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .experiment-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 300px;
+            transition: background-color 0.3s;
+        }
+
+        .experiment-button:hover {
+            background-color: #1976D2;
+        }
+
+        .experiment-button.completed {
+            background-color: #4CAF50;
+        }
+
+        .progress-info {
+            margin-top: 30px;
+            font-size: 16px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">除颤监护仪态势感知实验</h1>
+    
+    <div class="button-container">
+        <button class="experiment-button" onclick="startExperiment('layout')">
+            实验1：布局实验
+        </button>
+        <button class="experiment-button" onclick="startExperiment('prominence')">
+            实验2：信息凸显实验
+        </button>
+        <button class="experiment-button" onclick="startExperiment('infographic')">
+            实验3：监护任务
+        </button>
+        <button class="experiment-button" onclick="startExperiment('therapy')">
+            实验4：治疗任务
+        </button>
+    </div>
+
+    <div class="progress-info">
+        已完成实验：<span id="completedCount">0</span>/4
+    </div>
+
+    <script>
+        // 记录实验完成状态
+        const experimentStatus = {
+            layout: false,
+            prominence: false,
+            infographic: false,
+            therapy: false
+        };
+
+        // 启动实验
+        function startExperiment(experimentType) {
+            console.log(`开始${experimentType}实验`);
+            
+            // 存储当前实验类型到localStorage
+            localStorage.setItem('currentExperiment', experimentType);
+            
+            // 根据实验类型跳转到对应的实验页面
+            switch(experimentType) {
+                case 'layout':
+                    window.location.href = 'experiment_layout.html';
+                    break;
+                case 'prominence':
+                    window.location.href = 'experiment_prominence.html';
+                    break;
+                case 'infographic':
+                    window.location.href = 'experiment_infographic.html';
+                    break;
+                case 'therapy':
+                    window.location.href = 'experiment_therapy.html';
+                    break;
+            }
+        }
+
+        // 更新实验完成状态
+        function updateExperimentStatus() {
+            // 从localStorage获取完成状态
+            Object.keys(experimentStatus).forEach(exp => {
+                const completed = localStorage.getItem(`${exp}_completed`) === 'true';
+                experimentStatus[exp] = completed;
+                
+                // 更新按钮样式
+                const button = document.querySelector(`button[onclick="startExperiment('${exp}')"]`);
+                if (completed) {
+                    button.classList.add('completed');
+                }
+            });
+
+            // 更新完成计数
+            const completedCount = Object.values(experimentStatus).filter(status => status).length;
+            document.getElementById('completedCount').textContent = completedCount;
+        }
+
+        // 页面加载时检查实验状态
+        window.onload = function() {
+            updateExperimentStatus();
+        };
+
+        // 监听实验完成事件
+        window.addEventListener('storage', function(e) {
+            if (e.key.endsWith('_completed')) {
+                updateExperimentStatus();
+            }
+        });
+    </script>
+</body>
+</html> 

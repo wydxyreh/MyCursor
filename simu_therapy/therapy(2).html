@@ -559,10 +559,18 @@
                 this.frequencyThresholdHigh = 110;
                 this.frequencyThresholdLow = 90;
                 this.startTime = Date.now();
-                this.startMonitoring();
-                this.startCountdown();
+
+                // 重置 DOM 状态
+                this.progressBar.style.width = '100%';
+                this.timeDisplay.textContent = '2:00';
+                this.chart.innerHTML = '';
+                document.querySelector('.warnings').innerHTML = '';
+
                 this.MonitorId = null;
                 this.countdownIntervalId = null;
+
+                this.startMonitoring();
+                this.startCountdown();
             }
 
             depthToHeight(depth) {
@@ -644,49 +652,29 @@
             }
 
             startMonitoring() {
-                if (this.MonitorId !== undefined) {
-                    clearTimeout(this.MonitorId); // 清除旧的定时器
-                }
-
+                clearTimeout(this.MonitorId); // 清除旧定时器
                 this.updateChart();
                 const updateFunc = () => {
                     if (this.remainingTime <= 0) return;
                     this.updateChart();
                     this.currentInterval = this.generatePressInterval();
-                    
-                    // 设置新的定时器，并更新 MonitorId
-                    this.MonitorId = setTimeout(() => {
-                        updateFunc();
-                    }, this.currentInterval);
+                    this.MonitorId = setTimeout(updateFunc, this.currentInterval);
                 };
-                
-                // 首次调用 updateFunc，启动循环
                 this.MonitorId = setTimeout(updateFunc, this.currentInterval);
             }
 
+
             startCountdown() {
-                // 清除旧的定时器，如果有的话
-                if (this.countdownIntervalId !== undefined) {
-                    clearTimeout(this.countdownIntervalId); // 清除旧的定时器
-                }
-
-                this.updateCountdown(); // 更新倒计时显示
-
-                const countdownFunc = () => {
-                    if (this.remainingTime <= 0) {
-                        this.remainingTime = 0;
-                        this.updateCountdown();
-                        return; // 结束执行
-                    }
+                clearInterval(this.countdownIntervalId); // 清除旧定时器
+                this.remainingTime = this.totalTime;
+                this.updateCountdown();
+                this.countdownIntervalId = setInterval(() => {
                     this.remainingTime -= 1;
-                    this.updateCountdown(); // 更新倒计时显示
-
-                    // 设置新的定时器，并更新 countdownIntervalId
-                    this.countdownIntervalId = setTimeout(countdownFunc, 1000);
-                };
-
-                // 首次调用 countdownFunc，启动循环
-                this.countdownIntervalId = setTimeout(countdownFunc, 1000);
+                    if (this.remainingTime <= 0) {
+                        clearInterval(this.countdownIntervalId);
+                    }
+                    this.updateCountdown();
+                }, 1000);
             }
 
             updateCountdown() {
@@ -701,6 +689,11 @@
                 this.remainingTime = this.totalTime;
                 this.updateCountdown();
                 this.startCountdown();
+            }
+
+            destroy() {
+                clearTimeout(this.MonitorId);
+                clearInterval(this.countdownIntervalId);
             }
         }
 
@@ -751,18 +744,13 @@
         function selectStyle(styleNumber) {
             const style = compressionStyles[`style${styleNumber}`];
 
-            // 清除所有按钮的选中状态
             document.querySelectorAll('.style-button').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            
-            // 设置当前按钮为选中状态
             event.target.classList.add('selected');
 
             if (cprMonitorInstance) {
-                clearTimeout(cprMonitorInstance.MonitorId); // 清除旧的定时器
-                clearTimeout(cprMonitorInstance.countdownIntervalId); // 清除旧的定时器
-                cprMonitorInstance = null; // 清空旧的CPRMonitor实例
+                cprMonitorInstance.destroy(); // 销毁旧实例
             }
             cprMonitorInstance = new CPRMonitor(style);
 

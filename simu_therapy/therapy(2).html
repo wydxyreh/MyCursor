@@ -300,7 +300,7 @@
             margin-top: 10px;
         }
 
-        .patient-buttons {
+        .style-buttons {
             position: fixed;
             top: 10px;
             right: 10px;
@@ -309,7 +309,7 @@
             gap: 5px;
         }
 
-        .patient-button {
+        .style-button {
             padding: 5px 10px;
             background: #3F3F3F;
             color: white;
@@ -317,8 +317,52 @@
             cursor: pointer;
         }
 
-        .patient-button:hover {
+        .style-button:hover {
             background: #4F4F4F;
+        }
+        
+        .style-button.selected {
+            background: #5F5F5F;
+            border: 2px solid #00FF00;
+        }
+
+        /* 当前 style 信息容器 */
+        .current-style {
+            position: fixed;
+            top: 250px;
+            right: 10px;
+            background: #3F3F3F;
+            padding: 10px;
+            color: white;
+            border: 1px solid #555;
+            width: 250px; /* 稍微加宽以容纳两列 */
+            display: none; /* 默认隐藏 */
+        }
+
+        .current-style h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .current-style .style-data {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .current-style .column {
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        .current-style p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .current-style .label {
+            font-weight: bold;
+            color: #00FF00;
         }
     </style>
 </head>
@@ -402,12 +446,36 @@
     </div>
 
     <!-- 添加选择按钮 -->
-    <div class="patient-buttons">
-        <button class="patient-button" onclick="selectStyle(1)">Style 1</button>
-        <button class="patient-button" onclick="selectStyle(2)">Style 2</button>
-        <button class="patient-button" onclick="selectStyle(3)">Style 3</button>
-        <button class="patient-button" onclick="selectStyle(4)">Style 4</button>
-        <button class="patient-button" onclick="selectStyle(5)">Style 5</button>
+    <div class="style-buttons">
+        <button class="style-button" onclick="selectStyle(1)">Style 1</button>
+        <button class="style-button" onclick="selectStyle(2)">Style 2</button>
+        <button class="style-button" onclick="selectStyle(3)">Style 3</button>
+        <button class="style-button" onclick="selectStyle(4)">Style 4</button>
+        <button class="style-button" onclick="selectStyle(5)">Style 5</button>
+    </div>
+
+    <div class="current-style">
+        <h3>Current Style</h3>
+        <div class="style-data">
+            <div class="column">
+                <p class="label">Initial Values</p>
+                <p class="label">depth:</p>
+                <p>min: <span id="initial-depth-min"></span></p>
+                <p>max: <span id="initial-depth-max"></span></p>
+                <p class="label">interval:</p>
+                <p>min: <span id="initial-interval-min"></span></p>
+                <p>max: <span id="initial-interval-max"></span></p>
+            </div>
+            <div class="column">
+                <p class="label">Target Values</p>
+                <p class="label">depth:</p>
+                <p>min: <span id="target-depth-min"></span></p>
+                <p>max: <span id="target-depth-max"></span></p>
+                <p class="label">interval:</p>
+                <p>min: <span id="target-interval-min"></span></p>
+                <p>max: <span id="target-interval-max"></span></p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -680,14 +748,37 @@
         }
 
         // 选择style函数
-        function selectStyle(patientNumber) {
-            const style = compressionStyles[`style${patientNumber}`];
+        function selectStyle(styleNumber) {
+            const style = compressionStyles[`style${styleNumber}`];
+
+            // 清除所有按钮的选中状态
+            document.querySelectorAll('.style-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 设置当前按钮为选中状态
+            event.target.classList.add('selected');
+
             if (cprMonitorInstance) {
                 clearTimeout(cprMonitorInstance.MonitorId); // 清除旧的定时器
                 clearTimeout(cprMonitorInstance.countdownIntervalId); // 清除旧的定时器
                 cprMonitorInstance = null; // 清空旧的CPRMonitor实例
             }
             cprMonitorInstance = new CPRMonitor(style);
+
+            // 显示当前 style 信息
+            document.getElementById('initial-depth-min').textContent = style.initial.depth.min;
+            document.getElementById('initial-depth-max').textContent = style.initial.depth.max;
+            document.getElementById('initial-interval-min').textContent = style.initial.interval.min;
+            document.getElementById('initial-interval-max').textContent = style.initial.interval.max;
+
+            document.getElementById('target-depth-min').textContent = style.target.depth.min;
+            document.getElementById('target-depth-max').textContent = style.target.depth.max;
+            document.getElementById('target-interval-min').textContent = style.target.interval.min;
+            document.getElementById('target-interval-max').textContent = style.target.interval.max;
+            
+            // 显示当前 style 信息容器
+            document.querySelector('.current-style').style.display = 'block';
         }
 
         window.addEventListener('load', () => {

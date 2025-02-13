@@ -314,6 +314,71 @@
             left: 10px;
             top: 40px;
         }
+
+        .style-buttons {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .style-button {
+            padding: 5px 10px;
+            background: #3F3F3F;
+            color: white;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+        .style-button:hover {
+            background: #4F4F4F;
+        }
+        
+        .style-button.selected {
+            background: #5F5F5F;
+            border: 2px solid #00FF00;
+        }
+
+        /* 当前 style 信息容器 */
+        .current-style {
+            position: fixed;
+            top: 250px;
+            right: 10px;
+            background: #3F3F3F;
+            padding: 10px;
+            color: white;
+            border: 1px solid #555;
+            width: 250px; /* 稍微加宽以容纳两列 */
+            display: none; /* 默认隐藏 */
+        }
+
+        .current-style h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .current-style .style-data {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .current-style .column {
+            flex: 1;
+            padding: 0 10px;
+        }
+
+        .current-style p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .current-style .label {
+            font-weight: bold;
+            color: #00FF00;
+        }
     </style>
 </head>
 <body>
@@ -341,17 +406,17 @@
 
                             <div class="progress-bar">
                                 <div class="progress"></div>
-                                <span class="ratio">1:20</span>
+                                <span class="ratio">2:00</span>
                             </div>
 
                             <div class="metrics">
                                 <div class="metric">
                                     <span>深度</span>
-                                    <span class="metric-value">5.5/cm</span>
+                                    <span id="depth-value" class="metric-value">5.5/cm</span>
                                 </div>
                                 <div class="metric">
                                     <span>频率</span>
-                                    <span class="metric-value">100/min</span>
+                                    <span id="frequency-value" class="metric-value">100/min</span>
                                 </div>
                             </div>
 
@@ -395,14 +460,107 @@
         </div>
     </div>
 
+    <!-- 添加选择按钮 -->
+    <div class="style-buttons">
+        <button class="style-button" onclick="selectStyle(1)">Style 1</button>
+        <button class="style-button" onclick="selectStyle(2)">Style 2</button>
+        <button class="style-button" onclick="selectStyle(3)">Style 3</button>
+        <button class="style-button" onclick="selectStyle(4)">Style 4</button>
+        <button class="style-button" onclick="selectStyle(5)">Style 5</button>
+    </div>
+
+    <div class="current-style">
+        <h3>Current Style</h3>
+        <div class="style-data">
+            <div class="column">
+                <p class="label">Initial Values</p>
+                <p class="label">depth:</p>
+                <p>min: <span id="initial-depth-min"></span></p>
+                <p>max: <span id="initial-depth-max"></span></p>
+                <p class="label">interval:</p>
+                <p>min: <span id="initial-interval-min"></span></p>
+                <p>max: <span id="initial-interval-max"></span></p>
+            </div>
+            <div class="column">
+                <p class="label">Target Values</p>
+                <p class="label">depth:</p>
+                <p>min: <span id="target-depth-min"></span></p>
+                <p>max: <span id="target-depth-max"></span></p>
+                <p class="label">interval:</p>
+                <p>min: <span id="target-interval-min"></span></p>
+                <p>max: <span id="target-interval-max"></span></p>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // JavaScript部分
+        // 定义不同的按压参数
+        const compressionStyles = {
+            style1: {
+                initial: {
+                    depth: { min: 4.0, max: 5.5 },      // 过浅
+                    interval: { min: 300, max: 400 } // 过快
+                },
+                target: {
+                    depth: { min: 5, max: 6 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                transitionTime: 15000
+            },
+            style2: {
+                initial: {
+                    depth: { min: 6.5, max: 7.5 },  // 过深
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                target: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                transitionTime: 20000
+            },
+            style3: {
+                initial: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                target: {
+                    depth: { min: 3, max: 4 },      // 过浅
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                transitionTime: 15000
+            },
+            style4: {
+                initial: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                target: {
+                    depth: { min: 6.5, max: 7.5 },  // 过深
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                transitionTime: 15000
+            },
+            style5: {
+                initial: {
+                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    interval: { min: 500, max: 600 } // 正常
+                },
+                target: {
+                    depth: { min: 6.5, max: 7.5 },  // 过深
+                    interval: { min: 700, max: 800 } // 过慢
+                },
+                transitionTime: 20000
+            }
+        };
+
+        let cprMonitorInstance = null;
+
         class CPRMonitor {
-            constructor() {
+            constructor(style) {
+                this.style = style;
                 this.chart = document.querySelector('.chart');
                 this.maxBars = 12;
                 this.pressData = [];
-                this.updateInterval = 1000;
                 this.scaleMin = 5.0;
                 this.scaleMax = 6.0;
                 this.chartHeight = 100;
@@ -415,23 +573,38 @@
                 this.pressTimes = [];
                 this.frequencyThresholdHigh = 110;
                 this.frequencyThresholdLow = 90;
+                this.startTime = Date.now();
+
+                // 重置 DOM 状态
+                this.progressBar.style.width = '100%';
+                this.timeDisplay.textContent = '2:00';
+                this.chart.innerHTML = '';
+                document.querySelector('.warnings').innerHTML = '';
+
+                // 用于存储最近5次的深度和间隔时间
+                this.depthHistory = [];
+                this.intervalHistory = [];
+
+                this.MonitorId = null;
+                this.countdownIntervalId = null;
+
                 this.startMonitoring();
                 this.startCountdown();
             }
-    
+
             depthToHeight(depth) {
                 const heightRange = this.chartHeight;
                 const depthRange = this.scaleMax - this.scaleMin;
                 const scaleFactor = heightRange / depthRange;
                 return depth * (this.line1Height / this.scaleMin);
             }
-    
+
             getPressType(depth) {
                 if (depth > this.scaleMax) return 'danger';
                 if (depth < this.scaleMin) return 'warning';
                 return 'success';
             }
-    
+
             updateChart() {
                 const depth = this.generatePressDepth();
                 const type = this.getPressType(depth);
@@ -447,17 +620,60 @@
                     bar.style.height = `${press.height}px`;
                     this.chart.appendChild(bar);
                 });
+
+                // 更新深度和频率的历史记录
+                this.depthHistory.unshift(depth);
+                if (this.depthHistory.length > 5) {
+                    this.depthHistory.pop();
+                }
+
+                this.currentInterval = this.generatePressInterval();
+                this.intervalHistory.unshift(this.currentInterval);
+                if (this.intervalHistory.length > 5) {
+                    this.intervalHistory.pop();
+                }
+
+                // 计算并更新深度和频率的显示
+                this.updateDepthAndFrequency();
+
                 this.updateWarnings();
             }
-    
-            generatePressDepth() {
-                return 4.5 + Math.random() * 2;
+
+            updateDepthAndFrequency() {
+                // 计算深度的平均值
+                const averageDepth = this.depthHistory.reduce((sum, depth) => sum + depth, 0) / this.depthHistory.length;
+                document.getElementById('depth-value').textContent = `${averageDepth.toFixed(1)}/cm`;
+
+                // 计算频率的平均值
+                const averageInterval = this.intervalHistory.reduce((sum, interval) => sum + interval, 0) / this.intervalHistory.length;
+                const averageFrequency = Math.round(60000 / averageInterval);
+                document.getElementById('frequency-value').textContent = `${averageFrequency}/min`;
             }
-    
+
+            generatePressDepth() {
+                const elapsedTime = Date.now() - this.startTime;
+                const progress = Math.min(elapsedTime / this.style.transitionTime, 1);
+                const initialDepthRange = this.style.initial.depth.max - this.style.initial.depth.min;
+                const targetDepthRange = this.style.target.depth.max - this.style.target.depth.min;
+                const currentDepthMin = this.style.initial.depth.min + (this.style.target.depth.min - this.style.initial.depth.min) * progress;
+                const currentDepthMax = this.style.initial.depth.max + (this.style.target.depth.max - this.style.initial.depth.max) * progress;
+                return currentDepthMin + Math.random() * (currentDepthMax - currentDepthMin);
+            }
+
+            generatePressInterval() {
+                const elapsedTime = Date.now() - this.startTime;
+                const progress = Math.min(elapsedTime / this.style.transitionTime, 1);
+                const initialIntervalRange = this.style.initial.interval.max - this.style.initial.interval.min;
+                const targetIntervalRange = this.style.target.interval.max - this.style.target.interval.min;
+                const currentIntervalMin = this.style.initial.interval.min + (this.style.target.interval.min - this.style.initial.interval.min) * progress;
+                const currentIntervalMax = this.style.initial.interval.max + (this.style.target.interval.max - this.style.initial.interval.max) * progress;
+                return currentIntervalMin + Math.random() * (currentIntervalMax - currentIntervalMin);
+            }
+
             calculateFrequency(interval) {
                 return 60000 / interval;
             }
-    
+
             updateWarnings() {
                 const warningContainer = document.querySelector('.warnings');
                 warningContainer.innerHTML = '';
@@ -480,33 +696,33 @@
                     warningContainer.appendChild(document.createElement('span')).textContent = '按压频率正常！';
                 }
             }
-    
+
             startMonitoring() {
+                clearTimeout(this.MonitorId); // 清除旧定时器
                 this.updateChart();
-                const randomIntervals = [666, 1000, 800, 600, 550, 500, 400, 200, 545];
                 const updateFunc = () => {
                     if (this.remainingTime <= 0) return;
                     this.updateChart();
-                    this.currentInterval = randomIntervals[Math.floor(Math.random() * randomIntervals.length)];
-                    setTimeout(updateFunc, this.currentInterval);
+                    this.currentInterval = this.generatePressInterval();
+                    this.MonitorId = setTimeout(updateFunc, this.currentInterval);
                 };
-                updateFunc();
+                this.MonitorId = setTimeout(updateFunc, this.currentInterval);
             }
-    
+
+
             startCountdown() {
+                clearInterval(this.countdownIntervalId); // 清除旧定时器
+                this.remainingTime = this.totalTime;
                 this.updateCountdown();
-                const countdownInterval = setInterval(() => {
+                this.countdownIntervalId = setInterval(() => {
                     this.remainingTime -= 1;
                     if (this.remainingTime <= 0) {
-                        clearInterval(countdownInterval);
-                        this.remainingTime = 0;
-                        this.updateCountdown();
-                        return;
+                        clearInterval(this.countdownIntervalId);
                     }
                     this.updateCountdown();
                 }, 1000);
             }
-    
+
             updateCountdown() {
                 const progress = (this.remainingTime / this.totalTime) * 100;
                 this.progressBar.style.width = `${progress}%`;
@@ -514,14 +730,19 @@
                 const seconds = this.remainingTime % 60;
                 this.timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
             }
-    
+
             resetCountdown() {
                 this.remainingTime = this.totalTime;
                 this.updateCountdown();
                 this.startCountdown();
             }
+
+            destroy() {
+                clearTimeout(this.MonitorId);
+                clearInterval(this.countdownIntervalId);
+            }
         }
-    
+
         // 除颤模块的随机显示功能
         class DefibrillationModule {
             constructor() {
@@ -533,7 +754,7 @@
                 this.setInitialValues();
                 this.startMonitoring();
             }
-    
+
             setInitialValues() {
                 // 随机生成电击次数，范围是1-3次
                 const shockCount = Math.floor(Math.random() * 3) + 1; // 修改这里，使范围变为1-3
@@ -548,14 +769,14 @@
                 this.energyElement.textContent = `${energy}J`;
                 this.energyDisplayElement.textContent = energy;
             }
-    
+
             startMonitoring() {
                 const randomTime = Math.floor(Math.random() * 120000); // 随机生成一个时间点（0-120秒）
                 setTimeout(() => {
                     this.generateDefibrillationSignal();
                 }, randomTime);
             }
-    
+
             generateDefibrillationSignal() {
                 const shouldGenerateSignal = Math.random() > 0.5; // 50% 的概率生成信号
                 if (shouldGenerateSignal) {
@@ -564,9 +785,37 @@
                 }
             }
         }
-    
+
+        // 选择style函数
+        function selectStyle(styleNumber) {
+            const style = compressionStyles[`style${styleNumber}`];
+
+            document.querySelectorAll('.style-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+
+            if (cprMonitorInstance) {
+                cprMonitorInstance.destroy(); // 销毁旧实例
+            }
+            cprMonitorInstance = new CPRMonitor(style);
+
+            // 显示当前 style 信息
+            document.getElementById('initial-depth-min').textContent = style.initial.depth.min;
+            document.getElementById('initial-depth-max').textContent = style.initial.depth.max;
+            document.getElementById('initial-interval-min').textContent = style.initial.interval.min;
+            document.getElementById('initial-interval-max').textContent = style.initial.interval.max;
+
+            document.getElementById('target-depth-min').textContent = style.target.depth.min;
+            document.getElementById('target-depth-max').textContent = style.target.depth.max;
+            document.getElementById('target-interval-min').textContent = style.target.interval.min;
+            document.getElementById('target-interval-max').textContent = style.target.interval.max;
+            
+            // 显示当前 style 信息容器
+            document.querySelector('.current-style').style.display = 'block';
+        }
+
         window.addEventListener('load', () => {
-            new CPRMonitor();
             new DefibrillationModule();
         });
     </script>

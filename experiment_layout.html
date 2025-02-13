@@ -274,7 +274,6 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
-            console.log('显示屏幕:', screenId);
         }
 
         // 显示注视点
@@ -311,8 +310,6 @@
                 imagePath = `images/layout${currentLayout}/test${formalCount + 1}.png`;
             }
             
-            console.log('加载图片:', imagePath);
-            
             img.onload = () => {
                 stimulusContainer.innerHTML = '';
                 stimulusContainer.appendChild(img);
@@ -320,7 +317,6 @@
             };
             
             img.onerror = () => {
-                console.error('图片加载失败:', imagePath);
                 alert(`图片加载失败: ${imagePath}\n请检查图片文件是否存在`);
             };
             
@@ -444,7 +440,6 @@
 
         // 按键事件处理
         window.onkeydown = function(event) {
-            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
             
             if (currentPhase === 'instruction') {
                 // 从指导语进入第一个变量的练习说明
@@ -480,7 +475,6 @@
             createCSVFile();
             
             showScreen('instruction');
-            console.log('实验初始化完成，当前阶段:', currentPhase);
         };
 
         // 在HTML中添加调试信息显示（可选）

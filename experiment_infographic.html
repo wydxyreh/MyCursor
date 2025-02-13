@@ -137,7 +137,7 @@
 
         // 问题数据结构
         const questions = {
-            prominence1: {
+            infographic1: {
                 practice: [
                     {
                         questions: [
@@ -198,7 +198,7 @@
                     }
                 ]
             },
-            prominence2: {
+            infographic2: {
                 practice: [
                     {
                         questions: [
@@ -259,7 +259,7 @@
                     }
                 ]
             },
-            prominence3: {
+            infographic3: {
                 practice: [
                     {
                         questions: [
@@ -320,7 +320,7 @@
                     }
                 ]
             },
-            prominence4: {
+            infographic4: {
                 practice: [
                     {
                         questions: [
@@ -504,25 +504,13 @@
 
         // 问题加载和显示逻辑
         function loadQuestions() {
-            const layoutKey = `prominence${currentLayout}`;
+            const layoutKey = `infographic${currentLayout}`;
             const phase = practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal';
             const trialIndex = phase === 'practice' ? practiceCount : formalCount;
-            
-            console.log('加载问题:', {
-                layoutKey,
-                phase,
-                trialIndex,
-                questionsData: questions[layoutKey]?.[phase]?.[trialIndex]
-            });
 
-            try {
-                currentQuestions = questions[layoutKey][phase][trialIndex].questions;
-                currentQuestionIndex = 0;
-                showNextQuestion();
-            } catch (error) {
-                console.error('加载问题时出错:', error);
-                console.log('当前状态:', {layoutKey, phase, trialIndex});
-            }
+            currentQuestions = questions[layoutKey][phase][trialIndex].questions;
+            currentQuestionIndex = 0;
+            showNextQuestion();
         }
 
         function showNextQuestion() {
@@ -576,14 +564,11 @@
         function handleTrialComplete() {
             const questionContainer = document.querySelector('.question-container');
             questionContainer.style.display = 'none';
-
-            console.log('试次完成', {practiceCount, formalCount, currentLayout});
             
             if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
                 practiceCount++;
                 showFixation();
                 updateDebugInfo();
-                console.log('进入下一个练习:', practiceCount + 1);
             } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                 practiceCount++;
                 alert('练习结束，即将进入正式实验');
@@ -594,7 +579,6 @@
                 formalCount++;
                 showFixation();
                 updateDebugInfo();
-                console.log('进入下一个正式实验:', formalCount + 1);
             } else {  // 当前变量结束
                 if (currentLayout < experimentConfig.totalLayouts) {
                     currentLayout++;

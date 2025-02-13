@@ -383,7 +383,6 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
-            console.log('显示屏幕:', screenId);
         }
     
         // 显示注视点
@@ -420,8 +419,6 @@
                 imagePath = `images/prominence${currentLayout}/test${formalCount + 1}.png`;
             }
             
-            console.log('加载图片:', imagePath);
-            
             img.onload = () => {
                 stimulusContainer.innerHTML = '';
                 stimulusContainer.appendChild(img);
@@ -429,7 +426,6 @@
             };
             
             img.onerror = () => {
-                console.error('图片加载失败:', imagePath);
                 alert(`图片加载失败: ${imagePath}\n请检查图片文件是否存在`);
             };
             
@@ -473,7 +469,6 @@
             
             // 添加按钮点击事件
             submitBtn.addEventListener('click', function() {
-                console.log('提交按钮被点击');
                 const position = positionInput.value.trim();
                 const value = valueInput.value.trim();
                 
@@ -482,7 +477,6 @@
                     return;
                 }
                 
-                console.log('提交答案:', position, value);
                 handleResponse(position, value);
             });
             
@@ -501,7 +495,6 @@
             
             // 问题显示20秒
             questionTimeout = setTimeout(() => {
-                console.log('问题超时');
                 handleTimeout();
             }, 20000);
             
@@ -618,8 +611,6 @@
 
         // 按键事件处理
         window.onkeydown = function(event) {
-            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
-            
             if (currentPhase === 'instruction') {
                 // 从指导语进入第一个变量的练习说明
                 currentPhase = 'practiceInstruction';
@@ -683,11 +674,9 @@
             imageElement.onload = function() {
                 // 显示图片
                 showScreen('image');
-                console.log('图片开始显示：' + new Date().toLocaleTimeString());
                 
                 // 图片展示时间设为5秒 = 3000毫秒
                 setTimeout(() => {
-                    console.log('图片结束显示：' + new Date().toLocaleTimeString());
                     showQuestion();
                 }, 3000);  // 确保是3000毫秒
             };

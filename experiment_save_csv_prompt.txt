@@ -1,0 +1,158 @@
+修改上述代码，要求如下：
+1.每次运行时，将数据实时存储在 csv 当中，csv 以运行时的日期时间为名称，如果不存在对应的文件，则创造一个，在运行过程中，始终将数据存储在同一个文件中，文件保存在当前运行目录下；
+2.要求 csv 文件名 只能在一开始的时候，调用一次 getCurrentDateTime 获得，并将文件名保存起来，后续的数据存储都保存在同一个文件中
+3.csv 中的数据头为：
+const headers = [
+                'trial',
+                'answer-position',
+                'correct-position',
+                'answer-number',
+                'correct-number',
+                'check',
+                'reaction time'
+            ];
+4.每一行的头名称格式为 {name}$(number)-{type}$(number)：
+5.每次数据输入后，都要实时保存在csv中，并且在数据中新增一行来存储对应的数据内容；
+6.6.在超时的时候，将用户回答的部分 answer-position 、 answer-number 、 check 则默认为 NAN ， reaction time 值为 超时时间
+7.如果 answer-position 、 answer-number 和 correct-position 、 correct-answer 一致，则 check 为 0，否则为 1；
+8.只需要给出修改的地方，未修改的函数就不用再给出
+
+可以参考下列代码函数实现：
+let csvFileName;  // 新增：持久化保存文件名
+let csvData = []; // 新增：保存所有CSV数据
+
+// 获取当前日期时间作为文件名
+function getCurrentDateTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+}
+
+// 创建CSV文件并写入表头
+function createCSVFile() {
+    const headers = [
+        'trial',
+        'answer-position',
+        'correct-position',
+        'answer-number',
+        'correct-number',
+        'check',
+        'reaction time'
+    ];
+    csvData = [headers.join(',')]; // 初始化数据（含表头）
+}
+
+// 追加数据到CSV文件
+function appendDataToCSV(data) {
+    // 构建CSV行数据
+    const csvRow = [
+        data.trial,
+        data['answer-position'],
+        data['correct-position'],
+        data['answer-number'],
+        data['correct-number'],
+        data.check,
+        data['reaction time']
+    ].join(',');
+
+    csvData.push(csvRow); // 追加到数据数组
+    downloadCSV();        // 触发文件下载
+}
+
+// 统一下载函数
+function downloadCSV() {
+    const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = csvFileName; // 始终使用同一个文件名
+    link.click();
+    URL.revokeObjectURL(link.href); // 释放内存
+}
+
+
+
+
+
+修改上述代码，要求如下：
+1.每次运行时，将数据实时存储在 csv 当中，csv 以运行时的日期时间为名称，如果不存在对应的文件，则创造一个，在运行过程中，始终将数据存储在同一个文件中，文件保存在当前运行目录下；
+2.要求 csv 文件名 只能在一开始的时候，调用一次 getCurrentDateTime 获得，并将文件名保存起来，后续的数据存储都保存在同一个文件中
+3.csv 中的数据头为：
+const headers = [
+                'trial',
+                'user-answer',
+                'correct-answer',
+                'check',
+                'reaction time'
+            ];
+4.每一行的头名称格式为 {name}$(number)-{type}$(number)：
+5.每次数据输入后，都要实时保存在csv中，并且在数据中新增一行来存储对应的数据内容；
+6.在超时的时候，将用户回答的部分 user-answer 、 check 则默认为 NAN ， reaction time 值为 超时时间
+7.如果 user-answer 和 correct-answer 一致，则 check 为 0，否则为 1；
+8.只需要给出修改的地方，未修改的函数就不用再给出
+
+可以参考下列代码函数实现：
+let csvFileName;  // 新增：持久化保存文件名
+let csvData = []; // 新增：保存所有CSV数据
+
+// 获取当前日期时间作为文件名
+function getCurrentDateTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+}
+
+
+// 创建CSV文件并写入表头
+function createCSVFile() {
+    const headers = [
+        'trial',
+        'user-answer',
+        'correct-answer',
+        'check',
+        'reaction time'
+    ];
+    csvData = [headers.join(',')]; // 初始化数据（含表头）
+    downloadCSV(); // 立即创建文件并写入表头
+}
+
+// 追加数据到CSV文件
+function appendDataToCSV(data) {
+    // 构建CSV行数据
+    const csvRow = [
+        `prominence${currentLayout}-${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
+        data['user-answer'],
+        data['correct-answer'],
+        data.check,
+        data['reaction time']
+    ].join(',');
+
+    csvData.push(csvRow); // 追加到数据数组
+    downloadCSV();        // 触发文件下载
+}
+
+// 统一下载函数
+function downloadCSV() {
+    const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = csvFileName; // 始终使用同一个文件名
+    link.click();
+    URL.revokeObjectURL(link.href); // 释放内存
+}
+
+
+
+
+
+修改上述代码，要求 csv 中每一行的头名称格式为 therapy$(number)-{type}$(number)-question${number}：
+只需要给出修改的地方，未修改的函数就不用再给出

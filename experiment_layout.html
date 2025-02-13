@@ -113,6 +113,9 @@
         let questionTimeout;
         let isProcessingResponse = false;
         const results = [];
+        let csvFileName;  // 新增：持久化保存文件名
+        let csvData = []; // 新增：保存所有CSV数据
+
 
         // 定义实验问题和正确答案
         const questions = {
@@ -170,7 +173,56 @@
             }
         };
 
-        // 修改记录结果函数
+        // 获取当前日期时间作为文件名
+        function getCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+        }
+
+        // 创建CSV文件并写入表头
+        function createCSVFile() {
+            const headers = [
+                'trial',
+                'user-answer',
+                'correct-answer',
+                'check',
+                'reaction time'
+            ];
+            csvData = [headers.join(',')]; // 初始化数据（含表头）
+        }
+
+        // 追加数据到CSV文件
+        function appendDataToCSV(data) {
+            // 构建CSV行数据
+            const csvRow = [
+                data.trial,
+                data['user-answer'],
+                data['correct-answer'],
+                data.check,
+                data['reaction time']
+            ].join(',');
+
+            csvData.push(csvRow); // 追加到数据数组
+            downloadCSV();        // 触发文件下载
+        }
+
+        // 统一下载函数
+        function downloadCSV() {
+            const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = csvFileName; // 始终使用同一个文件名
+            link.click();
+            URL.revokeObjectURL(link.href); // 释放内存
+        }
+
+        // 记录结果函数
         function recordResult(reactionTime) {
             const currentQuestion = practiceCount < 4 ? 
                 questions[`layout${currentLayout}`].practice[practiceCount] : 
@@ -183,20 +235,19 @@
                 `layout${currentLayout}/excise${practiceCount + 1}.png` : 
                 `layout${currentLayout}/test${formalCount + 1}.png`;
             
-            results.push({
-                layout: currentLayout,
-                trialType: practiceCount < 4 ? '练习' : '正式',
-                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
-                imagePath: imagePath,
-                question: currentQuestion.question,
-                correctAnswer: currentQuestion.correctAnswer.toUpperCase(),
-                userResponse: lastResponse.toUpperCase(),
-                isCorrect: isCorrect ? "正确" : "错误",
-                reactionTime: reactionTime
-            });
+            // 构建CSV数据
+            const csvRow = {
+                trial: `layout${currentLayout}-${practiceCount < 4 ? 'practice' : 'formal'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
+                'user-answer': lastResponse.toUpperCase(),
+                'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
+                check: isCorrect ? '0' : '1',
+                'reaction time': reactionTime
+            };
+
+            appendDataToCSV(csvRow);
         }
 
-        // 修改导出CSV函数
+        // 导出CSV函数
         function exportToCSV() {
             let csvContent = "\ufeff变量,试次类型,试次编号,图片路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
             
@@ -307,23 +358,19 @@
 
         // 处理超时
         function handleTimeout() {
-            results.push({
-                layout: currentLayout,
-                trialType: practiceCount < 4 ? '练习' : '正式',
-                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
-                imagePath: practiceCount < 4 ? 
-                    `layout${currentLayout}/excise${practiceCount + 1}.png` : 
-                    `layout${currentLayout}/test${formalCount + 1}.png`,
-                question: practiceCount < 4 ? 
-                    questions[`layout${currentLayout}`].practice[practiceCount].question : 
-                    questions[`layout${currentLayout}`].formal[formalCount].question,
-                correctAnswer: practiceCount < 4 ? 
-                    questions[`layout${currentLayout}`].practice[practiceCount].correctAnswer.toUpperCase() : 
-                    questions[`layout${currentLayout}`].formal[formalCount].correctAnswer.toUpperCase(),
-                userResponse: 'TIMEOUT',
-                isCorrect: '错误',
-                reactionTime: 10000
-            });
+            const currentQuestion = practiceCount < 4 ? 
+                questions[`layout${currentLayout}`].practice[practiceCount] : 
+                questions[`layout${currentLayout}`].formal[formalCount];
+            
+            const csvRow = {
+                trial: `layout${currentLayout}-${practiceCount < 4 ? 'practice' : 'formal'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
+                'user-answer': 'NAN',
+                'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
+                check: 'NAN',
+                'reaction time': 10000
+            };
+
+            appendDataToCSV(csvRow);
 
             clearTimeout(questionTimeout);
 
@@ -346,7 +393,6 @@
                     } else {
                         // 所有实验结束
                         alert('实验结束！即将导出结果文件。');
-                        exportToCSV();
                         return;
                     }
                 } else {
@@ -354,7 +400,7 @@
                 }
             }
         }
-
+        
         // 处理响应
         function handleResponse(key) {
             if (isProcessingResponse) return;
@@ -396,7 +442,7 @@
             }, 200);
         }
 
-        // 修改按键事件处理
+        // 按键事件处理
         window.onkeydown = function(event) {
             console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
             
@@ -421,13 +467,17 @@
             }
         };
 
-        // 修改初始化函数
+        // 初始化函数
         window.onload = function() {
             // 确保所有变量都被正确初始化
             currentPhase = 'instruction';
             currentLayout = 1;
             practiceCount = 0;
             formalCount = 0;
+            
+            // 初始化CSV文件
+            csvFileName = `${getCurrentDateTime()}.csv`;
+            createCSVFile();
             
             showScreen('instruction');
             console.log('实验初始化完成，当前阶段:', currentPhase);

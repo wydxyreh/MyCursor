@@ -125,104 +125,99 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
+        // 添加实验配置接口
+        const experimentConfig = {
+            totalLayouts: 2,          // 变量数量
+            practiceTrials: 2,        // 每个变量的练习次数
+            formalTrials: 3,          // 每个变量的正式实验次数
+            questionsPerTrial: 7,     // 每个试次的问题数量
+        };
+
         // 修改问题数据结构，每个试次包含9个问题
         const questions = {
-            prominence1: {
+            therapy1: {
                 practice: [
-                    {
-                        questions: [
-                        { text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
                         { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
                         { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
                         { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
                         { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
                         { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
-                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },
-                        ]
-                    },
-                    {
-                        questions: [
-                            { text: "变量1-练习2-问题1：图中三角形是否都在左侧？", correctAnswer: "l" },
-                            { text: "变量1-练习2-问题2：图中是否有红色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习2-问题3：图中三角形是否都在右侧？", correctAnswer: "l" },
-                            { text: "变量1-练习2-问题4：图中三角形数量是否小于15？", correctAnswer: "l" },
-                            { text: "变量1-练习2-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习2-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-练习2-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习2-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-练习2-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
-                        ]
-                    },
-                    {
-                        questions: [
-                            { text: "变量1-练习3-问题1：图中是否有红色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习3-问题2：图中三角形是否都在左侧？", correctAnswer: "a" },
-                            { text: "变量1-练习3-问题3：图中三角形数量是否小于15？", correctAnswer: "l" },
-                            { text: "变量1-练习3-问题4：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习3-问题5：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-练习3-问题6：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习3-问题7：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-练习3-问题8：图中是否有绿色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习3-问题9：图中三角形数量是否大于10？", correctAnswer: "a" }
-                        ]
-                    },
-                    {
-                        questions: [
-                            { text: "变量1-练习4-问题1：图中三角形数量是否小于15？", correctAnswer: "l" },
-                            { text: "变量1-练习4-问题2：图中是否有红色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习4-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
-                            { text: "变量1-练习4-问题4：图中三角形数量是否大于10？", correctAnswer: "a" },
-                            { text: "变量1-练习4-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习4-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-练习4-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-练习4-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-练习4-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
-                        ]
-                    }
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] },  // 练习1的问题
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] }   // 练习2的问题
                 ],
                 formal: [
-                    {
-                        questions: [
-                            { text: "变量1-正式1-问题1：图中三角形的数量是否大于12？", correctAnswer: "a" },
-                            { text: "变量1-正式1-问题2：图中是否有红色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式1-问题3：图中三角形是否都在左侧？", correctAnswer: "a" },
-                            { text: "变量1-正式1-问题4：图中三角形数量是否小于15？", correctAnswer: "l" },
-                            { text: "变量1-正式1-问题5：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式1-问题6：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-正式1-问题7：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式1-问题8：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-正式1-问题9：图中是否有绿色三角形？", correctAnswer: "a" }
-                        ]
-                    },
-                    {
-                        questions: [
-                            { text: "变量1-正式2-问题1：图中三角形是否都在右侧？", correctAnswer: "l" },
-                            { text: "变量1-正式2-问题2：图中是否有红色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式2-问题3：图中三角形数量是否小于15？", correctAnswer: "l" },
-                            { text: "变量1-正式2-问题4：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式2-问题5：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-正式2-问题6：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式2-问题7：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-正式2-问题8：图中是否有绿色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式2-问题9：图中三角形数量是否大于10？", correctAnswer: "a" }
-                        ]
-                    },
-                    {
-                        questions: [
-                            { text: "变量1-正式3-问题1：图中是否有红色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式3-问题2：图中三角形是否都在左侧？", correctAnswer: "a" },
-                            { text: "变量1-正式3-问题3：图中三角形数量是否小于15？", correctAnswer: "l" },
-                            { text: "变量1-正式3-问题4：图中是否有蓝色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式3-问题5：图中三角形是否呈对称分布？", correctAnswer: "l" },
-                            { text: "变量1-正式3-问题6：图中是否有黄色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式3-问题7：图中三角形是否集中在中心？", correctAnswer: "l" },
-                            { text: "变量1-正式3-问题8：图中是否有绿色三角形？", correctAnswer: "a" },
-                            { text: "变量1-正式3-问题9：图中三角形数量是否大于10？", correctAnswer: "a" }
-                        ]
-                    }
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] },  // 正式1的问题
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] },  // 正式2的问题
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] }   // 正式3的问题
                 ]
             },
-            // ... 其他变量的问题结构类似
+            therapy2: {
+                practice: [
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] },  // 练习1的问题
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] }   // 练习2的问题
+                ],
+                formal: [
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] },  // 正式1的问题
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] },  // 正式2的问题
+                    { questions: [{ text: "变量1-练习1-问题1：病人之前进行过两次电击？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题2：当前急救人员对患者的按压深度正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题3：当前的按压频率较快？", correctAnswer: "l" },
+                        { text: "变量1-练习1-问题4：过去一段时间的按压深度从较浅转为正常？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题5：根据当前的情况，并未监测到可除颤信号？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题6：根据当前的态势变化，应该保持当前的按压力度和频率？", correctAnswer: "a" },
+                        { text: "变量1-练习1-问题7：根据当前的态势变化，需要继续观察患者的情况再决定是否除颤？", correctAnswer: "a" },] }   // 正式3的问题
+                ]
+            }
+            // ... 其他变量
         };
 
         // 显示屏幕函数
@@ -245,9 +240,13 @@
 
         // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
+            console.log('显示练习指导语', {currentLayout, practiceCount});
+            
+            const practiceInstructionText = `现在进入变量${currentLayout}的练习，
                 你会看到一段使用除颤监护仪进行急救任务的视频，界面中有心肺复苏（CPR）和手动除颤两个模块，
-                请根据您平时的使用经验仔细观察视频内容，视频会在任意时刻暂停，暂停后回答一系列有关问题。按任意键继续`;
+                请根据您平时的使用经验仔细观察视频内容，视频会在任意时刻暂停，暂停后回答一系列有关问题。
+                本变量将进行${experimentConfig.practiceTrials}次练习和${experimentConfig.formalTrials}次正式实验。
+                按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
@@ -266,13 +265,32 @@
             video.muted = true;
             
             let videoPath;
-            if (practiceCount < 4) {
+            if (practiceCount < experimentConfig.practiceTrials) {
                 videoPath = `images/therapy${currentLayout}/excise${practiceCount + 1}.mp4`;
             } else {
                 videoPath = `images/therapy${currentLayout}/test${formalCount + 1}.mp4`;
             }
             
-            console.log('加载视频:', videoPath);
+            console.log('尝试加载视频:', videoPath);
+            
+            video.onerror = () => {
+                console.error('视频加载失败:', videoPath);
+                alert(`未找到视频文件: ${videoPath}\n请确保已添加对应变量的视频文件`);
+                // 可以选择返回主界面或继续下一个变量
+                if (confirm('是否跳过当前变量，继续下一个变量？')) {
+                    if (currentLayout < experimentConfig.totalLayouts) {
+                        currentLayout++;
+                        practiceCount = 0;
+                        formalCount = 0;
+                        showPracticeInstruction();
+                    } else {
+                        alert('所有实验完成！');
+                        window.location.href = 'experiment_pre.html';
+                    }
+                } else {
+                    window.location.href = 'experiment_pre.html';
+                }
+            };
             
             video.onloadeddata = () => {
                 stimulusContainer.innerHTML = '';
@@ -282,24 +300,25 @@
             };
             
             video.onended = () => {
-                // 保持最后一帧但不清空容器
                 video.pause();
+                // 检查是否有对应的问题
+                if (!questions[`therapy${currentLayout}`] ||
+                    !questions[`therapy${currentLayout}`][practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal']) {
+                    console.error('未找到对应问题:', currentLayout, practiceCount, formalCount);
+                    alert('未找到对应的问题内容，请确保已添加问题数据');
+                    return;
+                }
                 
                 currentQuestionIndex = 0;
-                currentQuestions = practiceCount < 4 ? 
-                    questions[`prominence${currentLayout}`].practice[practiceCount].questions :
-                    questions[`prominence${currentLayout}`].formal[formalCount].questions;
+                currentQuestions = practiceCount < experimentConfig.practiceTrials ? 
+                    questions[`therapy${currentLayout}`].practice[practiceCount].questions :
+                    questions[`therapy${currentLayout}`].formal[formalCount].questions;
                 
-                console.log('视频结束，准备显示问题:', currentQuestions);
+                console.log('准备显示问题:', currentQuestions);
                 
                 setTimeout(() => {
                     showNextQuestion();
                 }, 500);
-            };
-            
-            video.onerror = () => {
-                console.error('视频加载失败:', videoPath);
-                alert(`视频加载失败: ${videoPath}\n请检查视频文件是否存在`);
             };
             
             video.src = videoPath;
@@ -309,11 +328,11 @@
         function showNextQuestion() {
             console.log('显示下一个问题', {
                 currentQuestionIndex,
-                totalQuestions: currentQuestions.length,
+                totalQuestions: experimentConfig.questionsPerTrial,
                 currentQuestions
             });
             
-            if (currentQuestionIndex >= currentQuestions.length) {
+            if (currentQuestionIndex >= experimentConfig.questionsPerTrial) {
                 handleTrialComplete();
                 return;
             }
@@ -321,10 +340,9 @@
             const questionContainer = document.querySelector('.question-container');
             const questionElement = document.querySelector('.question');
             
-            // 显示当前问题编号和总问题数
             questionElement.innerHTML = `
                 <div style="font-size: 16px; margin-bottom: 10px;">
-                    问题 ${currentQuestionIndex + 1}/7
+                    问题 ${currentQuestionIndex + 1}/${experimentConfig.questionsPerTrial}
                 </div>
                 ${currentQuestions[currentQuestionIndex].text}
                 <p>正确按A，错误按L</p>
@@ -332,8 +350,7 @@
             
             questionContainer.style.display = 'block';
             startTime = Date.now();
-
-            // 设置10秒超时
+            
             questionTimeout = setTimeout(() => {
                 handleTimeout();
             }, 10000);
@@ -345,10 +362,10 @@
             
             results.push({
                 layout: currentLayout,
-                trialType: practiceCount < 4 ? '练习' : '正式',
-                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
@@ -367,34 +384,35 @@
 
             console.log('试次完成', {practiceCount, formalCount, currentLayout});
             
-            if (practiceCount < 3) {
+            if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
                 practiceCount++;
                 showFixation();
                 updateDebugInfo();
                 console.log('进入下一个练习:', practiceCount + 1);
-            } else if (practiceCount === 3) {
+            } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                 practiceCount++;
                 alert('练习结束，即将进入正式实验');
+                formalCount = 0;  // 确保正式实验从0开始
                 showFixation();
                 updateDebugInfo();
-            } else if (formalCount < 2) {
+            } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
                 updateDebugInfo();
                 console.log('进入下一个正式实验:', formalCount + 1);
-            } else if (formalCount === 2) {
-                formalCount++;
-                if (currentLayout < 5) {
+            } else {  // 当前变量结束
+                if (currentLayout < experimentConfig.totalLayouts) {
+                    // 还有下一个变量
                     currentLayout++;
                     practiceCount = 0;
                     formalCount = 0;
-                    alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
+                    alert(`变量${currentLayout-1}实验完成，即将进入变量${currentLayout}实验`);
                     showPracticeInstruction();
                 } else {
-                    alert('实验结束！即将导出结果文件。');
+                    // 所有实验完成
+                    alert('所有实验完成！即将导出结果。');
                     exportToCSV();
                 }
-                updateDebugInfo();
             }
         }
 
@@ -410,10 +428,10 @@
             // 记录结果
             results.push({
                 layout: currentLayout,
-                trialType: practiceCount < 4 ? '练习' : '正式',
-                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: key.toUpperCase(),
@@ -428,28 +446,22 @@
         }
 
         // 修改按键事件处理
-        window.onkeydown = function(event) {
-            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
+        document.addEventListener('keydown', function(event) {
+            console.log('按键事件', {currentPhase, currentLayout, practiceCount, formalCount});
             
             if (currentPhase === 'instruction') {
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
-                return;
-            }
-            
-            if (currentPhase === 'practiceInstruction') {
+            } else if (currentPhase === 'practiceInstruction') {
                 currentPhase = 'experiment';
                 showFixation();
-                return;
-            }
-            
-            if (currentPhase === 'experiment' && 
+            } else if (currentPhase === 'experiment' && 
                 document.querySelector('.question-container').style.display === 'block') {
                 if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
                     handleResponse(event.key.toLowerCase());
                 }
             }
-        };
+        });
 
         // 修改初始化函数
         window.onload = function() {
@@ -476,8 +488,10 @@
 
         // 更新调试信息
         function updateDebugInfo() {
-            let trialType = practiceCount < 4 ? '练习' : '正式';
-            let trialNumber = practiceCount < 4 ? practiceCount + 1 : formalCount + 1;
+            let trialType = practiceCount < experimentConfig.practiceTrials ? '练习' : '正式';
+            let trialNumber = practiceCount < experimentConfig.practiceTrials ? 
+                practiceCount + 1 : 
+                formalCount + 1;
             debugInfo.textContent = `变量${currentLayout} | ${trialType}${trialNumber}`;
         }
 

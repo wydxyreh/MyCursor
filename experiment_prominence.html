@@ -181,6 +181,7 @@
         const results = [];
         let csvFileName;  // 新增：持久化保存文件名
         let csvData = []; // 新增：保存所有CSV数据
+        let isExperimentCompleted = false;
     
         // 定义实验问题和正确答案
         const questions = {
@@ -364,17 +365,17 @@
             ].join(',');
 
             csvData.push(csvRow); // 追加到数据数组
-            downloadCSV();        // 触发文件下载
         }
-
         // 统一下载函数
         function downloadCSV() {
-            const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = csvFileName; // 始终使用同一个文件名
-            link.click();
-            URL.revokeObjectURL(link.href); // 释放内存
+            if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
+                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = csvFileName; // 始终使用同一个文件名
+                link.click();
+                URL.revokeObjectURL(link.href); // 释放内存
+            }
         }
     
         // 显示屏幕函数
@@ -603,6 +604,8 @@
                         showPracticeInstruction();
                     } else {
                         alert('实验结束！最终数据已保存');
+                        downloadCSV(); // 实验结束时下载CSV文件
+                        isExperimentCompleted = true; // 标记实验完成
                     }
                 }
                 isProcessingResponse = false;
@@ -642,6 +645,12 @@
             showScreen('instruction');
         };
 
+        window.addEventListener('beforeunload', function (e) {
+            if (!isExperimentCompleted) {
+                // 实验未完成，保存当前数据
+                downloadCSV();
+            }
+        });
     
         // 在HTML中添加调试信息显示（可选）
         const debugInfo = document.createElement('div');

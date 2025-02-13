@@ -262,7 +262,7 @@
             ].join(',');
 
             csvData.push(csvRow); // 追加到数据数组
-            downloadCSV();        // 触发文件下载
+            // 移除 downloadCSV();  // 不再每次新增数据时下载
         }
 
         // 统一下载函数
@@ -454,7 +454,7 @@
                 } else {
                     // 所有实验完成
                     alert('所有实验完成！即将导出结果。');
-                    exportToCSV();
+                    downloadCSV();  // 实验完成时下载CSV
                 }
             }
         }
@@ -528,6 +528,14 @@
             
             showScreen('instruction');
             updateDebugInfo();
+        };
+
+        // 添加意外退出时的数据保存
+        window.onbeforeunload = function(event) {
+            if (currentLayout <= experimentConfig.totalLayouts && formalCount < experimentConfig.formalTrials) {
+                // 如果实验未完成，保存当前数据
+                downloadCSV();
+            }
         };
 
         // 在HTML中添加调试信息显示（可选）

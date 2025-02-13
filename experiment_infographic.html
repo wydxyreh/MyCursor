@@ -129,6 +129,7 @@
         const results = [];
         let csvFileName;  // 持久化保存文件名
         let csvData = []; // 保存所有CSV数据
+        let isExperimentCompleted = false;
 
 
         // 添加当前问题相关变量
@@ -411,8 +412,8 @@
         // 追加数据到CSV文件
         function appendDataToCSV(data) {
             // 构建CSV行数据
-            const trialType = practiceCount < 4 ? 'excise' : 'test';
-            const trialNumber = practiceCount < 4 ? practiceCount + 1 : formalCount + 1;
+            const trialType = practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test';
+            const trialNumber = practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1;
             const questionNumber = currentQuestionIndex + 1;
 
             const trial = `infographic${currentLayout}-${trialType}${trialNumber}-question${questionNumber}`;
@@ -425,8 +426,7 @@
                 data['reaction time']
             ].join(',');
 
-            csvData.push(csvRow); // 追加到数据数组
-            downloadCSV();        // 触发文件下载
+            csvData.push(csvRow); // 仅追加数据，不下载
         }
 
         // 统一下载函数
@@ -434,11 +434,10 @@
             const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = csvFileName; // 始终使用同一个文件名
+            link.download = csvFileName;
             link.click();
-            URL.revokeObjectURL(link.href); // 释放内存
+            URL.revokeObjectURL(link.href);
         }
-
         // 显示屏幕函数
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
@@ -599,6 +598,7 @@
 
         // 添加实验完成显示函数
         function showExperimentComplete() {
+            isExperimentCompleted = true; // 标记实验已完成
             const container = document.createElement('div');
             container.style.cssText = `
                 position: fixed;
@@ -623,7 +623,6 @@
             `;
             
             document.body.appendChild(container);
-            exportToCSV();  // 导出数据
             
             // 监听按键事件
             function handleKeyPress(e) {
@@ -632,6 +631,8 @@
             }
             
             window.addEventListener('keydown', handleKeyPress);
+
+            downloadCSV();  // 导出最终数据
         }
 
         // 处理响应
@@ -701,6 +702,19 @@
             updateDebugInfo();
         };
 
+        // 添加页面卸载事件监听
+        window.addEventListener('beforeunload', function(e) {
+            if (!isExperimentCompleted && csvData.length > 1) {
+                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `AUTO_SAVED_${csvFileName}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
         // 在HTML中添加调试信息显示（可选）
         const debugInfo = document.createElement('div');
         debugInfo.style.position = 'fixed';
@@ -719,28 +733,6 @@
                 practiceCount + 1 : 
                 formalCount + 1;
             debugInfo.textContent = `变量${currentLayout} | ${trialType}${trialNumber}`;
-        }
-
-        // CSV导出函数
-        function exportToCSV() {
-            let csvContent = "\ufeff变量,试次类型,试次编号,问题编号,视频路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
-            
-            results.forEach(result => {
-                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
-                            `${result.questionNumber},${result.videoPath},${result.question},` +
-                            `${result.correctAnswer},${result.userResponse},${result.isCorrect},` +
-                            `${result.reactionTime}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>

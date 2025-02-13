@@ -209,17 +209,19 @@
             ].join(',');
 
             csvData.push(csvRow); // 追加到数据数组
-            downloadCSV();        // 触发文件下载
         }
 
         // 统一下载函数
         function downloadCSV() {
-            const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = csvFileName; // 始终使用同一个文件名
-            link.click();
-            URL.revokeObjectURL(link.href); // 释放内存
+            if (currentLayout < 4 || formalCount < 3) {
+                // 仅在实验未完成时下载
+                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = csvFileName; // 始终使用同一个文件名
+                link.click();
+                URL.revokeObjectURL(link.href); // 释放内存
+            }
         }
 
         // 记录结果函数
@@ -427,7 +429,7 @@
                         } else {
                             // 所有实验结束
                             alert('实验结束！即将导出结果文件。');
-                            exportToCSV();
+                            downloadCSV(); // 仅在实验结束时下载CSV文件
                         }
                     } else {
                         showFixation();
@@ -469,12 +471,20 @@
             currentLayout = 1;
             practiceCount = 0;
             formalCount = 0;
-            
+
             // 初始化CSV文件
             csvFileName = `${getCurrentDateTime()}.csv`;
             createCSVFile();
-            
+
             showScreen('instruction');
+
+            // 添加页面关闭或刷新时的数据保存逻辑
+            window.addEventListener('beforeunload', function(event) {
+                if (currentLayout < 4 || formalCount < 3) {
+                    // 如果实验未完成，保存当前数据
+                    downloadCSV();
+                }
+            });
         };
 
         // 在HTML中添加调试信息显示（可选）

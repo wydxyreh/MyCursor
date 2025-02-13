@@ -397,11 +397,11 @@
                             <div class="metrics">
                                 <div class="metric">
                                     <span>深度</span>
-                                    <span class="metric-value">5.5/cm</span>
+                                    <span id="depth-value" class="metric-value">5.5/cm</span>
                                 </div>
                                 <div class="metric">
                                     <span>频率</span>
-                                    <span class="metric-value">100/min</span>
+                                    <span id="frequency-value" class="metric-value">100/min</span>
                                 </div>
                             </div>
 
@@ -566,6 +566,10 @@
                 this.chart.innerHTML = '';
                 document.querySelector('.warnings').innerHTML = '';
 
+                // 用于存储最近5次的深度和间隔时间
+                this.depthHistory = [];
+                this.intervalHistory = [];
+
                 this.MonitorId = null;
                 this.countdownIntervalId = null;
 
@@ -601,7 +605,34 @@
                     bar.style.height = `${press.height}px`;
                     this.chart.appendChild(bar);
                 });
+
+                // 更新深度和频率的历史记录
+                this.depthHistory.unshift(depth);
+                if (this.depthHistory.length > 5) {
+                    this.depthHistory.pop();
+                }
+
+                this.currentInterval = this.generatePressInterval();
+                this.intervalHistory.unshift(this.currentInterval);
+                if (this.intervalHistory.length > 5) {
+                    this.intervalHistory.pop();
+                }
+
+                // 计算并更新深度和频率的显示
+                this.updateDepthAndFrequency();
+
                 this.updateWarnings();
+            }
+
+            updateDepthAndFrequency() {
+                // 计算深度的平均值
+                const averageDepth = this.depthHistory.reduce((sum, depth) => sum + depth, 0) / this.depthHistory.length;
+                document.getElementById('depth-value').textContent = `${averageDepth.toFixed(1)}/cm`;
+
+                // 计算频率的平均值
+                const averageInterval = this.intervalHistory.reduce((sum, interval) => sum + interval, 0) / this.intervalHistory.length;
+                const averageFrequency = Math.round(60000 / averageInterval);
+                document.getElementById('frequency-value').textContent = `${averageFrequency}/min`;
             }
 
             generatePressDepth() {

@@ -438,7 +438,7 @@
                     <!-- 除颤模块 -->
                     <div class="defibrillation-module">
                         <div class="defibrillation-title">除颤</div>
-                        <div class="waiting-message">等待除颤信号...</div>
+                        <div class="waiting-message">正在检测中</div>
                         <div class="warning-message" style="display: none;">检测到可除颤信号！</div>
                         <div class="metrics-row">
                             <div class="metric">
@@ -499,57 +499,57 @@
             style1: {
                 initial: {
                     depth: { min: 4.0, max: 5.5 },      // 过浅
-                    interval: { min: 300, max: 400 } // 过快
+                    interval: { min: 450, max: 500 } // 过快
                 },
                 target: {
                     depth: { min: 5, max: 6 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
-                transitionTime: 15000
+                transitionTime: 30000
             },
             style2: {
                 initial: {
-                    depth: { min: 6.5, max: 7.5 },  // 过深
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 5.8, max: 6.5 },  // 过深
+                    interval: { min: 610, max: 660 } // 过慢
                 },
                 target: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.0, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
-                transitionTime: 20000
+                transitionTime: 30000
             },
             style3: {
                 initial: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.5, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
                 target: {
-                    depth: { min: 3, max: 4 },      // 过浅
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 4.8, max: 5.2 },      // 过浅
+                    interval: { min: 620, max: 680 } // 过慢
                 },
-                transitionTime: 15000
+                transitionTime: 30000
             },
             style4: {
                 initial: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.4, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
                 target: {
-                    depth: { min: 6.5, max: 7.5 },  // 过深
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 5.8, max: 6.3 },  // 过深
+                    interval: { min: 620, max: 650 } // 过慢
                 },
-                transitionTime: 15000
+                transitionTime: 30000
             },
             style5: {
                 initial: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.3, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
                 target: {
-                    depth: { min: 6.5, max: 7.5 },  // 过深
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 6.0, max: 6.3 },  // 过深
+                    interval: { min: 450, max: 500 } // 过快
                 },
-                transitionTime: 20000
+                transitionTime: 30000
             }
         };
 
@@ -689,11 +689,11 @@
                 }
                 const frequency = this.calculateFrequency(this.currentInterval);
                 if (frequency > this.frequencyThresholdHigh) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率过快！';
+                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过快！';
                 } else if (frequency < this.frequencyThresholdLow) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率过慢！';
+                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过慢！';
                 } else {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率正常！';
+                    warningContainer.appendChild(document.createElement('span')).textContent = '频率正常！';
                 }
             }
 

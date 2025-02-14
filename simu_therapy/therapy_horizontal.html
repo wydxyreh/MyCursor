@@ -145,12 +145,12 @@
             top: 60px;
             left: 37.5px;
             width: calc(100% - 30px);
-            height: 27px;
+            height: 40px;
             display: flex;
             justify-content: flex-start;
-            gap: 33px;
+            gap: 60px;
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         .metric {
@@ -237,20 +237,20 @@
 
         .warnings {
             position: absolute;
-            bottom: -3px;
+            bottom: 3px;
             left: 45px;
             right: 30px;
             height: 30px;
             display: flex;
             gap: 4.5px;
             color: #fff;
-            font-size: 15px;
+            font-size: 20px;
         }
         
         /* 除颤模块 */
         .defibrillation-module {
             background-color: #4d4b4b;
-            padding: 15px;
+            padding: 4px;
             border-radius: 0;
             width: 300px;
             height: 225px;
@@ -258,13 +258,13 @@
         }
 
         .defibrillation-title {
-            font-size: 20px;
+            font-size: 18px;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 0px;
         }
 
         .status {
-            font-size: 16px;
+            font-size: 20px;
             text-align: center;
             margin: 10px 0;
         }
@@ -272,11 +272,12 @@
         .metrics-row {
             display: flex;
             justify-content: space-around;
+            font-size: 14px;
             margin: 10px 0;
         }
 
         .energy-display {
-            font-size: 48px;
+            font-size: 60px;
             text-align: center;
             margin: 15px 0;
         }
@@ -288,16 +289,16 @@
 
         .warning-message {
             color: #FF3B30;
-            font-size: 16px;
+            font-size: 20px;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 18px;
         }
 
         .waiting-message {
             color: #00C764;
-            font-size: 16px;
+            font-size: 20px;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 18px;
         }
 
         .style-buttons {
@@ -437,7 +438,7 @@
                         <div class="energy-display">
                             <span class="energy-display-value">0</span><span class="energy-unit">J</span>
                         </div>
-                        <div class="waiting-message">等待除颤信号</div>
+                        <div class="waiting-message">正在检测中</div>
                         <div class="warning-message" style="display: none;">检测到可除颤信号！</div>
                     </div>
                 </div>
@@ -484,57 +485,57 @@
             style1: {
                 initial: {
                     depth: { min: 4.0, max: 5.5 },      // 过浅
-                    interval: { min: 300, max: 400 } // 过快
+                    interval: { min: 450, max: 500 } // 过快
                 },
                 target: {
                     depth: { min: 5, max: 6 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
-                transitionTime: 15000
+                transitionTime: 30000
             },
             style2: {
                 initial: {
-                    depth: { min: 6.5, max: 7.5 },  // 过深
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 5.8, max: 6.5 },  // 过深
+                    interval: { min: 610, max: 660 } // 过慢
                 },
                 target: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.0, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
-                transitionTime: 20000
+                transitionTime: 30000
             },
             style3: {
                 initial: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.5, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
                 target: {
-                    depth: { min: 3, max: 4 },      // 过浅
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 4.8, max: 5.2 },      // 过浅
+                    interval: { min: 620, max: 680 } // 过慢
                 },
-                transitionTime: 15000
+                transitionTime: 30000
             },
             style4: {
                 initial: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.4, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
                 target: {
-                    depth: { min: 6.5, max: 7.5 },  // 过深
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 5.8, max: 6.3 },  // 过深
+                    interval: { min: 620, max: 650 } // 过慢
                 },
-                transitionTime: 15000
+                transitionTime: 30000
             },
             style5: {
                 initial: {
-                    depth: { min: 4.5, max: 6.5 },  // 正常
+                    depth: { min: 5.3, max: 6.0 },  // 正常
                     interval: { min: 500, max: 600 } // 正常
                 },
                 target: {
-                    depth: { min: 6.5, max: 7.5 },  // 过深
-                    interval: { min: 700, max: 800 } // 过慢
+                    depth: { min: 6.0, max: 6.3 },  // 过深
+                    interval: { min: 450, max: 500 } // 过快
                 },
-                transitionTime: 20000
+                transitionTime: 30000
             }
         };
 
@@ -556,8 +557,8 @@
                 this.progressBar = document.querySelector('.progress');
                 this.timeDisplay = document.querySelector('.ratio');
                 this.pressTimes = [];
-                this.frequencyThresholdHigh = 110;
-                this.frequencyThresholdLow = 90;
+                this.frequencyThresholdHigh = 120;
+                this.frequencyThresholdLow = 100;
                 this.startTime = Date.now();
 
                 // 重置 DOM 状态
@@ -674,11 +675,11 @@
                 }
                 const frequency = this.calculateFrequency(this.currentInterval);
                 if (frequency > this.frequencyThresholdHigh) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率过快！';
+                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过快！';
                 } else if (frequency < this.frequencyThresholdLow) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率过慢！';
+                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过慢！';
                 } else {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '按压频率正常！';
+                    warningContainer.appendChild(document.createElement('span')).textContent = '频率正常！';
                 }
             }
 

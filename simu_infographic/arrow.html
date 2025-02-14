@@ -493,18 +493,24 @@
             const trend = value > averageValue ? 'up' : 
                         value < averageValue ? 'down' : '';
 
+            // 根据区间设置箭头颜色
+            let colorClass = '';
+            if (zone === 'red') {
+                colorClass = 'red';
+            } else if (zone === 'yellow') {
+                colorClass = 'yellow';
+            } else if (zone === 'green') {
+                colorClass = 'green';
+            }
+
             // 修改箭头显示逻辑
-            if (zone === 'red' && trend) {
-                // 在红色区间且有变化趋势时，显示红色箭头
-                arrowElement.className = `arrow show ${trend} red`;
-            } else if (zone === 'yellow' && trend) {
-                // 在黄色区间且有变化趋势时，显示黄色箭头
-                arrowElement.className = `arrow show ${trend} yellow`;
+            if (trend && colorClass) {
+                // 如果有趋势且颜色有效，显示箭头
+                arrowElement.className = `arrow show ${trend} ${colorClass}`;
             } else {
                 arrowElement.className = 'arrow';
             }
         }
-
         // 添加趋势控制系统
         const trendControl = {
             duration: 120,  // 2分钟 = 120秒

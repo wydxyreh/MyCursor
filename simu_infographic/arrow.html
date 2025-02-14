@@ -146,7 +146,11 @@
         }
 
         /* Pleth Panel 的箭头 */
-        .pleth-panel .arrow {
+        .pleth-panel .arrow-pleth-1 {
+            margin-left: -55px; /* Pleth 的箭头位置 */
+        }
+
+        .pleth-panel .arrow-pleth-2 {
             margin-left: -55px; /* Pleth 的箭头位置 */
         }
 
@@ -407,30 +411,32 @@
         // 定义参数范围
         const RANGES = {
             spo2: {
-                red: { min: 0, max: 90 },
-                green: { min: 90, max: 100 }
+                red: {max: 90 },
+                green: { min: 90}
             },
             hr: {
-                red: { min: 0, max: 50, min2: 120, max2: 140 },
+                red: {max: 50, min2: 120},
                 yellow: { min: 50, max: 60, min2: 100, max2: 120 },
                 green: { min: 60, max: 100 }
             },
             Pleth_bp1: {
-                red: { min: 50, max: 90, min2: 140, max2: 180 },
+                red: {max: 90, min2: 140},
                 yellow: { min: 90, max: 100, min2: 120, max2: 140 },
                 green: { min: 100, max: 120 }    
             },
             Pleth_bp2: {
-                red: { min: 50, max: 60, min2: 90, max2: 130 },
+                red: {max: 60, min2: 90},
                 yellow: { min: 60, max: 70, min2: 80, max2: 90 },
                 green: { min: 70, max: 80 }
             },
             temp: {
-                red: { min: 33, max: 35.5, min2: 38, max2: 42 },
+                red: {max: 35.5, min2: 38},
                 yellow: { min: 35.5, max: 36, min2: 37.3, max2: 38 },
                 green: { min: 36, max: 37.3 }
             }
         };
+
+        let newData = {};
 
         // 存储历史数据
         const history = {
@@ -440,6 +446,16 @@
             Pleth_bp2: [],
             temp: []
         };
+
+        // 在脚本顶部添加日志数组和日志记录函数
+        let logs = [];
+        function logEvent(type, data) {
+            logs.push({
+                timestamp: new Date().toISOString(),
+                type,
+                data
+            });
+        }
 
         // 判断值所在的区间
         function getValueZone(value, ranges) {
@@ -458,8 +474,8 @@
             
             // 最后检查红色区间
             const redRange = ranges.red;
-            if ((value >= redRange.min && value <= redRange.max) || 
-                (redRange.min2 && value >= redRange.min2 && value <= redRange.max2)) {
+            if ((value <= redRange.max) || 
+                (redRange.min2 && value >= redRange.min2)) {
                 return 'red';
             }
             
@@ -469,6 +485,11 @@
 
         // 更新箭头状态
         function updateArrow(param, value, arrowElement) {
+            if (!arrowElement) {
+                logEvent(`Arrow element for ${param} not found`);
+                return; // 提前返回，避免操作null
+            }
+
             const paramHistory = history[param];
 
             // 计算前4秒的平均值
@@ -488,10 +509,18 @@
             }
 
             const zone = getValueZone(value, ranges);
-
-            // 判断变化趋势
             const trend = value > averageValue ? 'up' : 
                         value < averageValue ? 'down' : '';
+            
+            // 记录 updateArrow 日志
+            logEvent('updateArrow', {
+                param,
+                value,
+                ranges: JSON.parse(JSON.stringify(ranges)), // 深度拷贝
+                zone,
+                trend,
+                averageValue
+            });
 
             // 根据区间设置箭头颜色
             let colorClass = '';
@@ -500,17 +529,34 @@
             } else if (zone === 'yellow') {
                 colorClass = 'yellow';
             } else if (zone === 'green') {
-                colorClass = 'green';
+                colorClass = '';
             }
 
             // 修改箭头显示逻辑
-            if (trend && colorClass) {
-                // 如果有趋势且颜色有效，显示箭头
-                arrowElement.className = `arrow show ${trend} ${colorClass}`;
+            if (param === 'Pleth_bp1') {
+                // 单独处理 Pleth 1 的箭头
+                if (trend && colorClass) {
+                    arrowElement.className = `arrow-pleth-1 show ${trend} ${colorClass}`;
+                } else {
+                    arrowElement.className = 'arrow-pleth-1';
+                }
+            } else if (param === 'Pleth_bp2') {
+                // 单独处理 Pleth 2 的箭头
+                if (trend && colorClass) {
+                    arrowElement.className = `arrow-pleth-2 show ${trend} ${colorClass}`;
+                } else {
+                    arrowElement.className = 'arrow-pleth-2';
+                }
             } else {
-                arrowElement.className = 'arrow';
+                // 其他参数的箭头处理
+                if (trend && colorClass) {
+                    arrowElement.className = `arrow show ${trend} ${colorClass}`;
+                } else {
+                    arrowElement.className = 'arrow';
+                }
             }
         }
+
         // 添加趋势控制系统
         const trendControl = {
             duration: 120,  // 2分钟 = 120秒
@@ -620,14 +666,11 @@
         function updateArrowData(data) {
             // SpO2模拟
             const spo2Arrow = document.querySelector('.spo2-panel .arrow');
-            
             // HR模拟
             const hrArrow = document.querySelector('.hr-panel .arrow');
-            
             // Pleth模拟
             const plethBP1Arrow = document.querySelector('.pleth-panel .arrow-pleth-1');
             const plethBP2Arrow = document.querySelector('.pleth-panel .arrow-pleth-2');
-            
             // Temp模拟
             const tempArrow = document.querySelector('.temp-panel .arrow');
 
@@ -641,24 +684,32 @@
 
         // 更新显示函数
         function updateArrowValues() {
-            const newData = generateRandomData();
-            // 只更新显示值
-            updateArrowData(newData);
+            updateArrowData(newData); // 直接使用全局变量
         }
 
         // 更新显示函数
         function updatePanelDisplay() {
-            const newData = generateRandomData();
-            // 只更新显示值
+            newData = generateRandomData();
             updatePanelValues(newData);
 
-            // 对于 history 的每个度量标准，添加新数据，并确保数组长度不超过4
             Object.keys(history).forEach(metric => {
                 if (Array.isArray(history[metric])) {
                     history[metric].push({ value: newData[metric], timestamp: Date.now() });
                     if (history[metric].length > 4) {
-                        history[metric].shift(); // 移除最旧的数据
+                        history[metric].shift();
                     }
+                }
+            });
+
+            // 记录 updatePanelDisplay 日志
+            logEvent('updatePanelDisplay', {
+                newData: {...newData},
+                history: {
+                    spo2: [...history.spo2],
+                    hr: [...history.hr],
+                    Pleth_bp1: [...history.Pleth_bp1],
+                    Pleth_bp2: [...history.Pleth_bp2],
+                    temp: [...history.temp]
                 }
             });
         }
@@ -927,6 +978,30 @@
             // 显示当前病人信息容器
             document.querySelector('.current-patient').style.display = 'block';
         }
+
+        // 添加页面卸载事件监听器
+        window.addEventListener('beforeunload', function() {
+            // 记录页面卸载事件
+            logEvent('pageUnload', { message: "Page is unloading" });
+            
+            // 保存日志到文件
+            const logText = logs.map(entry => 
+                JSON.stringify(entry, (key, value) => {
+                    if(key === 'timestamp') return value;
+                    return value;
+                }, 2)
+            ).join('\n');
+            
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `monitor_log_${new Date().toISOString()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
     </script>
 </body>
-</html> 
+</html>

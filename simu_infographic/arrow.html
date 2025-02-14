@@ -447,16 +447,6 @@
             temp: []
         };
 
-        // 在脚本顶部添加日志数组和日志记录函数
-        let logs = [];
-        function logEvent(type, data) {
-            logs.push({
-                timestamp: new Date().toISOString(),
-                type,
-                data
-            });
-        }
-
         // 判断值所在的区间
         function getValueZone(value, ranges) {
             // 先检查绿色区间
@@ -485,10 +475,6 @@
 
         // 更新箭头状态
         function updateArrow(param, value, arrowElement) {
-            if (!arrowElement) {
-                logEvent(`Arrow element for ${param} not found`);
-                return; // 提前返回，避免操作null
-            }
 
             const paramHistory = history[param];
 
@@ -512,16 +498,6 @@
             const trend = value > averageValue ? 'up' : 
                         value < averageValue ? 'down' : '';
             
-            // 记录 updateArrow 日志
-            logEvent('updateArrow', {
-                param,
-                value,
-                ranges: JSON.parse(JSON.stringify(ranges)), // 深度拷贝
-                zone,
-                trend,
-                averageValue
-            });
-
             // 根据区间设置箭头颜色
             let colorClass = '';
             if (zone === 'red') {
@@ -698,18 +674,6 @@
                     if (history[metric].length > 4) {
                         history[metric].shift();
                     }
-                }
-            });
-
-            // 记录 updatePanelDisplay 日志
-            logEvent('updatePanelDisplay', {
-                newData: {...newData},
-                history: {
-                    spo2: [...history.spo2],
-                    hr: [...history.hr],
-                    Pleth_bp1: [...history.Pleth_bp1],
-                    Pleth_bp2: [...history.Pleth_bp2],
-                    temp: [...history.temp]
                 }
             });
         }
@@ -978,30 +942,6 @@
             // 显示当前病人信息容器
             document.querySelector('.current-patient').style.display = 'block';
         }
-
-        // 添加页面卸载事件监听器
-        window.addEventListener('beforeunload', function() {
-            // 记录页面卸载事件
-            logEvent('pageUnload', { message: "Page is unloading" });
-            
-            // 保存日志到文件
-            const logText = logs.map(entry => 
-                JSON.stringify(entry, (key, value) => {
-                    if(key === 'timestamp') return value;
-                    return value;
-                }, 2)
-            ).join('\n');
-            
-            const blob = new Blob([logText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `monitor_log_${new Date().toISOString()}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
     </script>
 </body>
 </html>

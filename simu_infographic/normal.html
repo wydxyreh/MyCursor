@@ -269,39 +269,116 @@
     </div>
 
     <script>
-        // 当前值存储
-        let currentValues = {
-            spo2: 98,
-            hr: 72,
-            Pleth_bp1: 120,
-            Pleth_bp2: 75,
-            temp: 36.8
+        // 添加趋势控制系统
+        const trendControl = {
+            duration: 120,  // 2分钟 = 120秒
+            startTime: null,
+            initialValues: {
+                spo2: 90,
+                hr: 120,
+                Pleth_bp1: 120,
+                Pleth_bp2: 80,
+                temp: 38.0
+            },
+            targetValues: {
+                spo2: 90,
+                hr: 130,
+                Pleth_bp1: 160,
+                Pleth_bp2: 100,
+                temp: 38.0
+            },
+            isTransitioning: false
         };
 
-        // 目标值存储
-        let targetValues = {
-            spo2: 98,
-            hr: 72,
-            Pleth_bp1: 120,
-            Pleth_bp2: 75,
-            temp: 36.8
-        };
+        // 计算平滑过渡值的函数
+        function calculateTransitionValue(initial, target, progress) {
+            // 使用缓动函数使变化更自然
+            progress = Math.sin(progress * Math.PI / 2);
+            return initial + (target - initial) * progress;
+        }
 
-        // 平滑更新当前值向目标值过渡
-        function updateValue(param) {
-            const diff = targetValues[param] - currentValues[param];
-            // 计算每秒的变化量，确保120秒内完成变化
-            const change = diff / 120;  // 每秒变化总差值的1/10
-            currentValues[param] += change;
-            
-            // 如果非常接近目标值，直接设为目标值
-            if (Math.abs(currentValues[param] - targetValues[param]) < 0.01) {
-                currentValues[param] = targetValues[param];
+        // 生成随机数据的函数
+        function generateRandomData() {
+            if (!trendControl.isTransitioning) {
+                return {
+                    spo2: trendControl.initialValues.spo2,
+                    hr: trendControl.initialValues.hr,
+                    Pleth_bp1: trendControl.initialValues.Pleth_bp1,
+                    Pleth_bp2: trendControl.initialValues.Pleth_bp2,
+                    temp: trendControl.initialValues.temp
+                };
             }
-            
-            return param === 'temp' ? 
-                currentValues[param].toFixed(1) : 
-                Math.round(currentValues[param]);
+
+            const currentTime = Date.now();
+            const progress = Math.min((currentTime - trendControl.startTime) / (trendControl.duration * 1000), 1);
+
+            const result = {};
+            Object.keys(trendControl.initialValues).forEach(metric => {
+                const initial = trendControl.initialValues[metric];
+                const target = trendControl.targetValues[metric];
+                const baseValue = calculateTransitionValue(initial, target, progress);
+
+                // 根据当前值和目标值之间的差值来决定波动范围
+                let fluctuation;
+                if (progress < 1) { // 如果还未完成过渡
+                    fluctuation = Math.abs(baseValue - target) * 0.1; // 波动范围为差值的10%
+                } else {
+                    fluctuation = 0; // 最后一次更新直接设置为目标值
+                }
+
+                // 计算新值
+                let newValue = baseValue + (Math.random() * 2 - 1) * fluctuation; // 随机增加或减少
+                
+                // 确保温度保留一位小数，其他指标取整
+                if (metric === 'temp') {
+                    result[metric] = parseFloat(newValue.toFixed(1));
+                } else {
+                    result[metric] = Math.floor(newValue);
+                }
+                
+                // 当过渡结束时，确保值为目标值
+                if (progress >= 1) {
+                    result[metric] = target;
+                }
+            });
+
+            if (progress >= 1) {
+                trendControl.isTransitioning = false;
+            }
+
+            return result;
+        }
+
+        // 更新数据面板显示值
+        function updatePanelValues(data) {
+            // SpO2模拟
+            const spo2Value = document.querySelector('.spo2-panel .value');
+            // HR模拟
+            const hrValue = document.querySelector('.hr-panel .value');
+            // Pleth模拟
+            const plethBP1Value = document.querySelector('.pleth-panel .bp1');
+            const plethBP2Value = document.querySelector('.pleth-panel .bp2');
+            // Temp模拟
+            const tempValue = document.querySelector('.temp-panel .value');
+
+            const newSpo2 = data.spo2;
+            const newHR = data.hr;
+            const newPlethBP1 = data.Pleth_bp1;
+            const newPlethBP2 = data.Pleth_bp2;
+            const newTemp = data.temp;
+
+            spo2Value.textContent = newSpo2;
+            hrValue.textContent = newHR;
+            plethBP1Value.textContent = newPlethBP1;
+            plethBP2Value.textContent = newPlethBP2;
+            tempValue.textContent = newTemp;
+        }
+
+        // 更新显示函数
+        function updateMetricValues() {
+            const newData = generateRandomData();
+            // 只更新显示值
+            updatePanelValues(newData);
         }
 
         // 病人数据
@@ -506,6 +583,9 @@
             }
         };
 
+        // 用于存储定时器的 ID
+        let metricIntervalId = null;
+
         // 选择病人函数
         function selectPatient(patientNumber) {
             const patient = patientData[`patient${patientNumber}`];
@@ -518,13 +598,21 @@
             // 设置当前按钮为选中状态
             event.target.classList.add('selected');
             
-            // 设置初始值
-            currentValues = {...patient.initial};
-            // 设置目标值
-            targetValues = {...patient.target};
+            // 2. 重置 trendControl 参数并导入 patient.initial 和 patient.target 的数据
+            trendControl.initialValues = {...patient.initial};
+            trendControl.targetValues = {...patient.target};
+            trendControl.startTime = Date.now();
+            trendControl.isTransitioning = true;
+            trendControl.duration = 120;
             
-            // 更新显示
-            updateDisplay();
+            // 清除之前的定时器
+            if (metricIntervalId !== null) {
+                clearInterval(metricIntervalId);
+            }
+            updateMetricValues()
+
+            // 开始新的定时器
+            metricIntervalId = setInterval(updateMetricValues, 1000);  // 每秒更新显示值
             
             // 显示当前病人信息
             document.getElementById('initial-hr').textContent = patient.initial.hr;
@@ -542,42 +630,6 @@
             // 显示当前病人信息容器
             document.querySelector('.current-patient').style.display = 'block';
         }
-
-        // 更新显示函数
-        function updateDisplay() {
-            // SpO2模拟
-            const spo2Value = document.querySelector('.spo2-panel .value');
-            // HR模拟
-            const hrValue = document.querySelector('.hr-panel .value');
-            // Pleth模拟
-            const plethBP1Value = document.querySelector('.pleth-panel .bp1');
-            const plethBP2Value = document.querySelector('.pleth-panel .bp2');
-            // Temp模拟
-            const tempValue = document.querySelector('.temp-panel .value');
-
-            const newSpo2 = updateValue('spo2');
-            const newHR = updateValue('hr');
-            const newPlethBP1 = updateValue('Pleth_bp1');
-            const newPlethBP2 = updateValue('Pleth_bp2');
-            const newTemp = updateValue('temp');
-
-            spo2Value.textContent = newSpo2;
-            hrValue.textContent = newHR;
-            plethBP1Value.textContent = newPlethBP1;
-            plethBP2Value.textContent = newPlethBP2;
-            tempValue.textContent = newTemp;
-        }
-
-        // 模拟数据更新
-        function simulateDataUpdates() {
-            setInterval(() => {
-                // 平滑更新所有参数
-                updateDisplay()
-            }, 1000);  // 每秒更新一次
-        }
-
-        // 启动模拟
-        simulateDataUpdates();
     </script>
 </body>
 </html> 

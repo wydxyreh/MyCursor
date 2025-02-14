@@ -406,11 +406,11 @@
     <script>
         // 定义参数范围
         const RANGES = {
-            SpO2: {
+            spo2: {
                 red: { min: 0, max: 90 },
                 green: { min: 90, max: 100 }
             },
-            HR: {
+            hr: {
                 red: { min: 0, max: 50, min2: 120, max2: 140 },
                 yellow: { min: 50, max: 60, min2: 100, max2: 120 },
                 green: { min: 60, max: 100 }
@@ -425,7 +425,7 @@
                 yellow: { min: 60, max: 70, min2: 80, max2: 90 },
                 green: { min: 70, max: 80 }
             },
-            Temp: {
+            temp: {
                 red: { min: 33, max: 35.5, min2: 38, max2: 42 },
                 yellow: { min: 35.5, max: 36, min2: 37.3, max2: 38 },
                 green: { min: 36, max: 37.3 }
@@ -434,11 +434,11 @@
 
         // 存储历史数据
         const history = {
-            SpO2: [],
-            HR: [],
+            spo2: [],
+            hr: [],
             Pleth_bp1: [],
             Pleth_bp2: [],
-            Temp: []
+            temp: []
         };
 
         // 判断值所在的区间
@@ -471,26 +471,20 @@
         function updateArrow(param, value, arrowElement) {
             const paramHistory = history[param];
 
-            // 添加新数据，并确保数组长度不超过4
-            paramHistory.push({ time: Date.now(), value });
-            if (paramHistory.length > 4) {
-                paramHistory.shift(); // 移除最旧的数据
-            }
-
             // 计算前4秒的平均值
             const averageValue = paramHistory.reduce((sum, data) => sum + data.value, 0) / paramHistory.length;
 
             let ranges;
-            if (param === 'SpO2') {
-                ranges = RANGES.SpO2;
-            } else if (param === 'HR') {
-                ranges = RANGES.HR;
+            if (param === 'spo2') {
+                ranges = RANGES.spo2;
+            } else if (param === 'hr') {
+                ranges = RANGES.hr;
             } else if (param === 'Pleth_bp1') {
                 ranges = RANGES.Pleth_bp1;
             } else if (param === 'Pleth_bp2') {
                 ranges = RANGES.Pleth_bp2;
-            } else if (param === 'Temp') {
-                ranges = RANGES.Temp;
+            } else if (param === 'temp') {
+                ranges = RANGES.temp;
             }
 
             const zone = getValueZone(value, ranges);
@@ -511,39 +505,156 @@
             }
         }
 
-        // 当前值存储
-        let currentValues = {
-            spo2: 98,
-            hr: 72,
-            Pleth_bp1: 120,
-            Pleth_bp2: 75,
-            temp: 36.8
+        // 添加趋势控制系统
+        const trendControl = {
+            duration: 120,  // 2分钟 = 120秒
+            startTime: null,
+            initialValues: {
+                spo2: 90,
+                hr: 120,
+                Pleth_bp1: 120,
+                Pleth_bp2: 80,
+                temp: 38.0
+            },
+            targetValues: {
+                spo2: 90,
+                hr: 130,
+                Pleth_bp1: 160,
+                Pleth_bp2: 100,
+                temp: 38.0
+            },
+            isTransitioning: false
         };
 
-        // 目标值存储
-        let targetValues = {
-            spo2: 98,
-            hr: 72,
-            Pleth_bp1: 120,
-            Pleth_bp2: 75,
-            temp: 36.8
-        };
+        // 计算平滑过渡值的函数
+        function calculateTransitionValue(initial, target, progress) {
+            // 使用缓动函数使变化更自然
+            progress = Math.sin(progress * Math.PI / 2);
+            return initial + (target - initial) * progress;
+        }
 
-        // 平滑更新当前值向目标值过渡
-        function updateValue(param) {
-            const diff = targetValues[param] - currentValues[param];
-            // 计算每秒的变化量，确保120秒内完成变化
-            const change = diff / 120;  // 每秒变化总差值的1/10
-            currentValues[param] += change;
-            
-            // 如果非常接近目标值，直接设为目标值
-            if (Math.abs(currentValues[param] - targetValues[param]) < 0.01) {
-                currentValues[param] = targetValues[param];
+        // 生成随机数据的函数
+        function generateRandomData() {
+            if (!trendControl.isTransitioning) {
+                return {
+                    spo2: trendControl.initialValues.spo2,
+                    hr: trendControl.initialValues.hr,
+                    Pleth_bp1: trendControl.initialValues.Pleth_bp1,
+                    Pleth_bp2: trendControl.initialValues.Pleth_bp2,
+                    temp: trendControl.initialValues.temp
+                };
             }
+
+            const currentTime = Date.now();
+            const progress = Math.min((currentTime - trendControl.startTime) / (trendControl.duration * 1000), 1);
+
+            const result = {};
+            Object.keys(trendControl.initialValues).forEach(metric => {
+                const initial = trendControl.initialValues[metric];
+                const target = trendControl.targetValues[metric];
+                const baseValue = calculateTransitionValue(initial, target, progress);
+
+                // 根据当前值和目标值之间的差值来决定波动范围
+                let fluctuation;
+                if (progress < 1) { // 如果还未完成过渡
+                    fluctuation = Math.abs(baseValue - target) * 0.1; // 波动范围为差值的10%
+                } else {
+                    fluctuation = 0; // 最后一次更新直接设置为目标值
+                }
+
+                // 计算新值
+                let newValue = baseValue + (Math.random() * 2 - 1) * fluctuation; // 随机增加或减少
+                
+                // 确保温度保留一位小数，其他指标取整
+                if (metric === 'temp') {
+                    result[metric] = parseFloat(newValue.toFixed(1));
+                } else {
+                    result[metric] = Math.floor(newValue);
+                }
+                
+                // 当过渡结束时，确保值为目标值
+                if (progress >= 1) {
+                    result[metric] = target;
+                }
+            });
+
+            if (progress >= 1) {
+                trendControl.isTransitioning = false;
+            }
+
+            return result;
+        }
+
+        // 更新数据面板显示值
+        function updatePanelValues(data) {
+            // SpO2模拟
+            const spo2Value = document.querySelector('.spo2-panel .value');
+            // HR模拟
+            const hrValue = document.querySelector('.hr-panel .value');
+            // Pleth模拟
+            const plethBP1Value = document.querySelector('.pleth-panel .bp1');
+            const plethBP2Value = document.querySelector('.pleth-panel .bp2');
+            // Temp模拟
+            const tempValue = document.querySelector('.temp-panel .value');
+
+            const newSpo2 = data.spo2;
+            const newHR = data.hr;
+            const newPlethBP1 = data.Pleth_bp1;
+            const newPlethBP2 = data.Pleth_bp2;
+            const newTemp = data.temp;
+
+            spo2Value.textContent = newSpo2;
+            hrValue.textContent = newHR;
+            plethBP1Value.textContent = newPlethBP1;
+            plethBP2Value.textContent = newPlethBP2;
+            tempValue.textContent = newTemp;
+        }
+
+        // 模拟数据更新函数
+        function updateArrowData(data) {
+            // SpO2模拟
+            const spo2Arrow = document.querySelector('.spo2-panel .arrow');
             
-            return param === 'temp' ? 
-                currentValues[param].toFixed(1) : 
-                Math.round(currentValues[param]);
+            // HR模拟
+            const hrArrow = document.querySelector('.hr-panel .arrow');
+            
+            // Pleth模拟
+            const plethBP1Arrow = document.querySelector('.pleth-panel .arrow-pleth-1');
+            const plethBP2Arrow = document.querySelector('.pleth-panel .arrow-pleth-2');
+            
+            // Temp模拟
+            const tempArrow = document.querySelector('.temp-panel .arrow');
+
+            // 更新历史数据和箭头
+            updateArrow('spo2', data.spo2, spo2Arrow);
+            updateArrow('hr', data.hr, hrArrow);
+            updateArrow('Pleth_bp1', data.Pleth_bp1, plethBP1Arrow);
+            updateArrow('Pleth_bp2', data.Pleth_bp2, plethBP2Arrow);
+            updateArrow('temp', data.temp, tempArrow);
+        }
+
+        // 更新显示函数
+        function updateArrowValues() {
+            const newData = generateRandomData();
+            // 只更新显示值
+            updateArrowData(newData);
+        }
+
+        // 更新显示函数
+        function updatePanelDisplay() {
+            const newData = generateRandomData();
+            // 只更新显示值
+            updatePanelValues(newData);
+
+            // 对于 history 的每个度量标准，添加新数据，并确保数组长度不超过4
+            Object.keys(history).forEach(metric => {
+                if (Array.isArray(history[metric])) {
+                    history[metric].push({ value: newData[metric], timestamp: Date.now() });
+                    if (history[metric].length > 4) {
+                        history[metric].shift(); // 移除最旧的数据
+                    }
+                }
+            });
         }
 
         // 病人数据
@@ -748,6 +859,10 @@
             }
         };
 
+        // 用于存储定时器的 ID
+        let metricIntervalId = null;
+        let trendIntervalId = null;
+
         // 选择病人函数
         function selectPatient(patientNumber) {
             const patient = patientData[`patient${patientNumber}`];
@@ -760,10 +875,12 @@
             // 设置当前按钮为选中状态
             event.target.classList.add('selected');
 
-            // 设置初始值
-            currentValues = {...patient.initial};
-            // 设置目标值
-            targetValues = {...patient.target};
+            // 2. 重置 trendControl 参数并导入 patient.initial 和 patient.target 的数据
+            trendControl.initialValues = {...patient.initial};
+            trendControl.targetValues = {...patient.target};
+            trendControl.startTime = Date.now();
+            trendControl.isTransitioning = true;
+            trendControl.duration = 120;
             
             // 清空历史数据
             Object.keys(history).forEach(key => {
@@ -775,8 +892,18 @@
                 arrow.className = 'arrow';
             });
             
-            // 立即更新显示
-            updateDisplay();
+            // 清除之前的定时器
+            if (metricIntervalId !== null) {
+                clearInterval(metricIntervalId);
+            }
+            if (trendIntervalId !== null) {
+                clearInterval(trendIntervalId);
+            }
+            updatePanelDisplay()
+
+            // 开始新的定时器
+            metricIntervalId = setInterval(updatePanelDisplay, 1000);  // 每秒更新显示值
+            trendIntervalId = setInterval(updateArrowValues, 5000);     // 每5秒更新一次箭头
 
             // 显示当前病人信息
             document.getElementById('initial-hr').textContent = patient.initial.hr;
@@ -794,68 +921,6 @@
             // 显示当前病人信息容器
             document.querySelector('.current-patient').style.display = 'block';
         }
-
-        // 更新显示函数
-        function updateDisplay() {
-            const spo2Value = document.querySelector('.spo2-panel .value');
-            const hrValue = document.querySelector('.hr-panel .value');
-            const plethBP1Value = document.querySelector('.pleth-panel .bp1');
-            const plethBP2Value = document.querySelector('.pleth-panel .bp2');
-            const tempValue = document.querySelector('.temp-panel .value');
-
-            spo2Value.textContent = Math.round(currentValues.spo2);
-            hrValue.textContent = Math.round(currentValues.hr);
-            plethBP1Value.textContent = Math.round(currentValues.Pleth_bp1);
-            plethBP2Value.textContent = Math.round(currentValues.Pleth_bp2);
-            tempValue.textContent = currentValues.temp.toFixed(1);
-        }
-
-        // 模拟数据更新函数
-        function simulateDataUpdates() {
-            // SpO2模拟
-            const spo2Value = document.querySelector('.spo2-panel .value');
-            const spo2Arrow = document.querySelector('.spo2-panel .arrow');
-            
-            // HR模拟
-            const hrValue = document.querySelector('.hr-panel .value');
-            const hrArrow = document.querySelector('.hr-panel .arrow');
-            
-            // Pleth模拟
-            const plethBP1Value = document.querySelector('.pleth-panel .bp1');
-            const plethBP1Arrow = document.querySelector('.pleth-panel .arrow-pleth-1');
-            const plethBP2Value = document.querySelector('.pleth-panel .bp2');
-            const plethBP2Arrow = document.querySelector('.pleth-panel .arrow-pleth-2');
-            
-            // Temp模拟
-            const tempValue = document.querySelector('.temp-panel .value');
-            const tempArrow = document.querySelector('.temp-panel .arrow');
-
-            // 每1秒更新一次数据
-            setInterval(() => {
-                // 平滑更新所有参数
-                const newSpo2 = updateValue('spo2');
-                const newHR = updateValue('hr');
-                const newPlethBP1 = updateValue('Pleth_bp1');
-                const newPlethBP2 = updateValue('Pleth_bp2');
-                const newTemp = updateValue('temp');
-
-                // 更新显示
-                updateDisplay();
-            }, 1000);
-
-            // 每5秒更新一次箭头
-            setInterval(() => {
-                // 更新历史数据和箭头
-                updateArrow('SpO2', currentValues.spo2, spo2Arrow);
-                updateArrow('HR', currentValues.hr, hrArrow);
-                updateArrow('Pleth_bp1', currentValues.Pleth_bp1, plethBP1Arrow);
-                updateArrow('Pleth_bp2', currentValues.Pleth_bp2, plethBP2Arrow);
-                updateArrow('Temp', currentValues.temp, tempArrow);
-            }, 5000);  // 每5秒更新一次箭头
-        }
-
-        // 启动模拟
-        simulateDataUpdates();
     </script>
 </body>
 </html> 

@@ -951,11 +951,7 @@
         }
 
         updateTrendLines();
-
-        // 用于存储定时器的 ID
-        let metricIntervalId = null;
-        let trendIntervalId = null;
-
+        
         // 病人数据
         const patientData = {
             patient1: {
@@ -1157,6 +1153,10 @@
                 }
             }
         };
+
+        // 用于存储定时器的 ID
+        let metricIntervalId = null;
+        let trendIntervalId = null;
 
         // 选择病人函数
         function selectPatient(patientNumber) {

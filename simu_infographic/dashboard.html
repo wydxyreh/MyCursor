@@ -879,10 +879,6 @@
             </style>
         `);
 
-        // 用于存储定时器的 ID
-        let metricIntervalId = null;
-        let trendIntervalId = null;
-
         // 病人数据
         const patientData = {
             patient1: {
@@ -1085,6 +1081,9 @@
             }
         };
 
+        // 用于存储定时器的 ID
+        let metricIntervalId = null;
+
         // 选择病人函数
         function selectPatient(patientNumber) {
             const patient = patientData[`patient${patientNumber}`];
@@ -1108,10 +1107,6 @@
             if (metricIntervalId !== null) {
                 clearInterval(metricIntervalId);
             }
-            if (trendIntervalId !== null) {
-                clearInterval(trendIntervalId);
-            }
-
             updateMetricValues()
             
             // 开始新的定时器

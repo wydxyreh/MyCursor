@@ -64,6 +64,9 @@
             transform: rotate(180deg);
             opacity: 0;
             transition: opacity 0.3s;
+            position: absolute; /* 添加绝对定位 */
+            left: 100%; /* 将箭头定位到 value 的右侧 */
+            margin-left: -40px; /* 调整箭头与 value 的距离 */
         }
 
         .arrow.show {
@@ -90,7 +93,8 @@
             border-bottom-color: green;
         }
         
-        .arrow-pleth-1 {
+        .arrow-pleth-1,
+        .arrow-pleth-2 {
             width: 0;
             height: 0;
             border-left: 11.22px solid transparent;
@@ -99,6 +103,9 @@
             transform: rotate(180deg);
             opacity: 0;
             transition: opacity 0.3s;
+            position: absolute; /* 添加绝对定位 */
+            left: 100%; /* 将箭头定位到 value 的右侧 */
+            margin-left: -40px; /* 调整箭头与 value 的距离 */
         }
 
         .arrow-pleth-1.show {
@@ -123,17 +130,6 @@
 
         .arrow-pleth-1.green {
             border-bottom-color: green;
-        }
-
-        .arrow-pleth-2 {
-            width: 0;
-            height: 0;
-            border-left: 11.22px solid transparent;
-            border-right: 11.22px solid transparent;
-            border-bottom: 29.93px solid transparent;
-            transform: rotate(180deg);
-            opacity: 0;
-            transition: opacity 0.3s;
         }
 
         .arrow-pleth-2.show {
@@ -251,6 +247,28 @@
         .current-patient .label {
             font-weight: bold;
             color: #00FF00;
+        }
+
+        /* 修改 HR Panel 和 SpO2 Panel 的布局 */
+        .temp-panel .value-container,
+        .pleth-panel .value-container,
+        .hr-panel .value-container,
+        .spo2-panel .value-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .temp-panel .value,
+        .pleth-panel .value,
+        .hr-panel .value,
+        .spo2-panel .value {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>

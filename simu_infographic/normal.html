@@ -147,6 +147,28 @@
             font-weight: bold;
             color: #00FF00;
         }
+
+        /* 修改 HR Panel 和 SpO2 Panel 的布局 */
+        .temp-panel .value-container,
+        .pleth-panel .value-container,
+        .hr-panel .value-container,
+        .spo2-panel .value-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .temp-panel .value,
+        .pleth-panel .value,
+        .hr-panel .value,
+        .spo2-panel .value {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>

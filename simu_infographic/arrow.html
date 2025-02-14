@@ -784,6 +784,11 @@
             Object.keys(history).forEach(key => {
                 history[key] = [];
             });
+
+            // 清空箭头显示
+            document.querySelectorAll('.arrow').forEach(arrow => {
+                arrow.className = 'arrow';
+            });
             
             // 立即更新显示
             updateDisplay();
@@ -863,6 +868,7 @@
                 updateArrow('Temp', currentValues.temp, tempArrow);
             }, 5000);  // 每5秒更新一次箭头
         }
+
         // 启动模拟
         simulateDataUpdates();
     </script>

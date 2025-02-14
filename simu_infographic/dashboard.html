@@ -289,8 +289,8 @@
         /* 当前病人信息容器 */
         .current-patient {
             position: fixed;
-            top: 400px;
-            right: 10px;
+            top: 10px;
+            right: 150px;
             background: #3F3F3F;
             padding: 10px;
             color: white;
@@ -668,20 +668,20 @@
             if (type === 'systolic') {
                 gaugeSegments = document.querySelectorAll('.gauge-scale-systolic .gauge-segment');
                 thresholds = [
-                    {min: 140, max: 180, segment: 0}, // red1
+                    {min: 140, segment: 0}, // red1
                     {min: 120, max: 140, segment: 1}, // yellow1
                     {min: 100, max: 120, segment: 2}, // green
                     {min: 90, max: 100, segment: 3}, // yellow2
-                    {min: 50, max: 90, segment: 4} // red2
+                    {max: 90, segment: 4} // red2
                 ];
             } else { // for diastolic
                 gaugeSegments = document.querySelectorAll('.gauge-scale-diastolic .gauge-segment');
                 thresholds = [
-                    {min: 90, max: 130, segment: 0}, // red1
+                    {min: 90, segment: 0}, // red1
                     {min: 80, max: 90, segment: 1}, // yellow1
                     {min: 70, max: 80, segment: 2}, // green
                     {min: 60, max: 70, segment: 3}, // yellow2
-                    {min: 50, max: 60, segment: 4} // red2
+                    {max: 60, segment: 4} // red2
                 ];
             }
 

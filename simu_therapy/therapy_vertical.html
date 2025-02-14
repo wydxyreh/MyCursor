@@ -411,11 +411,11 @@
 
                             <div class="metrics">
                                 <div class="metric">
-                                    <span>深度</span>
+                                    <span>平均深度</span>
                                     <span id="depth-value" class="metric-value">5.5/cm</span>
                                 </div>
                                 <div class="metric">
-                                    <span>频率</span>
+                                    <span>平均频率</span>
                                     <span id="frequency-value" class="metric-value">100/min</span>
                                 </div>
                             </div>
@@ -677,23 +677,45 @@
             updateWarnings() {
                 const warningContainer = document.querySelector('.warnings');
                 warningContainer.innerHTML = '';
-                if (this.pressData.length > 0) {
-                    const latestPress = this.pressData[0];
-                    if (latestPress.type === 'danger') {
-                        warningContainer.appendChild(document.createElement('span')).textContent = '按压过深！';
-                    } else if (latestPress.type === 'warning') {
-                        warningContainer.appendChild(document.createElement('span')).textContent = '按压过浅！';
-                    } else {
-                        warningContainer.appendChild(document.createElement('span')).textContent = '按压正常！';
-                    }
-                }
-                const frequency = this.calculateFrequency(this.currentInterval);
-                if (frequency > this.frequencyThresholdHigh) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过快！';
-                } else if (frequency < this.frequencyThresholdLow) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过慢！';
+
+                // 获取当前深度和频率
+                const latestDepth = this.depthHistory.length > 0 ? this.depthHistory[0] : 0;
+                const latestFrequency = this.calculateFrequency(this.currentInterval);
+
+                // 按压深度警告
+                if (latestDepth < 5.0) {
+                    const depthWarning = document.createElement('span');
+                    depthWarning.textContent = '按压过浅！';
+                    depthWarning.style.color = 'yellow'; // 低于正常值显示黄色
+                    warningContainer.appendChild(depthWarning);
+                } else if (latestDepth > 6.0) {
+                    const depthWarning = document.createElement('span');
+                    depthWarning.textContent = '按压过深！';
+                    depthWarning.style.color = 'red'; // 高于正常值显示红色
+                    warningContainer.appendChild(depthWarning);
                 } else {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '频率正常！';
+                    const depthWarning = document.createElement('span');
+                    depthWarning.textContent = '按压深度正常！';
+                    depthWarning.style.color = 'green'; // 正常值显示绿色
+                    warningContainer.appendChild(depthWarning);
+                }
+
+                // 按压频率警告
+                if (latestFrequency < 100) {
+                    const frequencyWarning = document.createElement('span');
+                    frequencyWarning.textContent = '频率过慢！';
+                    frequencyWarning.style.color = 'yellow'; // 低于正常值显示黄色
+                    warningContainer.appendChild(frequencyWarning);
+                } else if (latestFrequency > 120) {
+                    const frequencyWarning = document.createElement('span');
+                    frequencyWarning.textContent = '频率过快！';
+                    frequencyWarning.style.color = 'red'; // 高于正常值显示红色
+                    warningContainer.appendChild(frequencyWarning);
+                } else {
+                    const frequencyWarning = document.createElement('span');
+                    frequencyWarning.textContent = '频率正常！';
+                    frequencyWarning.style.color = 'green'; // 正常值显示绿色
+                    warningContainer.appendChild(frequencyWarning);
                 }
             }
 

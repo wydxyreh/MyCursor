@@ -148,7 +148,7 @@
             height: 40px;
             display: flex;
             justify-content: flex-start;
-            gap: 60px;
+            gap: 20px;
             color: #fff;
             font-size: 14px;
         }
@@ -397,11 +397,11 @@
 
                             <div class="metrics">
                                 <div class="metric">
-                                    <span>深度</span>
+                                    <span>平均深度</span>
                                     <span id="depth-value" class="metric-value">5.5/cm</span>
                                 </div>
                                 <div class="metric">
-                                    <span>频率</span>
+                                    <span>平均频率</span>
                                     <span id="frequency-value" class="metric-value">100/min</span>
                                 </div>
                             </div>
@@ -663,24 +663,41 @@
             updateWarnings() {
                 const warningContainer = document.querySelector('.warnings');
                 warningContainer.innerHTML = '';
-                if (this.pressData.length > 0) {
-                    const latestPress = this.pressData[0];
-                    if (latestPress.type === 'danger') {
-                        warningContainer.appendChild(document.createElement('span')).textContent = '按压过深！';
-                    } else if (latestPress.type === 'warning') {
-                        warningContainer.appendChild(document.createElement('span')).textContent = '按压过浅！';
-                    } else {
-                        warningContainer.appendChild(document.createElement('span')).textContent = '按压正常！';
-                    }
-                }
+
+                // 获取当前按压深度和频率
+                const latestPress = this.pressData.length > 0 ? this.pressData[0] : null;
                 const frequency = this.calculateFrequency(this.currentInterval);
-                if (frequency > this.frequencyThresholdHigh) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过快！';
-                } else if (frequency < this.frequencyThresholdLow) {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '频率过慢！';
-                } else {
-                    warningContainer.appendChild(document.createElement('span')).textContent = '频率正常！';
+
+                // 按压深度警告
+                if (latestPress) {
+                    const depth = latestPress.depth;
+                    let depthWarning = document.createElement('span');
+                    if (depth < 5.0) {
+                        depthWarning.textContent = '按压过浅！';
+                        depthWarning.style.color = 'yellow'; // 低于正常值，黄色
+                    } else if (depth > 6.0) {
+                        depthWarning.textContent = '按压过深！';
+                        depthWarning.style.color = 'red'; // 高于正常值，红色
+                    } else {
+                        depthWarning.textContent = '按压正常！';
+                        depthWarning.style.color = 'green'; // 正常值，绿色
+                    }
+                    warningContainer.appendChild(depthWarning);
                 }
+
+                // 按压频率警告
+                let frequencyWarning = document.createElement('span');
+                if (frequency < 100) {
+                    frequencyWarning.textContent = '频率过慢！';
+                    frequencyWarning.style.color = 'yellow'; // 低于正常值，黄色
+                } else if (frequency > 120) {
+                    frequencyWarning.textContent = '频率过快！';
+                    frequencyWarning.style.color = 'red'; // 高于正常值，红色
+                } else {
+                    frequencyWarning.textContent = '频率正常！';
+                    frequencyWarning.style.color = 'green'; // 正常值，绿色
+                }
+                warningContainer.appendChild(frequencyWarning);
             }
 
             startMonitoring() {

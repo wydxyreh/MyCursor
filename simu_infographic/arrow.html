@@ -54,6 +54,49 @@
             color: white;
             font-size: 36px;
         }
+        
+        /* Panel specific positions */
+        .spo2-panel {
+            top: 12px;
+            height: 124.24px;
+        }
+
+        .hr-panel {
+            top: 147.76px;
+            height: 124.24px;
+        }
+
+        .pleth-panel {
+            top: 283.52px;
+            height: 180px;
+        }
+
+        .temp-panel {
+            top: 475.27px;
+            height: 124.24px;
+        }
+
+        /* 修改 HR Panel 和 SpO2 Panel 的布局 */
+        .temp-panel .value-container,
+        .pleth-panel .value-container,
+        .hr-panel .value-container,
+        .spo2-panel .value-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .temp-panel .value,
+        .pleth-panel .value,
+        .hr-panel .value,
+        .spo2-panel .value {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
 
         .arrow {
             width: 0;
@@ -66,7 +109,6 @@
             transition: opacity 0.3s;
             position: absolute; /* 添加绝对定位 */
             left: 100%; /* 将箭头定位到 value 的右侧 */
-            margin-left: -40px; /* 调整箭头与 value 的距离 */
         }
 
         .arrow.show {
@@ -91,6 +133,26 @@
 
         .arrow.green {
             border-bottom-color: green;
+        }
+
+        /* SpO2 Panel 的箭头 */
+        .spo2-panel .arrow {
+            margin-left: -65px; /* SpO2 的箭头位置 */
+        }
+
+        /* HR Panel 的箭头 */
+        .hr-panel .arrow {
+            margin-left: -55px; /* HR 的箭头位置 */
+        }
+
+        /* Pleth Panel 的箭头 */
+        .pleth-panel .arrow {
+            margin-left: -55px; /* Pleth 的箭头位置 */
+        }
+
+        /* Temp Panel 的箭头 */
+        .temp-panel .arrow {
+            margin-left: -53px; /* Temp 的箭头位置 */
         }
         
         .arrow-pleth-1,
@@ -163,27 +225,6 @@
             margin: 13px 0;
         }
 
-        /* Panel specific positions */
-        .spo2-panel {
-            top: 12px;
-            height: 124.24px;
-        }
-
-        .hr-panel {
-            top: 147.76px;
-            height: 124.24px;
-        }
-
-        .pleth-panel {
-            top: 283.52px;
-            height: 180px;
-        }
-
-        .temp-panel {
-            top: 475.27px;
-            height: 124.24px;
-        }
-
         .patient-buttons {
             position: fixed;
             top: 10px;
@@ -247,28 +288,6 @@
         .current-patient .label {
             font-weight: bold;
             color: #00FF00;
-        }
-
-        /* 修改 HR Panel 和 SpO2 Panel 的布局 */
-        .temp-panel .value-container,
-        .pleth-panel .value-container,
-        .hr-panel .value-container,
-        .spo2-panel .value-container {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-        }
-
-        .temp-panel .value,
-        .pleth-panel .value,
-        .hr-panel .value,
-        .spo2-panel .value {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
         }
     </style>
 </head>
@@ -342,7 +361,7 @@
                 <div>35.5</div>
             </div>
             <div class="value-display">
-                <div class="value temp">36.8</div>
+                <div class="value">36.8</div>
                 <div class="arrow"></div>
             </div>
         </div>
@@ -518,49 +537,6 @@
             Pleth_bp2: 1,   // 舒张压变化较慢
             temp: 0.1     // 体温变化非常缓慢
         };
-
-        // 生成新的目标值
-        function generateNewTarget(param, current) {
-            let newTarget;
-            switch(param) {
-                case 'spo2':
-                    // 90%概率在正常范围，10%概率下降
-                    newTarget = Math.random() < 0.9 ?
-                        95 + Math.random() * 5 :  // 95-100
-                        85 + Math.random() * 5;   // 85-90
-                    break;
-                case 'hr':
-                    // 80%概率在正常范围
-                    newTarget = Math.random() < 0.8 ?
-                        70 + Math.random() * 20 :  // 70-90
-                        Math.random() < 0.5 ?
-                            100 + Math.random() * 30 :  // 100-130
-                            45 + Math.random() * 15;    // 45-60
-                    break;
-                case 'Pleth_bp1':
-                    newTarget = Math.random() < 0.8 ?
-                        95 + Math.random() * 20 :  // 95-115
-                        Math.random() < 0.5 ?
-                            125 + Math.random() * 25 :  // 125-150
-                            75 + Math.random() * 15;    // 75-90
-                    break;
-                case 'Pleth_bp2':
-                    newTarget = Math.random() < 0.8 ?
-                        65 + Math.random() * 10 :  // 65-75
-                        Math.random() < 0.5 ?
-                            85 + Math.random() * 15 :  // 85-100
-                            45 + Math.random() * 15;   // 45-60
-                    break;
-                case 'temp':
-                    newTarget = Math.random() < 0.8 ?
-                        36.2 + Math.random() * 1.0 :  // 36.2-37.2
-                        Math.random() < 0.5 ?
-                            37.4 + Math.random() * 0.8 :  // 37.4-38.2
-                            35.8 + Math.random() * 0.4;   // 35.8-36.2
-                    break;
-            }
-            return newTarget;
-        }
 
         // 平滑更新当前值向目标值过渡
         function updateValue(param) {
@@ -843,7 +819,7 @@
             tempValue.textContent = currentValues.temp.toFixed(1);
         }
 
-        // 修改模拟数据更新函数
+        // 模拟数据更新函数
         function simulateDataUpdates() {
             // SpO2模拟
             const spo2Value = document.querySelector('.spo2-panel .value');

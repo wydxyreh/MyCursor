@@ -440,10 +440,8 @@
                 paramHistory.shift(); // 移除最旧的数据
             }
 
-            // 获取上一次的数据（倒数第二个元素）
-            const oldValue = paramHistory.length >= 2 ? paramHistory[paramHistory.length - 2].value : null;
-
-            if (!oldValue) return;
+            // 计算前4秒的平均值
+            const averageValue = paramHistory.reduce((sum, data) => sum + data.value, 0) / paramHistory.length;
 
             let ranges;
             if (param === 'SpO2') {
@@ -461,8 +459,8 @@
             const zone = getValueZone(value, ranges);
 
             // 判断变化趋势
-            const trend = value > oldValue ? 'up' : 
-                        value < oldValue ? 'down' : '';
+            const trend = value > averageValue ? 'up' : 
+                        value < averageValue ? 'down' : '';
 
             // 修改箭头显示逻辑
             if (zone === 'red' && trend) {
@@ -842,6 +840,7 @@
             const tempValue = document.querySelector('.temp-panel .value');
             const tempArrow = document.querySelector('.temp-panel .arrow');
 
+            // 每1秒更新一次数据
             setInterval(() => {
                 // 平滑更新所有参数
                 const newSpo2 = updateValue('spo2');
@@ -852,16 +851,18 @@
 
                 // 更新显示
                 updateDisplay();
+            }, 1000);
 
+            // 每5秒更新一次箭头
+            setInterval(() => {
                 // 更新历史数据和箭头
-                updateArrow('SpO2', newSpo2, spo2Arrow);
-                updateArrow('HR', newHR, hrArrow);
-                updateArrow('Pleth_bp1', newPlethBP1, plethBP1Arrow);
-                updateArrow('Pleth_bp2', newPlethBP2, plethBP2Arrow);
-                updateArrow('Temp', newTemp, tempArrow);
-            }, 1000);  // 每1秒更新一次
+                updateArrow('SpO2', currentValues.spo2, spo2Arrow);
+                updateArrow('HR', currentValues.hr, hrArrow);
+                updateArrow('Pleth_bp1', currentValues.Pleth_bp1, plethBP1Arrow);
+                updateArrow('Pleth_bp2', currentValues.Pleth_bp2, plethBP2Arrow);
+                updateArrow('Temp', currentValues.temp, tempArrow);
+            }, 5000);  // 每5秒更新一次箭头
         }
-
         // 启动模拟
         simulateDataUpdates();
     </script>

@@ -49,6 +49,11 @@
             background-color: #4CAF50;
         }
 
+        .experiment-button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
+
         .progress-info {
             margin-top: 30px;
             font-size: 16px;
@@ -142,6 +147,10 @@
                 return;
             }
             
+            // 禁用按钮
+            button.disabled = true;
+            button.classList.add('completed');
+            
             // 存储当前实验类型和方向到localStorage
             localStorage.setItem('currentExperiment', experimentType);
             
@@ -184,4 +193,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

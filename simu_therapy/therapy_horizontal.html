@@ -674,13 +674,13 @@
                     let depthWarning = document.createElement('span');
                     if (depth < 5.0) {
                         depthWarning.textContent = '按压过浅！';
-                        depthWarning.style.color = 'yellow'; // 低于正常值，黄色
+                        depthWarning.style.color = 'white'; // 低于正常值，黄色
                     } else if (depth > 6.0) {
                         depthWarning.textContent = '按压过深！';
-                        depthWarning.style.color = 'red'; // 高于正常值，红色
+                        depthWarning.style.color = 'white'; // 高于正常值，红色
                     } else {
                         depthWarning.textContent = '按压正常！';
-                        depthWarning.style.color = 'green'; // 正常值，绿色
+                        depthWarning.style.color = 'white'; // 正常值，绿色
                     }
                     warningContainer.appendChild(depthWarning);
                 }
@@ -689,13 +689,13 @@
                 let frequencyWarning = document.createElement('span');
                 if (frequency < 100) {
                     frequencyWarning.textContent = '频率过慢！';
-                    frequencyWarning.style.color = 'yellow'; // 低于正常值，黄色
+                    frequencyWarning.style.color = 'white'; // 低于正常值，黄色
                 } else if (frequency > 120) {
                     frequencyWarning.textContent = '频率过快！';
-                    frequencyWarning.style.color = 'red'; // 高于正常值，红色
+                    frequencyWarning.style.color = 'white'; // 高于正常值，红色
                 } else {
                     frequencyWarning.textContent = '频率正常！';
-                    frequencyWarning.style.color = 'green'; // 正常值，绿色
+                    frequencyWarning.style.color = 'white'; // 正常值，绿色
                 }
                 warningContainer.appendChild(frequencyWarning);
             }

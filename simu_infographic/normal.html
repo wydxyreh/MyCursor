@@ -269,36 +269,6 @@
     </div>
 
     <script>
-        // 定义参数范围
-        const RANGES = {
-            SpO2: {
-                red: { min: 0, max: 90 },
-                green: { min: 90, max: 100 }
-            },
-            HR: {
-                red: { min: 0, max: 50, min2: 120, max2: Infinity },
-                yellow: { min: 50, max: 60, min2: 100, max2: 120 },
-                green: { min: 60, max: 100 }
-            },
-            Pleth: {
-                bp1: {
-                    red: { min: 0, max: 90, min2: 140, max2: Infinity },
-                    yellow: { min: 120, max: 140 },
-                    green: { min: 90, max: 120 }
-                },
-                bp2: {
-                    red: { min: 0, max: 60, min2: 90, max2: Infinity },
-                    yellow: { min: 80, max: 90 },
-                    green: { min: 60, max: 80 }
-                }
-            },
-            Temp: {
-                red: { min: 0, max: 35.5, min2: 38, max2: Infinity },
-                yellow: { min: 35.5, max: 36, min2: 37.3, max2: 38 },
-                green: { min: 36, max: 37.3 }
-            }
-        };
-
         // 当前值存储
         let currentValues = {
             spo2: 98,
@@ -316,58 +286,6 @@
             Pleth_bp2: 75,
             temp: 36.8
         };
-
-        // 每次更新的最大变化量
-        const MAX_CHANGE = {
-            spo2: 1,      // 血氧饱和度变化缓慢
-            hr: 2,        // 心率可以相对快速变化
-            Pleth_bp1: 1.5, // 收缩压变化适中
-            Pleth_bp2: 1,   // 舒张压变化较慢
-            temp: 0.1     // 体温变化非常缓慢
-        };
-
-        // 生成新的目标值
-        function generateNewTarget(param, current) {
-            let newTarget;
-            switch(param) {
-                case 'spo2':
-                    // 90%概率在正常范围，10%概率下降
-                    newTarget = Math.random() < 0.9 ?
-                        95 + Math.random() * 5 :  // 95-100
-                        85 + Math.random() * 5;   // 85-90
-                    break;
-                case 'hr':
-                    // 80%概率在正常范围
-                    newTarget = Math.random() < 0.8 ?
-                        70 + Math.random() * 20 :  // 70-90
-                        Math.random() < 0.5 ?
-                            100 + Math.random() * 30 :  // 100-130
-                            45 + Math.random() * 15;    // 45-60
-                    break;
-                case 'Pleth_bp1':
-                    newTarget = Math.random() < 0.8 ?
-                        95 + Math.random() * 20 :  // 95-115
-                        Math.random() < 0.5 ?
-                            125 + Math.random() * 25 :  // 125-150
-                            75 + Math.random() * 15;    // 75-90
-                    break;
-                case 'Pleth_bp2':
-                    newTarget = Math.random() < 0.8 ?
-                        65 + Math.random() * 10 :  // 65-75
-                        Math.random() < 0.5 ?
-                            85 + Math.random() * 15 :  // 85-100
-                            45 + Math.random() * 15;   // 45-60
-                    break;
-                case 'temp':
-                    newTarget = Math.random() < 0.8 ?
-                        36.2 + Math.random() * 1.0 :  // 36.2-37.2
-                        Math.random() < 0.5 ?
-                            37.4 + Math.random() * 0.8 :  // 37.4-38.2
-                            35.8 + Math.random() * 0.4;   // 35.8-36.2
-                    break;
-            }
-            return newTarget;
-        }
 
         // 平滑更新当前值向目标值过渡
         function updateValue(param) {

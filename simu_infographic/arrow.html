@@ -529,15 +529,6 @@
             temp: 36.8
         };
 
-        // 每次更新的最大变化量
-        const MAX_CHANGE = {
-            spo2: 1,      // 血氧饱和度变化缓慢
-            hr: 2,        // 心率可以相对快速变化
-            Pleth_bp1: 1.5, // 收缩压变化适中
-            Pleth_bp2: 1,   // 舒张压变化较慢
-            temp: 0.1     // 体温变化非常缓慢
-        };
-
         // 平滑更新当前值向目标值过渡
         function updateValue(param) {
             const diff = targetValues[param] - currentValues[param];

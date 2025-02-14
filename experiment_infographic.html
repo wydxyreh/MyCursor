@@ -127,10 +127,6 @@
         let questionTimeout;
         let isProcessingResponse = false;
         const results = [];
-        let csvFileName;  // 持久化保存文件名
-        let csvData = []; // 保存所有CSV数据
-        let isExperimentCompleted = false;
-
 
         // 添加当前问题相关变量
         let currentQuestionIndex = 0;
@@ -138,7 +134,7 @@
 
         // 问题数据结构
         const questions = {
-            infographic1: {
+            prominence1: {
                 practice: [
                     {
                         questions: [
@@ -199,7 +195,7 @@
                     }
                 ]
             },
-            infographic2: {
+            prominence2: {
                 practice: [
                     {
                         questions: [
@@ -260,7 +256,7 @@
                     }
                 ]
             },
-            infographic3: {
+            prominence3: {
                 practice: [
                     {
                         questions: [
@@ -321,7 +317,7 @@
                     }
                 ]
             },
-            infographic4: {
+            prominence4: {
                 practice: [
                     {
                         questions: [
@@ -384,66 +380,13 @@
             }
         };
 
-        // 获取当前日期时间作为文件名
-        function getCurrentDateTime() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-        }
-
-
-        // 创建CSV文件并写入表头
-        function createCSVFile() {
-            const headers = [
-                'trial',
-                'user-answer',
-                'correct-answer',
-                'check',
-                'reaction time'
-            ];
-            csvData = [headers.join(',')]; // 初始化数据（含表头）
-        }
-
-        // 追加数据到CSV文件
-        function appendDataToCSV(data) {
-            // 构建CSV行数据
-            const trialType = practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test';
-            const trialNumber = practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1;
-            const questionNumber = currentQuestionIndex + 1;
-
-            const trial = `infographic${currentLayout}-${trialType}${trialNumber}-question${questionNumber}`;
-
-            const csvRow = [
-                trial,
-                data['user-answer'],
-                data['correct-answer'],
-                data.check,
-                data['reaction time']
-            ].join(',');
-
-            csvData.push(csvRow); // 仅追加数据，不下载
-        }
-
-        // 统一下载函数
-        function downloadCSV() {
-            const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = csvFileName;
-            link.click();
-            URL.revokeObjectURL(link.href);
-        }
         // 显示屏幕函数
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
+            console.log('显示屏幕:', screenId);
         }
 
         // 显示注视点
@@ -469,6 +412,7 @@
 
         // 显示刺激
         function showStimulus() {
+            console.log('显示刺激', {currentLayout, practiceCount, formalCount});
             const stimulusContainer = document.querySelector('.stimulus');
             const video = document.createElement('video');
             video.style.width = '100%';
@@ -483,6 +427,8 @@
                 videoPath = `images/infographic${currentLayout}/test${formalCount + 1}.mp4`;
             }
             
+            console.log('加载视频:', videoPath);
+            
             video.onloadeddata = () => {
                 stimulusContainer.innerHTML = '';
                 stimulusContainer.appendChild(video);
@@ -495,6 +441,7 @@
             };
             
             video.onerror = () => {
+                console.error('视频加载失败:', videoPath);
                 alert(`视频加载失败: ${videoPath}\n请检查视频文件是否存在`);
             };
             
@@ -503,13 +450,25 @@
 
         // 问题加载和显示逻辑
         function loadQuestions() {
-            const layoutKey = `infographic${currentLayout}`;
+            const layoutKey = `prominence${currentLayout}`;
             const phase = practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal';
             const trialIndex = phase === 'practice' ? practiceCount : formalCount;
+            
+            console.log('加载问题:', {
+                layoutKey,
+                phase,
+                trialIndex,
+                questionsData: questions[layoutKey]?.[phase]?.[trialIndex]
+            });
 
-            currentQuestions = questions[layoutKey][phase][trialIndex].questions;
-            currentQuestionIndex = 0;
-            showNextQuestion();
+            try {
+                currentQuestions = questions[layoutKey][phase][trialIndex].questions;
+                currentQuestionIndex = 0;
+                showNextQuestion();
+            } catch (error) {
+                console.error('加载问题时出错:', error);
+                console.log('当前状态:', {layoutKey, phase, trialIndex});
+            }
         }
 
         function showNextQuestion() {
@@ -532,42 +491,21 @@
             
             questionContainer.style.display = 'block';
             startTime = Date.now();
-
-            // 设置10秒超时
-            questionTimeout = setTimeout(() => {
-                handleTimeout();
-            }, 10000);
+            isProcessingResponse = false;
         }
 
-        // 处理问题超时
-        function handleTimeout() {
-            clearTimeout(questionTimeout);
-
-            // 构建数据行
-            const data = {
-                trial: `infographic${currentLayout}-${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
-                'user-answer': 'NAN',
-                'correct-answer': currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                check: 'NAN',
-                'reaction time': 10000
-            };
-
-            // 追加数据到CSV
-            appendDataToCSV(data);
-
-            currentQuestionIndex++;
-            showNextQuestion();
-        }
-        
         // 处理试次完成
         function handleTrialComplete() {
             const questionContainer = document.querySelector('.question-container');
             questionContainer.style.display = 'none';
+
+            console.log('试次完成', {practiceCount, formalCount, currentLayout});
             
             if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
                 practiceCount++;
                 showFixation();
                 updateDebugInfo();
+                console.log('进入下一个练习:', practiceCount + 1);
             } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                 practiceCount++;
                 alert('练习结束，即将进入正式实验');
@@ -578,8 +516,10 @@
                 formalCount++;
                 showFixation();
                 updateDebugInfo();
+                console.log('进入下一个正式实验:', formalCount + 1);
             } else {  // 当前变量结束
                 if (currentLayout < experimentConfig.totalLayouts) {
+                    // 还有下一个变量
                     currentLayout++;
                     practiceCount = 0;
                     formalCount = 0;
@@ -587,52 +527,10 @@
                     showPracticeInstruction();
                 } else {
                     // 所有实验完成
-                    const currentExperiment = localStorage.getItem('currentExperiment');
-                    localStorage.setItem(`${currentExperiment}_completed`, 'true');
-                    
-                    // 显示结束提示，等待按键返回
-                    showExperimentComplete();
+                    alert('所有实验完成！即将导出结果。');
+                    exportToCSV();
                 }
             }
-        }
-
-        // 添加实验完成显示函数
-        function showExperimentComplete() {
-            isExperimentCompleted = true; // 标记实验已完成
-            const container = document.createElement('div');
-            container.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: black;
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-                font-size: 24px;
-                z-index: 9999;
-            `;
-            
-            container.innerHTML = `
-                <div style="margin-bottom: 20px;">实验完成！</div>
-                <div style="margin-bottom: 20px;">数据已导出</div>
-                <div style="font-size: 18px;">按任意键返回主界面</div>
-            `;
-            
-            document.body.appendChild(container);
-            
-            // 监听按键事件
-            function handleKeyPress(e) {
-                window.removeEventListener('keydown', handleKeyPress);
-                window.location.href = 'experiment_pre.html';
-            }
-            
-            window.addEventListener('keydown', handleKeyPress);
-
-            downloadCSV();  // 导出最终数据
         }
 
         // 处理响应
@@ -644,20 +542,19 @@
             const reactionTime = Date.now() - startTime;
             lastResponse = key;
 
-            // 判断用户回答是否正确
-            const isCorrect = key === currentQuestions[currentQuestionIndex].correctAnswer ? "0" : "1";
-
-            // 构建数据行
-            const data = {
-                trial: `infographic${currentLayout}-${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
-                'user-answer': key.toUpperCase(),
-                'correct-answer': currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                check: isCorrect,
-                'reaction time': reactionTime
-            };
-
-            // 追加数据到CSV
-            appendDataToCSV(data);
+            // 记录结果
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < 4 ? '练习' : '正式',
+                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `infographic${currentLayout}/${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: key.toUpperCase(),
+                isCorrect: key === currentQuestions[currentQuestionIndex].correctAnswer ? "正确" : "错误",
+                reactionTime: reactionTime
+            });
 
             currentQuestionIndex++;
             isProcessingResponse = false;
@@ -667,6 +564,8 @@
 
         // 修改按键事件处理
         window.onkeydown = function(event) {
+            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
+            
             if (currentPhase === 'instruction') {
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
@@ -694,26 +593,10 @@
             practiceCount = 0;
             formalCount = 0;
             
-            // 初始化CSV文件
-            csvFileName = `${getCurrentDateTime()}.csv`;
-            createCSVFile();
-            
             showScreen('instruction');
+            console.log('实验初始化完成，当前阶段:', currentPhase);
             updateDebugInfo();
         };
-
-        // 添加页面卸载事件监听
-        window.addEventListener('beforeunload', function(e) {
-            if (!isExperimentCompleted && csvData.length > 1) {
-                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `AUTO_SAVED_${csvFileName}`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        });
 
         // 在HTML中添加调试信息显示（可选）
         const debugInfo = document.createElement('div');
@@ -733,6 +616,28 @@
                 practiceCount + 1 : 
                 formalCount + 1;
             debugInfo.textContent = `变量${currentLayout} | ${trialType}${trialNumber}`;
+        }
+
+        // 修改CSV导出函数
+        function exportToCSV() {
+            let csvContent = "\ufeff变量,试次类型,试次编号,问题编号,视频路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
+            
+            results.forEach(result => {
+                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
+                            `${result.questionNumber},${result.videoPath},${result.question},` +
+                            `${result.correctAnswer},${result.userResponse},${result.isCorrect},` +
+                            `${result.reactionTime}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>

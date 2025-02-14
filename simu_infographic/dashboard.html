@@ -6,7 +6,7 @@
     <title>生命体征监测</title>
     <style>
         body {
-            background-color: #333;
+            background-color: #000000;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,7 +27,7 @@
             height: 80px;
             background-color: #3F3F3F;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 0px;
         }
 
         .dashboard-title {
@@ -108,7 +108,7 @@
             height: 160px;
             background-color: #3F3F3F;
             padding: 15px;
-            border-radius: 4px;
+            border-radius: 0px;
         }
 
         .block-title {
@@ -289,7 +289,7 @@
         /* 当前病人信息容器 */
         .current-patient {
             position: fixed;
-            top: 250px;
+            top: 400px;
             right: 10px;
             background: #3F3F3F;
             padding: 10px;
@@ -420,8 +420,8 @@
                     <div class="bp-value-systolic">120</div>
 
                     <div class="gauge-limits-systolic">
-                        <span>180</span>
-                        <span>50</span>
+                        <span>140</span>
+                        <span>90</span>
                     </div>
 
                     <div class="gauge-scale-systolic">
@@ -441,8 +441,8 @@
                     <div class="bp-value-diastolic">80</div>
 
                     <div class="gauge-limits-diastolic">
-                        <span>130</span>
-                        <span>50</span>
+                        <span>90</span>
+                        <span>60</span>
                     </div>
 
                     <div class="gauge-scale-diastolic">
@@ -504,12 +504,18 @@
 
     <!-- 添加病人选择按钮 -->
     <div class="patient-buttons">
-        <button class="patient-button" onclick="selectPatient(1)">Patient 1</button>
-        <button class="patient-button" onclick="selectPatient(2)">Patient 2</button>
-        <button class="patient-button" onclick="selectPatient(3)">Patient 3</button>
-        <button class="patient-button" onclick="selectPatient(4)">Patient 4</button>
-        <button class="patient-button" onclick="selectPatient(5)">Patient 5</button>
-        <button class="patient-button" onclick="selectPatient(6)">Patient 6</button>
+        <button class="patient-button" onclick="selectPatient(1)">Patient 1恶化</button>
+        <button class="patient-button" onclick="selectPatient(2)">Patient 2恶化</button>
+        <button class="patient-button" onclick="selectPatient(3)">Patient 3恶化</button>
+        <button class="patient-button" onclick="selectPatient(4)">Patient 4恶化</button>
+        <button class="patient-button" onclick="selectPatient(5)">Patient 5恶化</button>
+        <button class="patient-button" onclick="selectPatient(6)">Patient 6恶化</button>
+        <button class="patient-button" onclick="selectPatient(7)">Patient 1好转</button>
+        <button class="patient-button" onclick="selectPatient(8)">Patient 2好转</button>
+        <button class="patient-button" onclick="selectPatient(9)">Patient 3好转</button>
+        <button class="patient-button" onclick="selectPatient(10)">Patient 4好转</button>
+        <button class="patient-button" onclick="selectPatient(11)">Patient 5好转</button>
+        <button class="patient-button" onclick="selectPatient(12)">Patient 6好转</button>
     </div>
 
     <div class="current-patient">
@@ -973,6 +979,108 @@
                     Pleth_bp1: 100,
                     Pleth_bp2: 65,
                     temp: 38.0
+                }
+            },
+            patient7: {
+                initial: {
+                    hr: 130,
+                    spo2: 88,
+                    Pleth_bp1: 85,
+                    Pleth_bp2: 50,
+                    temp: 37.2
+                },
+                target: {
+                   
+                    hr: 110,
+                    spo2: 94,
+                    Pleth_bp1: 100,
+                    Pleth_bp2: 60,
+                    temp: 37.0
+                }
+            },
+            patient8: {
+                initial: {
+                    hr: 105,
+                    spo2: 80,
+                    Pleth_bp1: 105,
+                    Pleth_bp2: 60,
+                    temp: 37.8
+                },
+                target: {
+                    
+                    hr: 95,
+                    spo2: 88,
+                    Pleth_bp1: 110,
+                    Pleth_bp2: 65,
+                    temp: 37.5
+                }
+            },
+            patient9: {
+                initial: {
+                    hr: 120,
+                    spo2: 88,
+                    Pleth_bp1: 75,
+                    Pleth_bp2: 45,
+                    temp: 39.0
+                },
+                target: {
+                    
+                    hr: 100,
+                    spo2: 92,
+                    Pleth_bp1: 90,
+                    Pleth_bp2: 55,
+                    temp: 38.5
+                }
+            },
+            patient10: {
+                initial: {
+                    hr: 90,
+                    spo2: 95,
+                    Pleth_bp1: 150,
+                    Pleth_bp2: 90,
+                    temp: 37.2
+                },
+                target: {
+                    
+                    hr: 85,
+                    spo2: 96,
+                    Pleth_bp1: 140,
+                    Pleth_bp2: 85,
+                    temp: 36.8
+                }
+            },
+            patient11: {
+                initial: {
+                    hr: 110,
+                    spo2: 90,
+                    Pleth_bp1: 90,
+                    Pleth_bp2: 50,
+                    temp: 37.0
+                },
+                target: {
+                    
+                    hr: 75,
+                    spo2: 98,
+                    Pleth_bp1: 120,
+                    Pleth_bp2: 70,
+                    temp: 36.5
+                }
+            },
+            patient12: {
+                initial: {
+                    hr: 90,
+                    spo2: 96,
+                    Pleth_bp1: 100,
+                    Pleth_bp2: 65,
+                    temp: 38.0
+                },
+                target: {
+                    
+                    hr: 80,
+                    spo2: 97,
+                    Pleth_bp1: 110,
+                    Pleth_bp2: 70,
+                    temp: 37.0
                 }
             }
         };

@@ -560,9 +560,6 @@
 
             if (practiceCount < 4) {
                 practiceCount++;
-                if (practiceCount === 4) {
-                    alert('练习结束，即将进入正式实验');
-                }
                 showFixation();
             } else if (formalCount < 3) {
                 formalCount++;
@@ -572,7 +569,6 @@
                         currentLayout++;
                         practiceCount = 0;
                         formalCount = 0;
-                        alert(`变量${currentLayout - 1}实验结束，即将进入变量${currentLayout}实验`);
                         showPracticeInstruction();
                     } else {
                         // 所有实验结束
@@ -616,7 +612,6 @@
             setTimeout(() => {
                 if (practiceCount < 4) {
                     practiceCount++;
-                    if (practiceCount === 4) alert('练习结束，即将进入正式实验');
                     showFixation();
                 } else if (formalCount < 2) {
                     formalCount++;
@@ -625,7 +620,6 @@
                     if (currentLayout < 5) {
                         currentLayout++;
                         practiceCount = formalCount = 0;
-                        alert(`变量${currentLayout - 1}实验结束，进入变量${currentLayout}`);
                         showPracticeInstruction();
                     } else {
                         alert('实验结束！最终数据已保存');

@@ -49,133 +49,81 @@
             background-color: #4CAF50;
         }
 
-        .experiment-button:disabled {
-            background-color: #888;
-            cursor: not-allowed;
-        }
-
         .progress-info {
             margin-top: 30px;
             font-size: 16px;
             color: #888;
-        }
-
-        /* 添加新的按钮组样式 */
-        .button-group {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .direction-label {
-            color: white;
-            font-size: 18px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .deteriorate-buttons, .improve-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .group-title {
-            color: #FF4444;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .improve-buttons .group-title {
-            color: #44FF44;
         }
     </style>
 </head>
 <body>
     <h1 class="main-title">除颤监护仪态势感知实验</h1>
     
-    <div class="button-group">
-        <!-- 病情恶化组 -->
-        <div class="deteriorate-buttons">
-            <div class="group-title">病情恶化方向</div>
-            <button class="experiment-button" onclick="startExperiment('patient1-deteriorate')">病人1 - 恶化</button>
-            <button class="experiment-button" onclick="startExperiment('patient2-deteriorate')">病人2 - 恶化</button>
-            <button class="experiment-button" onclick="startExperiment('patient3-deteriorate')">病人3 - 恶化</button>
-            <button class="experiment-button" onclick="startExperiment('patient4-deteriorate')">病人4 - 恶化</button>
-            <button class="experiment-button" onclick="startExperiment('patient5-deteriorate')">病人5 - 恶化</button>
-            <button class="experiment-button" onclick="startExperiment('patient6-deteriorate')">病人6 - 恶化</button>
-        </div>
-
-        <!-- 病情好转组 -->
-        <div class="improve-buttons">
-            <div class="group-title">病情好转方向</div>
-            <button class="experiment-button" onclick="startExperiment('patient1-improve')">病人1 - 好转</button>
-            <button class="experiment-button" onclick="startExperiment('patient2-improve')">病人2 - 好转</button>
-            <button class="experiment-button" onclick="startExperiment('patient3-improve')">病人3 - 好转</button>
-            <button class="experiment-button" onclick="startExperiment('patient4-improve')">病人4 - 好转</button>
-            <button class="experiment-button" onclick="startExperiment('patient5-improve')">病人5 - 好转</button>
-            <button class="experiment-button" onclick="startExperiment('patient6-improve')">病人6 - 好转</button>
-        </div>
+    <div class="button-container">
+        <button class="experiment-button" onclick="startExperiment('layout')">
+            实验1：布局实验
+        </button>
+        <button class="experiment-button" onclick="startExperiment('prominence')">
+            实验2：信息凸显实验
+        </button>
+        <button class="experiment-button" onclick="startExperiment('infographic')">
+            实验3：监护任务
+        </button>
+        <button class="experiment-button" onclick="startExperiment('therapy')">
+            实验4：治疗任务
+        </button>
     </div>
 
     <div class="progress-info">
-        已完成实验：<span id="completedCount">0</span>/12
+        已完成实验：<span id="completedCount">0</span>/4
     </div>
 
     <script>
-        // 更新实验状态对象以包含方向
+        // 记录实验完成状态
         const experimentStatus = {
-            'patient1-deteriorate': false,
-            'patient1-improve': false,
-            'patient2-deteriorate': false,
-            'patient2-improve': false,
-            'patient3-deteriorate': false,
-            'patient3-improve': false,
-            'patient4-deteriorate': false,
-            'patient4-improve': false,
-            'patient5-deteriorate': false,
-            'patient5-improve': false,
-            'patient6-deteriorate': false,
-            'patient6-improve': false
+            layout: false,
+            prominence: false,
+            infographic: false,
+            therapy: false
         };
 
         // 启动实验
         function startExperiment(experimentType) {
-            const button = document.querySelector(`button[onclick="startExperiment('${experimentType}')"]`);
-            if (button.disabled) {
-                return;
-            }
-            
-            // 禁用按钮
-            button.disabled = true;
-            button.classList.add('completed');
-            
-            // 存储当前实验类型和方向到localStorage
+            // 存储当前实验类型到localStorage
             localStorage.setItem('currentExperiment', experimentType);
             
-            // 解析实验类型和方向
-            const [patientNum, direction] = experimentType.split('-');
-            
-            // 跳转到对应的实验页面，并传递方向参数
-            window.location.href = `experiment_infographic.html?patient=${patientNum}&direction=${direction}`;
+            // 根据实验类型跳转到对应的实验页面
+            switch(experimentType) {
+                case 'layout':
+                    window.location.href = 'experiment_layout.html';
+                    break;
+                case 'prominence':
+                    window.location.href = 'experiment_prominence.html';
+                    break;
+                case 'infographic':
+                    window.location.href = 'experiment_infographic.html';
+                    break;
+                case 'therapy':
+                    window.location.href = 'experiment_therapy.html';
+                    break;
+            }
         }
 
         // 更新实验完成状态
         function updateExperimentStatus() {
+            // 从localStorage获取完成状态
             Object.keys(experimentStatus).forEach(exp => {
                 const completed = localStorage.getItem(`${exp}_completed`) === 'true';
                 experimentStatus[exp] = completed;
                 
+                // 更新按钮样式
                 const button = document.querySelector(`button[onclick="startExperiment('${exp}')"]`);
                 if (completed) {
                     button.classList.add('completed');
-                    button.disabled = true;
-                    button.style.cursor = 'not-allowed';
-                    button.innerHTML = `${button.innerHTML} (已完成)`;
                 }
             });
 
+            // 更新完成计数
             const completedCount = Object.values(experimentStatus).filter(status => status).length;
             document.getElementById('completedCount').textContent = completedCount;
         }
@@ -193,4 +141,4 @@
         });
     </script>
 </body>
-</html>
+</html> 

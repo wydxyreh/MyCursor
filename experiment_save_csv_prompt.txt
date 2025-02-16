@@ -111,7 +111,6 @@ function getCurrentDateTime() {
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 }
 
-
 // 创建CSV文件并写入表头
 function createCSVFile() {
     const headers = [
@@ -142,12 +141,14 @@ function appendDataToCSV(data) {
 
 // 统一下载函数
 function downloadCSV() {
-    const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = csvFileName; // 始终使用同一个文件名
-    link.click();
-    URL.revokeObjectURL(link.href); // 释放内存
+    if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
+        const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = csvFileName; // 始终使用同一个文件名
+        link.click();
+        URL.revokeObjectURL(link.href); // 释放内存
+    }
 }
 
 
@@ -163,4 +164,11 @@ function downloadCSV() {
 
 修改上述代码，不要在每一次数据新增的时候都下载一个csv文件，而是仅在实验完成的时候，才会下载一个csv文件；
 以及在中途意外退出，包括 刷新、返回、意外退出、关闭 的时候也要将当前数据保存为一个csv文件（除非当前实验已完成、已下载完整的csv文件）：
+只需要给出修改的地方，未修改的函数就不用再给出
+
+
+
+
+
+检查上述代码逻辑和语法问题，如果有问题，则对其进行修改，并标注出修改的部分；
 只需要给出修改的地方，未修改的函数就不用再给出

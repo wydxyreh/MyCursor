@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    <!-- 新增：参考图片界面 -->
+    <!-- 参考图片界面 -->
     <div id="referenceInstruction" class="screen">
         <div class="instruction">
             <h2>参考示例</h2>
@@ -123,10 +123,22 @@
         let lastResponse = '';
         let questionTimeout;
         let isProcessingResponse = false;
-        const results = [];
-        let csvFileName;  // 新增：持久化保存文件名
-        let csvData = []; // 新增：保存所有CSV数据
 
+        const results = [];
+        let csvFileName;  // 持久化保存文件名
+        let csvData = []; // 保存所有CSV数据
+
+        // 添加当前问题相关变量
+        let currentQuestionIndex = 0;
+        let currentQuestions = [];
+
+        // 实验配置接口
+        const experimentConfig = {
+            totalLayouts: 2,          // 变量数量
+            practiceTrials: 2,        // 每个变量的练习次数
+            formalTrials: 3,          // 每个变量的正式实验次数
+            questionsPerTrial: 7,     // 每个试次的问题数量
+        };
 
         // 定义实验问题和正确答案
         const questions = {
@@ -221,11 +233,10 @@
 
             csvData.push(csvRow); // 追加到数据数组
         }
-
+        
         // 统一下载函数
         function downloadCSV() {
-            if (currentLayout < 4 || formalCount < 3) {
-                // 仅在实验未完成时下载
+            if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
                 const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -234,7 +245,7 @@
                 URL.revokeObjectURL(link.href); // 释放内存
             }
         }
-
+        
         // 记录结果函数
         function recordResult(reactionTime) {
             const currentQuestion = practiceCount < 4 ? 
@@ -258,27 +269,6 @@
             };
 
             appendDataToCSV(csvRow);
-        }
-
-        // 导出CSV函数
-        function exportToCSV() {
-            let csvContent = "\ufeff变量,试次类型,试次编号,图片路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
-            
-            results.forEach(result => {
-                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
-                            `${result.imagePath},${result.question},${result.correctAnswer},` +
-                            `${result.userResponse},${result.isCorrect},${result.reactionTime}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
         }
 
         // 显示屏幕函数
@@ -378,9 +368,23 @@
                 'reaction time': 10000
             };
 
-            appendDataToCSV(csvRow);
-
             clearTimeout(questionTimeout);
+
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `therapy${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: 'TIMEOUT',
+                isCorrect: '错误',
+                reactionTime: 10000
+            });
+            currentQuestionIndex++;
+
+            appendDataToCSV(csvRow);
 
             if (practiceCount < 4) {
                 practiceCount++;
@@ -418,6 +422,22 @@
             const reactionTime = Date.now() - startTime;
             lastResponse = key;
             recordResult(reactionTime);
+            
+            const isCorrect = lastResponse === currentQuestion.correctAnswer;
+
+            // 记录结果
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: key.toUpperCase(),
+                isCorrect: isCorrect ? "错误" : "正确",
+                reactionTime: reactionTime
+            });
 
             setTimeout(() => {
                 if (practiceCount < 4) {
@@ -446,7 +466,6 @@
                     }
                 }
                 isProcessingResponse = false;
-                updateDebugInfo();
             }, 200);
         }
 
@@ -502,25 +521,6 @@
                 }
             });
         };
-
-        // 在HTML中添加调试信息显示（可选）
-        const debugInfo = document.createElement('div');
-        debugInfo.style.position = 'fixed';
-        debugInfo.style.bottom = '10px';
-        debugInfo.style.right = '10px';
-        debugInfo.style.background = 'rgba(0,0,0,0.7)';
-        debugInfo.style.color = 'white';
-        debugInfo.style.padding = '5px';
-        debugInfo.style.fontSize = '12px';
-        document.body.appendChild(debugInfo);
-
-        // 更新调试信息
-        function updateDebugInfo() {
-            debugInfo.textContent = `阶段: ${currentPhase} | 变量: ${currentLayout} | 练习: ${practiceCount} | 正式: ${formalCount}`;
-        }
-
-        // 在每次状态改变时调用updateDebugInfo
-        setInterval(updateDebugInfo, 100);
     </script>
 </body>
 </html>

@@ -135,7 +135,7 @@
         </div>
     </div>
     
-    <!-- 新增：参考图片界面 -->
+    <!-- 参考图片界面 -->
     <div id="referenceInstruction" class="screen">
         <div class="instruction">
             <h2>参考示例</h2>
@@ -190,10 +190,23 @@
         let lastResponse = '';
         let questionTimeout;
         let isProcessingResponse = false;
+
         const results = [];
-        let csvFileName;  // 新增：持久化保存文件名
-        let csvData = []; // 新增：保存所有CSV数据
-        let isExperimentCompleted = false;
+        let csvFileName;  // 持久化保存文件名
+        let csvData = []; // 保存所有CSV数据
+
+        // 添加当前问题相关变量
+        let currentQuestionIndex = 0;
+        let currentQuestions = [];
+
+        // 实验配置接口
+        const experimentConfig = {
+            totalLayouts: 2,          // 变量数量
+            practiceTrials: 2,        // 每个变量的练习次数
+            formalTrials: 3,          // 每个变量的正式实验次数
+            questionsPerTrial: 7,     // 每个试次的问题数量
+        };
+
     
         // 定义实验问题和正确答案
         const questions = {
@@ -378,6 +391,7 @@
 
             csvData.push(csvRow); // 追加到数据数组
         }
+        
         // 统一下载函数
         function downloadCSV() {
             if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
@@ -539,10 +553,25 @@
                 'reaction time': 20000  // 记录为最大反应时间
             };
 
+            clearTimeout(questionTimeout);
+
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `prominence${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: 'TIMEOUT',
+                isCorrect: '错误',
+                reactionTime: 10000
+            });
+
             // 追加数据到CSV文件
             appendDataToCSV(trialData);
 
-            clearTimeout(questionTimeout);
+            currentQuestionIndex++;
 
             if (practiceCount < 4) {
                 practiceCount++;
@@ -594,6 +623,21 @@
                 check: isPositionCorrect && isNumberCorrect ? '0' : '1',
                 'reaction time': reactionTime
             };
+
+            // 记录结果
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: key.toUpperCase(),
+                isCorrect: isPositionCorrect && isNumberCorrect ? '0' : '1',
+                reactionTime: reactionTime
+            });
+            currentQuestionIndex++;
 
             // 追加数据到CSV文件
             appendDataToCSV(trialData);

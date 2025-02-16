@@ -117,7 +117,7 @@
             questionsPerTrial: 7,     // 每个试次的问题数量
         };
 
-        // 修改基本变量
+        // 基本变量
         let currentPhase = 'instruction';  // 当前阶段
         let currentLayout = 1;             // 当前变量（1-5）
         let practiceCount = 0;             // 练习计数
@@ -127,6 +127,9 @@
         let questionTimeout;
         let isProcessingResponse = false;
         const results = [];
+
+        let csvFileName;
+        let csvData = [];
 
         // 添加当前问题相关变量
         let currentQuestionIndex = 0;
@@ -380,6 +383,58 @@
             }
         };
 
+        // 获取当前日期时间作为文件名
+        function getCurrentDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+        }
+
+        // 创建CSV文件并写入表头
+        function createCSVFile() {
+            const headers = [
+                'trial',
+                'user-answer',
+                'correct-answer',
+                'check',
+                'reaction time'
+            ];
+            csvData = [headers.join(',')]; // 初始化数据（含表头）
+            downloadCSV(); // 立即创建文件并写入表头
+        }
+
+        // 追加数据到CSV文件
+        function appendDataToCSV(data) {
+            // 构建CSV行数据
+            const csvRow = [
+                `prominence${currentLayout}-${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}`,
+                data['user-answer'],
+                data['correct-answer'],
+                data.check,
+                data['reaction time']
+            ].join(',');
+
+            csvData.push(csvRow); // 追加到数据数组
+            downloadCSV();        // 触发文件下载
+        }
+
+        // 统一下载函数
+        function downloadCSV() {
+            if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
+                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = csvFileName; // 始终使用同一个文件名
+                link.click();
+                URL.revokeObjectURL(link.href); // 释放内存
+            }
+        }
+
         // 显示屏幕函数
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(screen => {
@@ -492,6 +547,39 @@
             questionContainer.style.display = 'block';
             startTime = Date.now();
             isProcessingResponse = false;
+
+            questionTimeout = setTimeout(() => {
+                handleTimeout();
+            }, 10000);
+        }
+
+        // 处理问题超时
+        function handleTimeout() {
+            clearTimeout(questionTimeout);
+            
+            results.push({
+                layout: currentLayout,
+                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                questionNumber: currentQuestionIndex + 1,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                question: currentQuestions[currentQuestionIndex].text,
+                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                userResponse: 'TIMEOUT',
+                isCorrect: '错误',
+                reactionTime: 10000
+            });
+
+            // 追加超时数据到CSV
+            appendDataToCSV({
+                'user-answer': 'NAN',
+                'correct-answer': currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
+                'check': 'NAN',
+                'reaction time': 10000
+            });
+
+            currentQuestionIndex++;
+            showNextQuestion();
         }
 
         // 处理试次完成
@@ -537,23 +625,20 @@
         function handleResponse(key) {
             if (isProcessingResponse) return;
             isProcessingResponse = true;
-
             clearTimeout(questionTimeout);
+
             const reactionTime = Date.now() - startTime;
             lastResponse = key;
 
-            // 记录结果
-            results.push({
-                layout: currentLayout,
-                trialType: practiceCount < 4 ? '练习' : '正式',
-                trialNumber: practiceCount < 4 ? practiceCount + 1 : formalCount + 1,
-                questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < 4 ? 'excise' : 'test'}${practiceCount < 4 ? practiceCount + 1 : formalCount + 1}.mp4`,
-                question: currentQuestions[currentQuestionIndex].text,
-                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                userResponse: key.toUpperCase(),
-                isCorrect: key === currentQuestions[currentQuestionIndex].correctAnswer ? "正确" : "错误",
-                reactionTime: reactionTime
+            // 记录结果到CSV
+            const currentQuestion = currentQuestions[currentQuestionIndex];
+            const check = key === currentQuestion.correctAnswer ? 0 : 1;
+            
+            appendDataToCSV({
+                'user-answer': key.toUpperCase(),
+                'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
+                'check': check,
+                'reaction time': reactionTime
             });
 
             currentQuestionIndex++;
@@ -586,8 +671,11 @@
             }
         };
 
-        // 修改初始化函数
+        // 初始化函数
         window.onload = function() {
+            csvFileName = getCurrentDateTime() + ".csv"; // 初始化文件名
+            createCSVFile(); // 创建CSV文件
+            
             currentPhase = 'instruction';
             currentLayout = 1;
             practiceCount = 0;

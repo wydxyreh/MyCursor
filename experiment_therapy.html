@@ -119,6 +119,7 @@
         let lastResponse = '';
         let questionTimeout;
         let isProcessingResponse = false;
+
         const results = [];
         let csvFileName;  // 持久化保存文件名
         let csvData = []; // 保存所有CSV数据
@@ -127,7 +128,7 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
-        // 添加实验配置接口
+        // 实验配置接口
         const experimentConfig = {
             totalLayouts: 2,          // 变量数量
             practiceTrials: 2,        // 每个变量的练习次数
@@ -135,7 +136,7 @@
             questionsPerTrial: 7,     // 每个试次的问题数量
         };
 
-        // 修改问题数据结构，每个试次包含9个问题
+        // 定义实验问题和正确答案
         const questions = {
             therapy1: {
                 practice: [
@@ -262,17 +263,18 @@
             ].join(',');
 
             csvData.push(csvRow); // 追加到数据数组
-            // 移除 downloadCSV();  // 不再每次新增数据时下载
         }
 
         // 统一下载函数
         function downloadCSV() {
-            const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = csvFileName; // 始终使用同一个文件名
-            link.click();
-            URL.revokeObjectURL(link.href); // 释放内存
+            if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
+                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = csvFileName; // 始终使用同一个文件名
+                link.click();
+                URL.revokeObjectURL(link.href); // 释放内存
+            }
         }
 
         // 显示屏幕函数
@@ -286,7 +288,6 @@
         // 显示注视点
         function showFixation() {
             showScreen('fixation');
-            updateDebugInfo();
             setTimeout(() => {
                 showStimulus();
             }, 1000);
@@ -303,7 +304,6 @@
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
             currentPhase = 'practiceInstruction';
-            updateDebugInfo();
         }
 
         // 显示刺激
@@ -390,6 +390,7 @@
             questionContainer.style.display = 'block';
             startTime = Date.now();
             
+            // 问题显示10秒
             questionTimeout = setTimeout(() => {
                 handleTimeout();
             }, 10000);
@@ -404,7 +405,7 @@
                 trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
                 trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `therapy${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
@@ -432,17 +433,14 @@
             if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
                 practiceCount++;
                 showFixation();
-                updateDebugInfo();
             } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                 practiceCount++;
                 alert('练习结束，即将进入正式实验');
                 formalCount = 0;  // 确保正式实验从0开始
                 showFixation();
-                updateDebugInfo();
             } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
-                updateDebugInfo();
             } else {  // 当前变量结束
                 if (currentLayout < experimentConfig.totalLayouts) {
                     // 还有下一个变量
@@ -496,7 +494,6 @@
             currentQuestionIndex++;
             isProcessingResponse = false;
             showNextQuestion();
-            updateDebugInfo();
         }
 
         // 修改按键事件处理
@@ -527,58 +524,15 @@
             createCSVFile();
             
             showScreen('instruction');
-            updateDebugInfo();
+
+            // 添加意外退出时的数据保存
+            window.onbeforeunload = function(event) {
+                if (currentLayout <= experimentConfig.totalLayouts && formalCount < experimentConfig.formalTrials) {
+                    // 如果实验未完成，保存当前数据
+                    downloadCSV();
+                }
+            };
         };
-
-        // 添加意外退出时的数据保存
-        window.onbeforeunload = function(event) {
-            if (currentLayout <= experimentConfig.totalLayouts && formalCount < experimentConfig.formalTrials) {
-                // 如果实验未完成，保存当前数据
-                downloadCSV();
-            }
-        };
-
-        // 在HTML中添加调试信息显示（可选）
-        const debugInfo = document.createElement('div');
-        debugInfo.style.position = 'fixed';
-        debugInfo.style.bottom = '10px';
-        debugInfo.style.right = '10px';
-        debugInfo.style.background = 'rgba(0,0,0,0.7)';
-        debugInfo.style.color = 'white';
-        debugInfo.style.padding = '5px';
-        debugInfo.style.fontSize = '12px';
-        document.body.appendChild(debugInfo);
-
-        // 更新调试信息
-        function updateDebugInfo() {
-            let trialType = practiceCount < experimentConfig.practiceTrials ? '练习' : '正式';
-            let trialNumber = practiceCount < experimentConfig.practiceTrials ? 
-                practiceCount + 1 : 
-                formalCount + 1;
-            debugInfo.textContent = `变量${currentLayout} | ${trialType}${trialNumber}`;
-        }
-
-        // 修改CSV导出函数
-        function exportToCSV() {
-            let csvContent = "\ufeff变量,试次类型,试次编号,问题编号,视频路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
-            
-            results.forEach(result => {
-                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
-                            `${result.questionNumber},${result.videoPath},${result.question},` +
-                            `${result.correctAnswer},${result.userResponse},${result.isCorrect},` +
-                            `${result.reactionTime}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
     </script>
 </body>
 </html>

@@ -721,25 +721,6 @@
             });
         };
     
-        // 在HTML中添加调试信息显示（可选）
-        const debugInfo = document.createElement('div');
-        debugInfo.style.position = 'fixed';
-        debugInfo.style.bottom = '10px';
-        debugInfo.style.right = '10px';
-        debugInfo.style.background = 'rgba(0,0,0,0.7)';
-        debugInfo.style.color = 'white';
-        debugInfo.style.padding = '5px';
-        debugInfo.style.fontSize = '12px';
-        document.body.appendChild(debugInfo);
-    
-        // 更新调试信息
-        function updateDebugInfo() {
-            debugInfo.textContent = `阶段: ${currentPhase} | 变量: ${currentLayout} | 练习: ${practiceCount} | 正式: ${formalCount}`;
-        }
-    
-        // 在每次状态改变时调用updateDebugInfo
-        setInterval(updateDebugInfo, 100);
-    
         // 显示图片
         function showImage() {
             const imageContainer = document.getElementById('image');

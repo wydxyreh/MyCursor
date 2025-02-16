@@ -395,7 +395,6 @@
                 'reaction time'
             ];
             csvData = [headers.join(',')]; // 初始化数据（含表头）
-            downloadCSV(); // 立即创建文件并写入表头
         }
 
         // 追加数据到CSV文件
@@ -410,7 +409,6 @@
             ].join(',');
 
             csvData.push(csvRow); // 追加到数据数组
-            downloadCSV();        // 触发文件下载
         }
 
         // 统一下载函数
@@ -431,13 +429,11 @@
                 screen.classList.remove('active');
             });
             document.getElementById(screenId).classList.add('active');
-            console.log('显示屏幕:', screenId);
         }
 
         // 显示注视点
         function showFixation() {
             showScreen('fixation');
-            updateDebugInfo();
             setTimeout(() => {
                 showStimulus();
             }, 1000);
@@ -452,12 +448,10 @@
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
             currentPhase = 'practiceInstruction';
-            updateDebugInfo();
         }
 
         // 显示刺激
         function showStimulus() {
-            console.log('显示刺激', {currentLayout, practiceCount, formalCount});
             const stimulusContainer = document.querySelector('.stimulus');
             const video = document.createElement('video');
             video.style.width = '50%';
@@ -466,13 +460,11 @@
             video.muted = true;
             
             let videoPath;
-            if (practiceCount < 4) {
+            if (practiceCount < experimentConfig.practiceTrials) {
                 videoPath = `images/infographic${currentLayout}/excise${practiceCount + 1}.mp4`;
             } else {
                 videoPath = `images/infographic${currentLayout}/test${formalCount + 1}.mp4`;
             }
-            
-            console.log('加载视频:', videoPath);
             
             video.onloadeddata = () => {
                 stimulusContainer.innerHTML = '';
@@ -486,7 +478,6 @@
             };
             
             video.onerror = () => {
-                console.error('视频加载失败:', videoPath);
                 alert(`视频加载失败: ${videoPath}\n请检查视频文件是否存在`);
             };
             
@@ -498,22 +489,10 @@
             const layoutKey = `prominence${currentLayout}`;
             const phase = practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal';
             const trialIndex = phase === 'practice' ? practiceCount : formalCount;
-            
-            console.log('加载问题:', {
-                layoutKey,
-                phase,
-                trialIndex,
-                questionsData: questions[layoutKey]?.[phase]?.[trialIndex]
-            });
 
-            try {
-                currentQuestions = questions[layoutKey][phase][trialIndex].questions;
-                currentQuestionIndex = 0;
-                showNextQuestion();
-            } catch (error) {
-                console.error('加载问题时出错:', error);
-                console.log('当前状态:', {layoutKey, phase, trialIndex});
-            }
+            currentQuestions = questions[layoutKey][phase][trialIndex].questions;
+            currentQuestionIndex = 0;
+            showNextQuestion();
         }
 
         function showNextQuestion() {
@@ -576,25 +555,18 @@
         function handleTrialComplete() {
             const questionContainer = document.querySelector('.question-container');
             questionContainer.style.display = 'none';
-
-            console.log('试次完成', {practiceCount, formalCount, currentLayout});
             
             if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
                 practiceCount++;
                 showFixation();
-                updateDebugInfo();
-                console.log('进入下一个练习:', practiceCount + 1);
             } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                 practiceCount++;
                 alert('练习结束，即将进入正式实验');
                 formalCount = 0;  // 确保正式实验从0开始
                 showFixation();
-                updateDebugInfo();
             } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
-                updateDebugInfo();
-                console.log('进入下一个正式实验:', formalCount + 1);
             } else {  // 当前变量结束
                 if (currentLayout < experimentConfig.totalLayouts) {
                     // 还有下一个变量
@@ -606,7 +578,7 @@
                 } else {
                     // 所有实验完成
                     alert('所有实验完成！即将导出结果。');
-                    exportToCSV();
+                    downloadCSV(); // 仅在实验结束时下载CSV文件
                 }
             }
         }
@@ -634,13 +606,10 @@
             currentQuestionIndex++;
             isProcessingResponse = false;
             showNextQuestion();
-            updateDebugInfo();
         }
 
         // 修改按键事件处理
         window.onkeydown = function(event) {
-            console.log('当前阶段:', currentPhase, '当前布局:', currentLayout, '当前练习:', practiceCount, '当前正式:', formalCount);
-            
             if (currentPhase === 'instruction') {
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
@@ -672,51 +641,7 @@
             formalCount = 0;
             
             showScreen('instruction');
-            console.log('实验初始化完成，当前阶段:', currentPhase);
-            updateDebugInfo();
         };
-
-        // 在HTML中添加调试信息显示（可选）
-        const debugInfo = document.createElement('div');
-        debugInfo.style.position = 'fixed';
-        debugInfo.style.bottom = '10px';
-        debugInfo.style.right = '10px';
-        debugInfo.style.background = 'rgba(0,0,0,0.7)';
-        debugInfo.style.color = 'white';
-        debugInfo.style.padding = '5px';
-        debugInfo.style.fontSize = '12px';
-        document.body.appendChild(debugInfo);
-
-        // 更新调试信息
-        function updateDebugInfo() {
-            let trialType = practiceCount < experimentConfig.practiceTrials ? '练习' : '正式';
-            let trialNumber = practiceCount < experimentConfig.practiceTrials ? 
-                practiceCount + 1 : 
-                formalCount + 1;
-            debugInfo.textContent = `变量${currentLayout} | ${trialType}${trialNumber}`;
-        }
-
-        // 修改CSV导出函数
-        function exportToCSV() {
-            let csvContent = "\ufeff变量,试次类型,试次编号,问题编号,视频路径,问题,正确答案,用户回答,判定,反应时间(ms)\n";
-            
-            results.forEach(result => {
-                csvContent += `${result.layout},${result.trialType},${result.trialNumber},` +
-                            `${result.questionNumber},${result.videoPath},${result.question},` +
-                            `${result.correctAnswer},${result.userResponse},${result.isCorrect},` +
-                            `${result.reactionTime}\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", `experiment_results_${new Date().getTime()}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
     </script>
 </body>
 </html>

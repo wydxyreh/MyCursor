@@ -555,23 +555,8 @@
 
             clearTimeout(questionTimeout);
 
-            results.push({
-                layout: currentLayout,
-                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
-                questionNumber: currentQuestionIndex + 1,
-                videoPath: `prominence${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
-                question: currentQuestions[currentQuestionIndex].text,
-                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                userResponse: 'TIMEOUT',
-                isCorrect: '错误',
-                reactionTime: 10000
-            });
-
             // 追加数据到CSV文件
             appendDataToCSV(trialData);
-
-            currentQuestionIndex++;
 
             if (practiceCount < 4) {
                 practiceCount++;
@@ -623,21 +608,6 @@
                 check: isPositionCorrect && isNumberCorrect ? '0' : '1',
                 'reaction time': reactionTime
             };
-
-            // 记录结果
-            results.push({
-                layout: currentLayout,
-                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
-                questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
-                question: currentQuestions[currentQuestionIndex].text,
-                correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                userResponse: key.toUpperCase(),
-                isCorrect: isPositionCorrect && isNumberCorrect ? '0' : '1',
-                reactionTime: reactionTime
-            });
-            currentQuestionIndex++;
 
             // 追加数据到CSV文件
             appendDataToCSV(trialData);

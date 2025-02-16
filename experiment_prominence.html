@@ -122,7 +122,8 @@
         <div class="instruction">
             <h2>实验指导语</h2>
             <p>欢迎参加本次实验。</p>
-            <p>在实验中，你会看到一些异常样式的数据块，每张图片展示5秒钟。</p>
+            <p>在实验中，你会看到一张图片，每张图片展示5秒钟。</p>
+            <p>图中有多个数据块，每张图片中会有一个数据块的样式异常，与其他数据块不同，</p>
             <p>请在这段时间内尽可能记住异常数据块的【位置】和异常数据块内的【数值】。</p>
             <p>之后会出现一个问题，请根据记忆回答。</p>
             <p>回答规则：</p>
@@ -132,6 +133,17 @@
             </ul>
             <p>按任意键继续...</p>
         </div>
+    </div>
+    
+    <!-- 新增：参考图片界面 -->
+    <div id="referenceInstruction" class="screen">
+        <div class="instruction">
+            <h2>参考示例</h2>
+        </div>
+        <div class="reference-image">
+            <img src="images/reference/reference2.png" alt="参考图片" style="width: 600px; height: auto; margin-top: 20px; object-fit: contain;">
+        </div>
+        <p style="margin-top: 20px;">按任意键继续...</p>
     </div>
 
     <!-- 练习提示语界面 -->
@@ -397,8 +409,7 @@
         // 显示练习提示语
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
-                你会看到图中有多个数据块，每张图片中会有一个数据块的样式异常，与其他数据块不同，
-                你需要在3秒内尽可能记住异常数据块的位置和异常数值，按任意键继续`;
+            请在3秒内尽可能记住异常数据块的位置和异常数值，按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
@@ -451,7 +462,7 @@
             
             // 创建问题界面的HTML结构
             const questionHTML = `
-                <img src="images/reference/1.png" alt="参考图" style="max-width: 800px; margin-bottom: 20px;">
+                <img src="images/reference/reference3.png" alt="参考图" style="max-width: 600px; margin-bottom: 20px;">
                 <div class="question-text">${currentQuestion.text}</div>
                 <div class="answer-inputs">
                     <input type="text" class="position-input" placeholder="位置">
@@ -615,7 +626,14 @@
         // 按键事件处理
         window.onkeydown = function(event) {
             if (currentPhase === 'instruction') {
-                // 从指导语进入第一个变量的练习说明
+                // 从指导语进入参考图片页面
+                currentPhase = 'reference';
+                showScreen('referenceInstruction');
+                return;
+            }
+            
+            if (currentPhase === 'reference') {
+                // 从参考图片页面进入练习说明
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
                 return;
@@ -634,23 +652,30 @@
                 }
             }
         };
-    
+
+
         // 初始化函数
         window.onload = function() {
+            // 确保所有变量都被正确初始化
             currentPhase = 'instruction';
             currentLayout = 1;
-            practiceCount = formalCount = 0;
-            csvFileName = `${getCurrentDateTime()}.csv`; // 生成文件名并保存
-            createCSVFile(); // 初始化时创建CSV文件
-            showScreen('instruction');
-        };
+            practiceCount = 0;
+            formalCount = 0;
 
-        window.addEventListener('beforeunload', function (e) {
-            if (!isExperimentCompleted) {
-                // 实验未完成，保存当前数据
-                downloadCSV();
-            }
-        });
+            // 初始化CSV文件
+            csvFileName = `${getCurrentDateTime()}.csv`;
+            createCSVFile();
+
+            showScreen('instruction');
+
+            // 添加页面关闭或刷新时的数据保存逻辑
+            window.addEventListener('beforeunload', function(event) {
+                if (currentLayout < 4 || formalCount < 3) {
+                    // 如果实验未完成，保存当前数据
+                    downloadCSV();
+                }
+            });
+        };
     
         // 在HTML中添加调试信息显示（可选）
         const debugInfo = document.createElement('div');

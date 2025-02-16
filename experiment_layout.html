@@ -29,7 +29,7 @@
         }
 
         .instruction {
-            font-size: 18px;
+            font-size: 20px;
             line-height: 1.6;
             text-align: left;
         }
@@ -71,6 +71,17 @@
             </ul>
             <p>按任意键继续...</p>
         </div>
+    </div>
+
+    <!-- 新增：参考图片界面 -->
+    <div id="referenceInstruction" class="screen">
+        <div class="instruction">
+            <h2>参考示例</h2>
+        </div>
+        <div class="reference-image">
+            <img src="images/reference/reference.png" alt="参考图片" style="width: 600px; height: auto; margin-top: 20px; object-fit: contain;">
+        </div>
+        <p style="margin-top: 20px;">按任意键继续...</p>
     </div>
 
     <!-- 练习提示语界面 -->
@@ -289,8 +300,7 @@
         // 显示练习提示语
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
-                你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
-                你需要在10秒内尽可能记住界面中三角形的数量，然后回答问题，正确按A，错误按L，按任意键继续`;
+                正确按A，错误按L，按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
@@ -442,9 +452,15 @@
 
         // 按键事件处理
         window.onkeydown = function(event) {
-            
             if (currentPhase === 'instruction') {
-                // 从指导语进入第一个变量的练习说明
+                // 从指导语进入参考图片页面
+                currentPhase = 'reference';
+                showScreen('referenceInstruction');
+                return;
+            }
+            
+            if (currentPhase === 'reference') {
+                // 从参考图片页面进入练习说明
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
                 return;

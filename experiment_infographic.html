@@ -73,23 +73,35 @@
         <div class="instruction">
             <h2>实验指导语</h2>
             <p>欢迎参加本次实验。</p>
-            <p>在实验中，你会看到一系列填充圆形阵列的视频。</p>
-            <p>请观看完整个视频，并尽可能记住视频中的内容。</p>
-            <p>之后会出现一个问题，请根据记忆回答。</p>
+            <p>在实验中，您会看到一系列模拟监护仪的视频。</p>
+            <p>每个视频中都有血氧/心率/血压/体温的指标，模拟病人在一段时间内（20分钟以上）的病情变化</p>
+            <p>为了减轻记忆负担，对模拟数据进行了加速处理，请观看视频，并尽可能记住病人情况的变化过程。</p>
+            <p>视频可能在任何时候暂停并冻结，请保持专注，不要错过任何重要信息。</p>
+            <p>冻结之后会出现一系列情境问题，您可以根据记忆回答。</p>
             <p>回答规则：</p>
             <ul>
-                <li>正确请按 A 键</li>
-                <li>错误请按 L 键</li>
+                <li>您认为陈述正确请按 A 键</li>
+                <li>您认为陈述错误请按 L 键</li>
             </ul>
             <p>按任意键继续...</p>
         </div>
+    </div>
+    <!-- 参考图片界面 -->
+    <div id="referenceInstruction" class="screen">
+        <div class="instruction">
+            <p>在临床实际中，可能会根据病人的实际情况调整报警上下限在本次实验中，每个参数的报警设置情况如下，请仔细阅读以下说明</p>
+        </div>
+        <div class="reference-image">
+            <img src="images/reference/reference4.png" alt="参考图片" style="width: 800px; height: auto; margin-top: 0px; object-fit: contain;">
+        </div>
+        <p style="margin-top: 0px;">按任意键继续...</p>
     </div>
 
     <!-- 练习提示语界面 -->
     <div id="practiceInstruction" class="screen">
         <div class="practice-instruction">
-            现在进入实验的练习，你会看到一张填充圆形阵列的图片，
-            中间有些圆形被替换成了三角形，你需要在5秒内尽可能记住图片上的内容然后回答问题，
+            现在进入实验的练习，想象您正在监护一位急诊病人，他/她的病情正在发生恶化或者好转
+            请观看视频，并尽可能记住病人情况的变化过程，然后根据您的理解和记忆回答问题，
             正确按A，错误按L
         </div>
     </div>
@@ -370,15 +382,29 @@
         }
 
         // 显示练习提示语
+        // function showPracticeInstruction() {
+        //     const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
+        //         你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
+        //         你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+            
+        //     document.querySelector('.practice-instruction').textContent = practiceInstructionText;
+        //     showScreen('practiceInstruction');
+        //     currentPhase = 'practiceInstruction';
+        // }
+       
+
+        // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
-                你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
-                你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
+            const practiceInstructionText = `现在进入变量${currentLayout}练习，想象您正在监护一位急诊病人，他/她的病情正在发生恶化或者好转。
+            请观看视频，并尽可能记住病人情况的变化过程，然后根据您的理解和记忆回答问题，正确按A，错误按L。本变量将进行${experimentConfig.practiceTrials}次练习和${experimentConfig.formalTrials}次正式实验。
+            按任意键继续`
+            ;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
             currentPhase = 'practiceInstruction';
         }
+        
 
         // 显示刺激
         function showStimulus() {
@@ -540,6 +566,14 @@
         // 修改按键事件处理
         window.onkeydown = function(event) {
             if (currentPhase === 'instruction') {
+                // 从指导语进入参考图片页面
+                currentPhase = 'reference';
+                showScreen('referenceInstruction');
+                return;
+            }
+            
+            if (currentPhase === 'reference') {
+                // 从参考图片页面进入练习说明
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
                 return;

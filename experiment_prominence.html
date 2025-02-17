@@ -422,8 +422,8 @@
     
         // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
-            请在3秒内尽可能记住异常数据块的位置和异常数值，按任意键继续`;
+            const practiceInstructionText = `现在进入实验练习，请在3秒内尽可能记住异常数据块的位置和异常数值，本变量将进行${experimentConfig.practiceTrials}次练习和${experimentConfig.formalTrials}次正式实验，
+                按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');

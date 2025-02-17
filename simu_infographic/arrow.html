@@ -411,26 +411,26 @@
         // 定义参数范围
         const RANGES = {
             spo2: {
-                red: {max: 90 },
-                green: { min: 90}
+                red: { max: 90 },
+                green: { min: 90 }
             },
             hr: {
-                red: {max: 50, min2: 120},
+                red: { max: 50, min2: 120 },
                 yellow: { min: 50, max: 60, min2: 100, max2: 120 },
                 green: { min: 60, max: 100 }
             },
             Pleth_bp1: {
-                red: {max: 90, min2: 140},
+                red: { max: 90, min2: 140 },
                 yellow: { min: 90, max: 100, min2: 120, max2: 140 },
-                green: { min: 100, max: 120 }    
+                green: { min: 100, max: 120 }
             },
             Pleth_bp2: {
-                red: {max: 60, min2: 90},
+                red: { max: 60, min2: 90 },
                 yellow: { min: 60, max: 70, min2: 80, max2: 90 },
                 green: { min: 70, max: 80 }
             },
             temp: {
-                red: {max: 35.5, min2: 38},
+                red: { max: 35.5, min2: 38 },
                 yellow: { min: 35.5, max: 36, min2: 37.3, max2: 38 },
                 green: { min: 36, max: 37.3 }
             }
@@ -449,27 +449,54 @@
 
         // 判断值所在的区间
         function getValueZone(value, ranges) {
-            // 先检查绿色区间
-            const greenRange = ranges.green;
-            if (value >= greenRange.min && value <= greenRange.max) {
-                return 'green';
-            }
-            
-            // 再检查黄色区间
-            const yellowRange = ranges.yellow;
-            if (yellowRange && ((value >= yellowRange.min && value <= yellowRange.max) || 
-                (yellowRange.min2 && value >= yellowRange.min2 && value <= yellowRange.max2))) {
-                return 'yellow';
-            }
-            
-            // 最后检查红色区间
             const redRange = ranges.red;
-            if ((value <= redRange.max) || 
-                (redRange.min2 && value >= redRange.min2)) {
+            // 检查红色区间
+            let inRed = false;
+            if (redRange.max !== undefined && value <= redRange.max) {
+                inRed = true;
+            }
+            if (redRange.min2 !== undefined && value >= redRange.min2) {
+                inRed = true;
+            }
+            if (inRed) {
                 return 'red';
             }
-            
-            // 如果不在任何定义的区间内，返回红色
+
+            // 检查黄色区间
+            const yellowRange = ranges.yellow;
+            if (yellowRange) {
+                let inYellow = false;
+                // 检查第一段黄色区间
+                const y1MinValid = yellowRange.min !== undefined && value >= yellowRange.min;
+                const y1MaxValid = yellowRange.max !== undefined && value <= yellowRange.max;
+                if (y1MinValid && y1MaxValid) {
+                    inYellow = true;
+                }
+                // 检查第二段黄色区间
+                const y2MinValid = yellowRange.min2 !== undefined && value >= yellowRange.min2;
+                const y2MaxValid = yellowRange.max2 !== undefined && value <= yellowRange.max2;
+                if (y2MinValid && y2MaxValid) {
+                    inYellow = true;
+                }
+                if (inYellow) {
+                    return 'yellow';
+                }
+            }
+
+            // 检查绿色区间
+            const greenRange = ranges.green;
+            let inGreen = true;
+            if (greenRange.min !== undefined && value < greenRange.min) {
+                inGreen = false;
+            }
+            if (greenRange.max !== undefined && value > greenRange.max) {
+                inGreen = false;
+            }
+            if (inGreen) {
+                return 'green';
+            }
+
+            // 默认返回红色
             return 'red';
         }
 
@@ -683,14 +710,14 @@
             patient1: {
                 initial: {
                     hr: 110,
-                    spo2: 94,
+                    spo2: 100,
                     Pleth_bp1: 100,
                     Pleth_bp2: 60,
                     temp: 37.0
                 },
                 target: {
                     hr: 130,
-                    spo2: 88,
+                    spo2: 90,
                     Pleth_bp1: 85,
                     Pleth_bp2: 50,
                     temp: 37.2

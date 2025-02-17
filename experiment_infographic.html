@@ -395,18 +395,6 @@
         }
 
         // 显示练习提示语
-        // function showPracticeInstruction() {
-        //     const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
-        //         你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
-        //         你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
-            
-        //     document.querySelector('.practice-instruction').textContent = practiceInstructionText;
-        //     showScreen('practiceInstruction');
-        //     currentPhase = 'practiceInstruction';
-        // }
-       
-
-        // 显示练习提示语
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}练习，想象您正在监护一位急诊病人，他/她的病情正在发生恶化或者好转。
             请观看视频，并尽可能记住病人情况的变化过程，然后根据您的理解和记忆回答问题，正确按A，错误按L。本变量将进行${experimentConfig.practiceTrials}次练习和${experimentConfig.formalTrials}次正式实验。
@@ -417,7 +405,6 @@
             showScreen('practiceInstruction');
             currentPhase = 'practiceInstruction';
         }
-        
 
         // 显示刺激
         function showStimulus() {

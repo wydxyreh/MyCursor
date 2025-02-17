@@ -624,7 +624,7 @@
                     } else {
                         alert('实验结束！最终数据已保存');
                         downloadCSV(); // 实验结束时下载CSV文件
-                        isExperimentCompleted = true; // 标记实验完成
+                        window.location.href = 'experiment_pre.html';
                     }
                 }
                 isProcessingResponse = false;

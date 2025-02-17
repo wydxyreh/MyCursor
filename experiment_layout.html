@@ -406,7 +406,6 @@
                     // 所有实验结束
                     alert('实验结束！即将导出结果文件。');
                     downloadCSV(); // 仅在实验结束时下载CSV文件
-                    window.parent.postMessage('experiment_completed', '*');
                     return;
                 }
             }
@@ -444,7 +443,6 @@
                         // 所有实验结束
                         alert('实验结束！即将导出结果文件。');
                         downloadCSV(); // 仅在实验结束时下载CSV文件
-                        window.parent.postMessage('experiment_completed', '*');
                         return;
                     }
                 }
@@ -505,7 +503,6 @@
                 if (currentLayout < experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
-                    window.parent.postMessage('experiment_completed', '*');
                 }
             });
         };

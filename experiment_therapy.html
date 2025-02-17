@@ -340,10 +340,7 @@
                         showPracticeInstruction();
                     } else {
                         alert('所有实验完成！');
-                        window.parent.postMessage('experiment_completed', '*');
                     }
-                } else {
-                    window.parent.postMessage('experiment_completed', '*');
                 }
             };
             
@@ -458,7 +455,6 @@
                     // 所有实验完成
                     alert('所有实验完成！即将导出结果。');
                     downloadCSV();  // 实验完成时下载CSV
-                    window.parent.postMessage('experiment_completed', '*');
                 }
             }
         }
@@ -554,7 +550,6 @@
                 if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
-                    window.parent.postMessage('experiment_completed', '*');
                 }
             };
         };

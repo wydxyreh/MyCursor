@@ -72,18 +72,30 @@
         <div class="instruction">
             <h2>实验指导语</h2>
             <p>欢迎参加本次实验。</p>
-            <p>在实验中， 你会看到一段使用除颤监护仪进行急救任务的视频
-            <p>界面中有心肺复苏（CPR）和手动除颤两个模块</p>
-            <p>请根据您平时的使用经验仔细观察视频内容，视频会在任意时刻暂停</p>
-            <p>暂停后根据您的记忆和理解回答一系列有关问题</p>
+            <p>在实验中，您会看到一系列模拟除颤治疗的视频。</p>
+            <p>每个模拟视频中都有CPR和手动除颤两个模块，代表着急救人员在急救过程中可能采取的治疗方式。</p>
+            <p>您需要时刻关注按压的情况和除颤相关信息，包括不限于按压深度/按压频率/除颤信号/电击次数等</p>
+            <p>视频可能在任何时候暂停并冻结，请保持专注，不要错过任何重要信息。</p>
+            <p>冻结之后会出现一系列情境问题，您可以根据记忆回答。</p>
             <p>回答规则：</p>
             <ul>
-                <li>正确请按 A 键</li>
-                <li>错误请按 L 键</li>
+                <li>您认为陈述正确请按 A 键</li>
+                <li>您认为陈述错误请按 L 键</li>
             </ul>
             <p>按任意键继续...</p>
         </div>
     </div>
+
+        <!-- 参考图片界面 -->
+        <div id="referenceInstruction" class="screen">
+            <div class="instruction">
+                <p>本次实验界面中的部分数据说明如下</p>
+            </div>
+            <div class="reference-image">
+                <img src="images/reference/reference5.png" alt="参考图片" style="width: 800px; height: auto; margin-top: 0px; object-fit: contain;">
+            </div>
+            <p style="margin-top: 0px;">按任意键继续...</p>
+        </div>
 
     <!-- 练习提示语界面 -->
     <div id="practiceInstruction" class="screen">
@@ -288,7 +300,20 @@
             }, 1000);
         }
 
-        // 显示练习提示语
+        // // 显示练习提示语
+        // function showPracticeInstruction() {
+        //     const practiceInstructionText = `现在进入变量${currentLayout}的练习，
+        //         你会看到一段使用除颤监护仪进行急救任务的视频，界面中有心肺复苏（CPR）和手动除颤两个模块，
+        //         请根据您平时的使用经验仔细观察视频内容，视频会在任意时刻暂停，暂停后回答一系列有关问题。
+        //         本变量将进行${experimentConfig.practiceTrials}次练习和${experimentConfig.formalTrials}次正式实验。
+        //         按任意键继续`;
+            
+        //     document.querySelector('.practice-instruction').textContent = practiceInstructionText;
+        //     showScreen('practiceInstruction');
+        //     currentPhase = 'practiceInstruction';
+        // }
+
+            // 显示练习提示语
         function showPracticeInstruction() {
             const practiceInstructionText = `现在进入变量${currentLayout}的练习，
                 你会看到一段使用除颤监护仪进行急救任务的视频，界面中有心肺复苏（CPR）和手动除颤两个模块，
@@ -299,7 +324,7 @@
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');
             currentPhase = 'practiceInstruction';
-        }
+    }
 
         // 显示刺激
         function showStimulus() {
@@ -491,20 +516,34 @@
         }
 
         // 修改按键事件处理
-        document.addEventListener('keydown', function(event) {
+        window.onkeydown = function(event) {
             if (currentPhase === 'instruction') {
+                // 从指导语进入参考图片页面
+                currentPhase = 'reference';
+                showScreen('referenceInstruction');
+                return;
+            }
+            
+            if (currentPhase === 'reference') {
+                // 从参考图片页面进入练习说明
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
-            } else if (currentPhase === 'practiceInstruction') {
+                return;
+            }
+            
+            if (currentPhase === 'practiceInstruction') {
                 currentPhase = 'experiment';
                 showFixation();
-            } else if (currentPhase === 'experiment' && 
+                return;
+            }
+            
+            if (currentPhase === 'experiment' && 
                 document.querySelector('.question-container').style.display === 'block') {
                 if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
                     handleResponse(event.key.toLowerCase());
                 }
             }
-        });
+        };
 
         // 初始化函数
         window.onload = function() {

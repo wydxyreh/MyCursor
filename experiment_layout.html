@@ -132,10 +132,6 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
-        // 在子实验页面中
-        const urlParams = new URLSearchParams(window.location.search);
-        const filename = urlParams.get('filename');
-
         // 实验配置接口
         const experimentConfig = {
             totalLayouts: 4,          // 变量数量
@@ -247,16 +243,7 @@
                 link.download = csvFileName; // 始终使用同一个文件名
                 link.click();
                 URL.revokeObjectURL(link.href); // 释放内存
-
-                // 保存数据到 localStorage
-                saveData(csvData.join('\n'));
             }
-        }
-
-        // 收集实验数据后执行
-        function saveData(data) {
-            localStorage.setItem(`${filename}-layout`, data);
-            window.parent.postMessage('experiment_completed', '*');
         }
         
         // 记录结果函数
@@ -343,7 +330,7 @@
                 setTimeout(() => {
                     showQuestion();
                 }, 500);
-            }, 10000);
+            }, 5000);
         }
 
         // 显示问题
@@ -385,14 +372,14 @@
 
             appendDataToCSV(csvRow);
 
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount < experimentConfig.practiceTrials - 1) {
                 practiceCount++;
                 showFixation();
-            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
+            } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                 practiceCount++;
                 formalCount = 1;  // 确保正式实验从0开始
                 showFixation();
-            } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
+            } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
             } else {
@@ -406,7 +393,6 @@
                     // 所有实验结束
                     alert('实验结束！即将导出结果文件。');
                     downloadCSV(); // 仅在实验结束时下载CSV文件
-                    window.parent.postMessage('experiment_completed', '*');
                     return;
                 }
             }
@@ -423,14 +409,14 @@
             recordResult(reactionTime);
             
             setTimeout(() => {
-                if (practiceCount < experimentConfig.practiceTrials) {
+                if (practiceCount < experimentConfig.practiceTrials - 1) {
                     practiceCount++;
                     showFixation();
-                } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
+                } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
                     practiceCount++;
                     formalCount = 1;  // 确保正式实验从0开始
                     showFixation();
-                } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
+                } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
                     formalCount++;
                     showFixation();
                 } else {
@@ -444,7 +430,6 @@
                         // 所有实验结束
                         alert('实验结束！即将导出结果文件。');
                         downloadCSV(); // 仅在实验结束时下载CSV文件
-                        window.parent.postMessage('experiment_completed', '*');
                         return;
                     }
                 }
@@ -490,12 +475,8 @@
             practiceCount = 1;
             formalCount = 1;
 
-            // 获取 filename
-            const urlParams = new URLSearchParams(window.location.search);
-            const filename = urlParams.get('filename');
-
             // 初始化CSV文件
-            csvFileName = `${filename || getCurrentDateTime()}-layout.csv`;
+            csvFileName = `${getCurrentDateTime()}.csv`;
             createCSVFile();
 
             showScreen('instruction');
@@ -505,10 +486,38 @@
                 if (currentLayout < experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
-                    window.parent.postMessage('experiment_completed', '*');
                 }
             });
         };
+
+        // 处理试次完成
+        function handleTrialComplete() {
+            if (practiceCount < experimentConfig.practiceTrials) {  // 练习阶段
+                practiceCount++;
+                showFixation();
+            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
+                practiceCount++;
+                formalCount = 0;  // 确保正式实验从0开始
+                showFixation();
+            } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
+                formalCount++;
+                showFixation();
+            } else {  // 当前变量结束
+                if (currentLayout < experimentConfig.totalLayouts) {
+                    // 还有下一个变量
+                    currentLayout++;
+                    practiceCount = 0;
+                    formalCount = 0;
+                    alert(`变量${currentLayout-1}实验完成，即将进入变量${currentLayout}实验`);
+                    showPracticeInstruction();
+                } else {
+                    // 所有实验完成
+                    alert('所有实验完成！即将导出结果。');
+                    downloadCSV();  // 实验完成时下载CSV
+                    window.parent.postMessage('experiment_completed', '*');
+                }
+            }
+        }
     </script>
 </body>
 </html>

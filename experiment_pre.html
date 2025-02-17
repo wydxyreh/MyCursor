@@ -105,7 +105,7 @@
     <iframe id="experimentFrame" src=""></iframe>
 
     <script>
-        let currentFilename = '';
+        let currentUsername  = '';
         const iframe = document.getElementById('experimentFrame');
         const mainContent = document.querySelector('body > :not(iframe)');
 
@@ -113,7 +113,7 @@
         function clearOldData() {
             const experiments = ['layout', 'prominence', 'infographic', 'therapy'];
             experiments.forEach(exp => {
-                localStorage.removeItem(`${currentFilename}-${exp}`);
+                localStorage.removeItem(`${currentUsername}-${exp}`);
             });
         }
 
@@ -124,38 +124,25 @@
                 return;
             }
             
-            const now = new Date();
-            const datePart = [
-                now.getFullYear(),
-                String(now.getMonth() + 1).padStart(2, '0'),
-                String(now.getDate()).padStart(2, '0')
-            ].join('');
-            
-            const timePart = [
-                String(now.getHours()).padStart(2, '0'),
-                String(now.getMinutes()).padStart(2, '0'),
-                String(now.getSeconds()).padStart(2, '0')
-            ].join('');
-            
-            currentFilename = `${username}-${datePart}-${timePart}`;
+            currentUsername = username; // 仅保存用户名
             document.getElementById('username').disabled = true;
             document.querySelector('.user-info button').disabled = true;
-            alert('受试者名称保存成功');
-
-            // 清除旧数据
-            clearOldData();
+            // alert('受试者名称保存成功');
+            // 清除旧数据（使用新逻辑）
+            const experiments = ['layout', 'prominence', 'infographic', 'therapy'];
+            experiments.forEach(exp => {
+                localStorage.removeItem(`${username}-${exp}`);
+            });
         }
 
         function startExperiment(experimentType) {
-            if (!currentFilename) {
+            if (!currentUsername) {
                 alert('请先输入受试者名称并保存');
                 return;
             }
-
             mainContent.style.display = 'none';
-            iframe.src = `${getExperimentUrl(experimentType)}?filename=${encodeURIComponent(currentFilename)}`;
+            iframe.src = `${getExperimentUrl(experimentType)}?filename=${encodeURIComponent(currentUsername)}`;
             iframe.style.display = 'block';
-
             iframe.onload = function() {
                 window.addEventListener('message', function(event) {
                     if (event.data === 'experiment_completed') {
@@ -167,8 +154,23 @@
                         updateCompletedCount();
                         
                         if (checkAllCompleted()) {
-                            alert(`所有实验已完成，请保存好实验数据收集文件${currentFilename}，并将其发送给实验方`);
-                            mergeCSVFiles();
+                            const now = new Date();
+                            const datePart = [
+                                now.getFullYear(),
+                                String(now.getMonth() + 1).padStart(2, '0'),
+                                String(now.getDate()).padStart(2, '0')
+                            ].join('');
+                            
+                            const timePart = [
+                                String(now.getHours()).padStart(2, '0'),
+                                String(now.getMinutes()).padStart(2, '0'),
+                                String(now.getSeconds()).padStart(2, '0')
+                            ].join('');
+                            
+                            const finalFilename = `${currentUsername}-${datePart}-${timePart}`;
+                            alert(`所有实验已完成，请保存好实验数据收集文件${finalFilename}，并将其发送给实验方`);
+                            
+                            mergeCSVFiles(finalFilename);
                         }
                     }
                 });
@@ -182,7 +184,7 @@
                 infographic: 'experiment_infographic.html',
                 therapy: 'experiment_therapy.html'
             };
-            return paths[experimentType] || '';
+            return paths[experimentType];
         }
 
         function updateCompletedCount() {
@@ -194,24 +196,25 @@
             return document.querySelectorAll('.experiment-button:disabled').length === 4;
         }
 
-        function mergeCSVFiles() {
+        function mergeCSVFiles(finalFilename) {
             const experiments = ['layout', 'prominence', 'infographic', 'therapy'];
             let mergedContent = '';
             
             experiments.forEach(exp => {
-                const data = localStorage.getItem(`${currentFilename}-${exp}`);
+                const data = localStorage.getItem(`${currentUsername}-${exp}`);
                 if (data) {
                     mergedContent += data + '\n\n';
                 }
             });
-
-            const blob = new Blob([mergedContent], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${currentFilename}-merged.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            if (mergedContent) {
+                const blob = new Blob([mergedContent], { type: 'text/csv' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${finalFilename}-merged.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
     </script>
 </body>

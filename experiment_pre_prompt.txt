@@ -73,3 +73,15 @@ window.onbeforeunload = function(event) {
                     window.parent.postMessage('experiment_completed', '*');
                 }
             };
+
+
+
+
+
+修复上述代码中的逻辑错误，尤其是experimentConfig对全局的参数控制逻辑
+
+
+
+
+
+

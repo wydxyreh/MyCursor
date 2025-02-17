@@ -385,14 +385,14 @@
 
             appendDataToCSV(csvRow);
 
-            if (practiceCount < experimentConfig.practiceTrials - 1) {
+            if (practiceCount < experimentConfig.practiceTrials) {
                 practiceCount++;
                 showFixation();
-            } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
+            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
                 formalCount = 0;  // 确保正式实验从0开始
                 showFixation();
-            } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
+            } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
             } else {
@@ -423,14 +423,14 @@
             recordResult(reactionTime);
             
             setTimeout(() => {
-                if (practiceCount < experimentConfig.practiceTrials - 1) {
+                if (practiceCount < experimentConfig.practiceTrials) {
                     practiceCount++;
                     showFixation();
-                } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
+                } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                     practiceCount++;
                     formalCount = 0;  // 确保正式实验从0开始
                     showFixation();
-                } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
+                } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                     formalCount++;
                     showFixation();
                 } else {

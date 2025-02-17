@@ -235,8 +235,8 @@
 
         // 追加数据到CSV文件
         function appendDataToCSV(data) {
-            const trialType = practiceCount < 4 ? 'excise' : 'test';
-            const trialNumber = practiceCount < 4 ? practiceCount + 1 : formalCount + 1;
+            const trialType = practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test';
+            const trialNumber = practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1;
             const questionNumber = currentQuestionIndex + 1;
 
             // 构建CSV行数据
@@ -425,14 +425,14 @@
             const questionContainer = document.querySelector('.question-container');
             questionContainer.style.display = 'none';
             
-            if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
+            if (practiceCount < experimentConfig.practiceTrials) {  // 练习阶段
                 practiceCount++;
                 showFixation();
-            } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
+            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
                 formalCount = 0;  // 确保正式实验从0开始
                 showFixation();
-            } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
+            } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
             } else {  // 当前变量结束

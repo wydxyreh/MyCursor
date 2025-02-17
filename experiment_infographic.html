@@ -640,6 +640,14 @@
             formalCount = 0;
             
             showScreen('instruction');
+
+            // 添加意外退出时的数据保存
+            window.onbeforeunload = function(event) {
+                if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
+                    // 如果实验未完成，保存当前数据
+                    downloadCSV();
+                }
+            };
         };
     </script>
 </body>

@@ -131,8 +131,8 @@
         // 实验配置接口
         const experimentConfig = {
             totalLayouts: 2,          // 变量数量
-            practiceTrials: 0,        // 每个变量的练习次数
-            formalTrials: 5,          // 每个变量的正式实验次数
+            practiceTrials: 2,        // 每个变量的练习次数
+            formalTrials: 3,          // 每个变量的正式实验次数
             questionsPerTrial: 7,     // 每个试次的问题数量
         };
 
@@ -525,7 +525,7 @@
 
             // 添加意外退出时的数据保存
             window.onbeforeunload = function(event) {
-                if (currentLayout <= experimentConfig.totalLayouts && formalCount < experimentConfig.formalTrials) {
+                if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
                 }

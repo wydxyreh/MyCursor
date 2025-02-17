@@ -184,8 +184,8 @@
         // 基本变量
         let currentPhase = 'instruction';  // 当前阶段
         let currentLayout = 1;             // 当前变量（1-5）
-        let practiceCount = 0;             // 练习计数（0-3）
-        let formalCount = 0;               // 正式实验计数（0-2）
+        let practiceCount = 1;             // 练习计数（1-4）
+        let formalCount = 1;               // 正式实验计数（1-3）
         let startTime;
         let lastResponse = '';
         let questionTimeout;
@@ -434,7 +434,7 @@
     
         // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
+            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount}次实验练习，
             请在3秒内尽可能记住异常数据块的位置和异常数值，按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
@@ -451,10 +451,10 @@
             let imagePath;
             if (practiceCount < experimentConfig.practiceTrials) {
                 // 练习阶段：prominence1/excise1.png, prominence2/excise1.png 等
-                imagePath = `images/prominence${currentLayout}/excise${practiceCount + 1}.png`;
+                imagePath = `images/prominence${currentLayout}/excise${practiceCount}.png`;
             } else {
                 // 正式实验：prominence1/test1.png, prominence2/test1.png 等
-                imagePath = `images/prominence${currentLayout}/test${formalCount + 1}.png`;
+                imagePath = `images/prominence${currentLayout}/test${formalCount}.png`;
             }
             
             img.onload = () => {
@@ -544,9 +544,9 @@
         function getCurrentQuestion() {
             const questionSet = questions[`prominence${currentLayout}`];
             if (practiceCount < experimentConfig.practiceTrials) {
-                return questionSet.practice[practiceCount].questions[0];
+                return questionSet.practice[practiceCount - 1].questions[0];
             } else {
-                return questionSet.formal[formalCount].questions[0];
+                return questionSet.formal[formalCount - 1].questions[0];
             }
         }
     
@@ -556,7 +556,7 @@
 
             const currentQuestion = getCurrentQuestion();
             const trialData = {
-                trial: `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}`,
+                trial: `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'answer-position': 'NAN',
                 'correct-position': currentQuestion.correctAnswer[0],
                 'answer-number': 'NAN',
@@ -575,7 +575,7 @@
                 showFixation();
             } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
-                formalCount = 0;  // 确保正式实验从0开始
+                formalCount = 1;  // 确保正式实验从0开始
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
@@ -584,8 +584,8 @@
                 if (currentLayout < experimentConfig.totalLayouts) {
                     // 进入下一个变量
                     currentLayout++;
-                    practiceCount = 0;
-                    formalCount = 0;
+                    practiceCount = 1;
+                    formalCount = 1;
                     showPracticeInstruction();
                 } else {
                     // 所有实验结束
@@ -611,7 +611,7 @@
 
             // 构建数据记录
             const trialData = {
-                trial: `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}`,
+                trial: `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'answer-position': position,
                 'correct-position': currentQuestion.correctAnswer[0],
                 'answer-number': value,
@@ -630,7 +630,7 @@
                     showFixation();
                 } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                     practiceCount++;
-                    formalCount = 0;  // 确保正式实验从0开始
+                    formalCount = 1;  // 确保正式实验从0开始
                     showFixation();
                 }  else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                     formalCount++;
@@ -639,7 +639,7 @@
                     if (currentLayout < experimentConfig.totalLayouts) {
                         // 进入下一个变量
                         currentLayout++;
-                        practiceCount = formalCount = 0;
+                        practiceCount = formalCount = 1;
                         showPracticeInstruction();
                     } else {
                         alert('实验结束！最终数据已保存');
@@ -687,8 +687,8 @@
             // 确保所有变量都被正确初始化
             currentPhase = 'instruction';
             currentLayout = 1;
-            practiceCount = 0;
-            formalCount = 0;
+            practiceCount = 1;
+            formalCount = 1;
 
             // 获取 filename
             const urlParams = new URLSearchParams(window.location.search);
@@ -713,7 +713,7 @@
         // 显示图片
         function showImage() {
             const imageContainer = document.getElementById('image');
-            const imagePath = `images/prominence${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.png`;
+            const imagePath = `images/prominence${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.png`;
             
             // 获取图片元素
             const imageElement = imageContainer.querySelector('img');

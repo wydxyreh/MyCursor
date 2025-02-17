@@ -117,8 +117,8 @@
         // 基本变量
         let currentPhase = 'instruction';  // 当前阶段
         let currentLayout = 1;             // 当前变量（1-4）
-        let practiceCount = 0;             // 练习计数（0-3）
-        let formalCount = 0;               // 正式实验计数（0-2）
+        let practiceCount = 1;             // 练习计数（1-4）
+        let formalCount = 1;               // 正式实验计数（1-3）
         let startTime;
         let lastResponse = '';
         let questionTimeout;
@@ -262,19 +262,19 @@
         // 记录结果函数
         function recordResult(reactionTime) {
             const currentQuestion = practiceCount < experimentConfig.practiceTrials ? 
-                questions[`layout${currentLayout}`].practice[practiceCount] : 
-                questions[`layout${currentLayout}`].formal[formalCount];
+                questions[`layout${currentLayout}`].practice[practiceCount - 1] : 
+                questions[`layout${currentLayout}`].formal[formalCount - 1];
             
             const isCorrect = lastResponse === currentQuestion.correctAnswer;
             
             // 构建当前试次的图片路径
             const imagePath = practiceCount < experimentConfig.practiceTrials ? 
-                `layout${currentLayout}/excise${practiceCount + 1}.png` : 
-                `layout${currentLayout}/test${formalCount + 1}.png`;
+                `layout${currentLayout}/excise${practiceCount}.png` : 
+                `layout${currentLayout}/test${formalCount}.png`;
             
             // 构建CSV数据
             const csvRow = {
-                trial: `layout${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}`,
+                trial: `layout${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'user-answer': lastResponse.toUpperCase(),
                 'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
                 check: isCorrect ? '0' : '1',
@@ -302,7 +302,7 @@
 
         // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次实验练习，
+            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount}次实验练习，
                 正确按A，错误按L，按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
@@ -319,10 +319,10 @@
             let imagePath;
             if (practiceCount < experimentConfig.practiceTrials) {
                 // 练习阶段：layout1/excise1.png, layout2/excise1.png 等
-                imagePath = `images/layout${currentLayout}/excise${practiceCount + 1}.png`;
+                imagePath = `images/layout${currentLayout}/excise${practiceCount}.png`;
             } else {
                 // 正式实验：layout1/test1.png, layout2/test1.png 等
-                imagePath = `images/layout${currentLayout}/test${formalCount + 1}.png`;
+                imagePath = `images/layout${currentLayout}/test${formalCount}.png`;
             }
             
             img.onload = () => {
@@ -350,8 +350,8 @@
         function showQuestion() {
             // 根据当前变量和阶段选择问题
             const questionText = practiceCount < experimentConfig.practiceTrials ? 
-                questions[`layout${currentLayout}`].practice[practiceCount].question : 
-                questions[`layout${currentLayout}`].formal[formalCount].question;
+                questions[`layout${currentLayout}`].practice[practiceCount - 1].question : 
+                questions[`layout${currentLayout}`].formal[formalCount - 1].question;
             
             document.querySelector('.question').innerHTML = `
                 ${questionText}
@@ -370,11 +370,11 @@
         // 处理超时
         function handleTimeout() {
             const currentQuestion = practiceCount < experimentConfig.practiceTrials ? 
-                questions[`layout${currentLayout}`].practice[practiceCount] : 
-                questions[`layout${currentLayout}`].formal[formalCount];
+                questions[`layout${currentLayout}`].practice[practiceCount - 1] : 
+                questions[`layout${currentLayout}`].formal[formalCount - 1];
             
             const csvRow = {
-                trial: `layout${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}`,
+                trial: `layout${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'user-answer': 'NAN',
                 'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
                 check: 'NAN',
@@ -390,7 +390,7 @@
                 showFixation();
             } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
-                formalCount = 0;  // 确保正式实验从0开始
+                formalCount = 1;  // 确保正式实验从0开始
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
@@ -399,8 +399,8 @@
                 if (currentLayout < experimentConfig.totalLayouts) {
                     // 进入下一个变量
                     currentLayout++;
-                    practiceCount = 0;
-                    formalCount = 0;
+                    practiceCount = 1;
+                    formalCount = 1;
                     showPracticeInstruction();
                 } else {
                     // 所有实验结束
@@ -428,7 +428,7 @@
                     showFixation();
                 } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                     practiceCount++;
-                    formalCount = 0;  // 确保正式实验从0开始
+                    formalCount = 1;  // 确保正式实验从0开始
                     showFixation();
                 } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                     formalCount++;
@@ -437,8 +437,8 @@
                     if (currentLayout < experimentConfig.totalLayouts) {
                         // 进入下一个变量
                         currentLayout++;
-                        practiceCount = 0;
-                        formalCount = 0;
+                        practiceCount = 1;
+                        formalCount = 1;
                         showPracticeInstruction();
                     } else {
                         // 所有实验结束
@@ -487,8 +487,8 @@
             // 确保所有变量都被正确初始化
             currentPhase = 'instruction';
             currentLayout = 1;
-            practiceCount = 0;
-            formalCount = 0;
+            practiceCount = 1;
+            formalCount = 1;
 
             // 获取 filename
             const urlParams = new URLSearchParams(window.location.search);

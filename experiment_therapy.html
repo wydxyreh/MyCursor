@@ -113,8 +113,8 @@
         // 基本变量
         let currentPhase = 'instruction';  // 当前阶段
         let currentLayout = 1;             // 当前变量（1-5）
-        let practiceCount = 0;             // 练习计数（0-3）
-        let formalCount = 0;               // 正式实验计数（0-2）
+        let practiceCount = 1;             // 练习计数（1-4）
+        let formalCount = 1;               // 正式实验计数（1-3）
         let startTime;
         let lastResponse = '';
         let questionTimeout;
@@ -236,7 +236,7 @@
         // 追加数据到CSV文件
         function appendDataToCSV(data) {
             const trialType = practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test';
-            const trialNumber = practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1;
+            const trialNumber = practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount;
             const questionNumber = currentQuestionIndex + 1;
 
             // 构建CSV行数据
@@ -312,9 +312,9 @@
             
             let videoPath;
             if (practiceCount < experimentConfig.practiceTrials) {
-                videoPath = `images/therapy${currentLayout}/excise${practiceCount + 1}.mp4`;
+                videoPath = `images/therapy${currentLayout}/excise${practiceCount}.mp4`;
             } else {
-                videoPath = `images/therapy${currentLayout}/test${formalCount + 1}.mp4`;
+                videoPath = `images/therapy${currentLayout}/test${formalCount}.mp4`;
             }
             
             video.onerror = () => {
@@ -323,8 +323,8 @@
                 if (confirm('是否跳过当前变量，继续下一个变量？')) {
                     if (currentLayout < experimentConfig.totalLayouts) {
                         currentLayout++;
-                        practiceCount = 0;
-                        formalCount = 0;
+                        practiceCount = 1;
+                        formalCount = 1;
                         showPracticeInstruction();
                     } else {
                         alert('所有实验完成！');
@@ -353,8 +353,8 @@
                 
                 currentQuestionIndex = 0;
                 currentQuestions = practiceCount < experimentConfig.practiceTrials ? 
-                    questions[`therapy${currentLayout}`].practice[practiceCount].questions :
-                    questions[`therapy${currentLayout}`].formal[formalCount].questions;
+                    questions[`therapy${currentLayout}`].practice[practiceCount - 1].questions :
+                    questions[`therapy${currentLayout}`].formal[formalCount - 1].questions;
                 
                 setTimeout(() => {
                     showNextQuestion();
@@ -398,9 +398,9 @@
             results.push({
                 layout: currentLayout,
                 trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `therapy${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `therapy${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
@@ -430,7 +430,7 @@
                 showFixation();
             } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
-                formalCount = 0;  // 确保正式实验从0开始
+                formalCount = 1;  // 确保正式实验从0开始
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
@@ -439,8 +439,8 @@
                 if (currentLayout < experimentConfig.totalLayouts) {
                     // 还有下一个变量
                     currentLayout++;
-                    practiceCount = 0;
-                    formalCount = 0;
+                    practiceCount = 1;
+                    formalCount = 1;
                     showPracticeInstruction();
                 } else {
                     // 所有实验完成
@@ -467,9 +467,9 @@
             results.push({
                 layout: currentLayout,
                 trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: key.toUpperCase(),
@@ -510,8 +510,8 @@
         window.onload = function() {
             currentPhase = 'instruction';
             currentLayout = 1;
-            practiceCount = 0;
-            formalCount = 0;
+            practiceCount = 1;
+            formalCount = 1;
 
             // 获取 filename
             const urlParams = new URLSearchParams(window.location.search);

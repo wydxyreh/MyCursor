@@ -120,9 +120,9 @@
 
         // 基本变量
         let currentPhase = 'instruction';  // 当前阶段
-        let currentLayout = 1;             // 当前变量（1-5）
-        let practiceCount = 0;             // 练习计数
-        let formalCount = 0;               // 正式实验计数
+        let currentLayout = 1;             // 当前变量（1-4）
+        let practiceCount = 1;             // 练习计数（1）
+        let formalCount = 1;               // 正式实验计数（1-2）
         let startTime;
         let lastResponse = '';
         let questionTimeout;
@@ -335,7 +335,7 @@
         function appendDataToCSV(data) {
             // 构建CSV行数据
             const csvRow = [
-                `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}`,
+                `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 data['user-answer'],
                 data['correct-answer'],
                 data.check,
@@ -384,7 +384,7 @@
 
         // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount + 1}次练习，
+            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount}次练习，
                 你会看到一张填充圆形阵列的图片，中间有些圆形被替换成了三角形，
                 你需要在5秒内尽可能记住图片上的内容然后回答问题，正确按A，错误按L`;
             
@@ -404,9 +404,9 @@
             
             let videoPath;
             if (practiceCount < experimentConfig.practiceTrials) {
-                videoPath = `images/infographic${currentLayout}/excise${practiceCount + 1}.mp4`;
+                videoPath = `images/infographic${currentLayout}/excise${practiceCount}.mp4`;
             } else {
-                videoPath = `images/infographic${currentLayout}/test${formalCount + 1}.mp4`;
+                videoPath = `images/infographic${currentLayout}/test${formalCount}.mp4`;
             }
             
             video.onloadeddata = () => {
@@ -431,7 +431,7 @@
         function loadQuestions() {
             const layoutKey = `prominence${currentLayout}`;
             const phase = practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal';
-            const trialIndex = phase === 'practice' ? practiceCount : formalCount;
+            const trialIndex = phase === 'practice' ? practiceCount - 1 : formalCount - 1;
 
             currentQuestions = questions[layoutKey][phase][trialIndex].questions;
             currentQuestionIndex = 0;
@@ -472,9 +472,9 @@
             results.push({
                 layout: currentLayout,
                 trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
@@ -504,7 +504,7 @@
                 showFixation();
             } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
-                formalCount = 0;  // 确保正式实验从0开始
+                formalCount = 1;  // 确保正式实验从0开始
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
@@ -513,8 +513,8 @@
                 if (currentLayout < experimentConfig.totalLayouts) {
                     // 还有下一个变量
                     currentLayout++;
-                    practiceCount = 0;
-                    formalCount = 0;
+                    practiceCount = 1;
+                    formalCount = 1;
                     alert(`变量${currentLayout-1}实验完成，即将进入变量${currentLayout}实验`);
                     showPracticeInstruction();
                 } else {
@@ -542,9 +542,9 @@
             results.push({
                 layout: currentLayout,
                 trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1,
+                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: key.toUpperCase(),
@@ -591,8 +591,8 @@
         window.onload = function() {
             currentPhase = 'instruction';
             currentLayout = 1;
-            practiceCount = 0;
-            formalCount = 0;
+            practiceCount = 1;
+            formalCount = 1;
 
             // 获取 filename
             const urlParams = new URLSearchParams(window.location.search);

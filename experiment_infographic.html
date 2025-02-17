@@ -86,7 +86,7 @@
             <p>按任意键继续...</p>
         </div>
     </div>
-    
+
     <!-- 参考图片界面 -->
     <div id="referenceInstruction" class="screen">
         <div class="instruction">
@@ -515,10 +515,6 @@
 
             if (practiceCount < experimentConfig.practiceTrials) {  // 练习阶段
                 practiceCount++;
-                showFixation();
-            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
-                practiceCount++;
-                formalCount = 1;  // 确保正式实验从0开始
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;

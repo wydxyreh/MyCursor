@@ -437,10 +437,6 @@
             if (practiceCount < experimentConfig.practiceTrials) {  // 练习阶段
                 practiceCount++;
                 showFixation();
-            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
-                practiceCount++;
-                formalCount = 1;  // 确保正式实验从0开始
-                showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
                 showFixation();

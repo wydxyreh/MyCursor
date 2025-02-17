@@ -128,6 +128,10 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
+        // 在子实验页面中
+        const urlParams = new URLSearchParams(window.location.search);
+        const filename = urlParams.get('filename');
+
         // 实验配置接口
         const experimentConfig = {
             totalLayouts: 2,          // 变量数量
@@ -256,7 +260,16 @@
                 link.download = csvFileName; // 始终使用同一个文件名
                 link.click();
                 URL.revokeObjectURL(link.href); // 释放内存
+
+                // 保存数据到 localStorage
+                saveData(csvData.join('\n'));
             }
+        }
+
+        // 收集实验数据后执行
+        function saveData(data) {
+            localStorage.setItem(`${filename}-therapy`, data);
+            window.parent.postMessage('experiment_completed', '*');
         }
 
         // 显示屏幕函数
@@ -315,10 +328,10 @@
                         showPracticeInstruction();
                     } else {
                         alert('所有实验完成！');
-                        window.location.href = 'experiment_pre.html';
+                        window.parent.postMessage('experiment_completed', '*');
                     }
                 } else {
-                    window.location.href = 'experiment_pre.html';
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             };
             
@@ -433,7 +446,7 @@
                     // 所有实验完成
                     alert('所有实验完成！即将导出结果。');
                     downloadCSV();  // 实验完成时下载CSV
-                    window.location.href = 'experiment_pre.html';
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             }
         }
@@ -499,11 +512,15 @@
             currentLayout = 1;
             practiceCount = 0;
             formalCount = 0;
-            
+
+            // 获取 filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+
             // 初始化CSV文件
-            csvFileName = `${getCurrentDateTime()}.csv`;
+            csvFileName = `${filename || getCurrentDateTime()}-therapy.csv`;
             createCSVFile();
-            
+
             showScreen('instruction');
 
             // 添加意外退出时的数据保存
@@ -511,6 +528,7 @@
                 if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             };
         };

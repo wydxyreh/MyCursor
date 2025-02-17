@@ -199,6 +199,10 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
+        // 在子实验页面中
+        const urlParams = new URLSearchParams(window.location.search);
+        const filename = urlParams.get('filename');
+
         // 实验配置接口
         const experimentConfig = {
             totalLayouts: 4,          // 变量数量
@@ -206,7 +210,6 @@
             formalTrials: 3,          // 每个变量的正式实验次数
             questionsPerTrial: 1,     // 每个试次的问题数量
         };
-
     
         // 定义实验问题和正确答案
         const questions = {
@@ -401,7 +404,16 @@
                 link.download = csvFileName; // 始终使用同一个文件名
                 link.click();
                 URL.revokeObjectURL(link.href); // 释放内存
+
+                // 保存数据到 localStorage
+                saveData(csvData.join('\n'));
             }
+        }
+
+        // 收集实验数据后执行
+        function saveData(data) {
+            localStorage.setItem(`${filename}-prominence`, data);
+            window.parent.postMessage('experiment_completed', '*');
         }
     
         // 显示屏幕函数
@@ -573,7 +585,8 @@
                     } else {
                         // 所有实验结束
                         alert('实验结束！即将导出结果文件。');
-                        exportToCSV();
+                        downloadCSV(); // 实验结束时下载CSV文件
+                        window.parent.postMessage('experiment_completed', '*');
                         return;
                     }
                 } else {
@@ -624,7 +637,7 @@
                     } else {
                         alert('实验结束！最终数据已保存');
                         downloadCSV(); // 实验结束时下载CSV文件
-                        window.location.href = 'experiment_pre.html';
+                        window.parent.postMessage('experiment_completed', '*');
                     }
                 }
                 isProcessingResponse = false;
@@ -670,8 +683,12 @@
             practiceCount = 0;
             formalCount = 0;
 
+            // 获取 filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+
             // 初始化CSV文件
-            csvFileName = `${getCurrentDateTime()}.csv`;
+            csvFileName = `${filename || getCurrentDateTime()}-prominence.csv`;
             createCSVFile();
 
             showScreen('instruction');
@@ -681,6 +698,7 @@
                 if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             });
         };

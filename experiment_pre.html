@@ -109,6 +109,14 @@
         const iframe = document.getElementById('experimentFrame');
         const mainContent = document.querySelector('body > :not(iframe)');
 
+        // 清除 localStorage 中的旧数据
+        function clearOldData() {
+            const experiments = ['layout', 'prominence', 'infographic', 'therapy'];
+            experiments.forEach(exp => {
+                localStorage.removeItem(`${currentFilename}-${exp}`);
+            });
+        }
+
         function saveUsername() {
             const username = document.getElementById('username').value.trim();
             if (!username) {
@@ -133,6 +141,9 @@
             document.getElementById('username').disabled = true;
             document.querySelector('.user-info button').disabled = true;
             alert('受试者名称保存成功');
+
+            // 清除旧数据
+            clearOldData();
         }
 
         function startExperiment(experimentType) {

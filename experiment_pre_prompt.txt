@@ -36,3 +36,40 @@ ${受试者名称}-${年}${月}${日}-${时}${分}${秒} ，并且该文件名�
 3.在完成所有的实验后，将弹出提示“所有实验已完成”，请保存号实验数据收集文件${实验数据文件}，并将其发送给实验方；
 4.在完成所有的实验后，还要实现一个功能，即读取4个子实验所保存到4个csv文件，每个子实验的csv文件命名格式都是按照 
 ${数据收集文件名}-${子实验名称}.csv 格式命名的，分别读取4个文件，然后保存到一个新的csv文件中，每个子csv文件数据在新的csv文件中纵向排列，然后以一个空的行来间隔：
+
+
+
+
+
+修改上述代码，实现下列功能：
+1.对于 localStorage 保存中的数据，每次页面刷新后，都要清除掉所有的旧数据；
+
+子实验中对文件名的获取和保存逻辑如下：
+const urlParams = new URLSearchParams(window.location.search);
+        const filename = urlParams.get('filename');
+function downloadCSV() {
+            if (csvData.length > 1) { // 确保有数据（表头 + 至少一行数据）
+                const blob = new Blob([csvData.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = csvFileName; // 始终使用同一个文件名
+                link.click();
+                URL.revokeObjectURL(link.href); // 释放内存
+
+                // 保存数据到 localStorage
+                saveData(csvData.join('\n'));
+            }
+        }
+
+        function saveData(data) {
+            localStorage.setItem(`${filename}-infographic`, data);
+            window.parent.postMessage('experiment_completed', '*');
+        }
+
+window.onbeforeunload = function(event) {
+                if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
+                    // 如果实验未完成，保存当前数据
+                    downloadCSV();
+                    window.parent.postMessage('experiment_completed', '*');
+                }
+            };

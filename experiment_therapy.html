@@ -140,6 +140,10 @@
         let currentQuestionIndex = 0;
         let currentQuestions = [];
 
+        // 在子实验页面中
+        const urlParams = new URLSearchParams(window.location.search);
+        const filename = urlParams.get('filename');
+
         // 实验配置接口
         const experimentConfig = {
             totalLayouts: 2,          // 变量数量
@@ -243,8 +247,8 @@
 
         // 追加数据到CSV文件
         function appendDataToCSV(data) {
-            const trialType = practiceCount < 4 ? 'excise' : 'test';
-            const trialNumber = practiceCount < 4 ? practiceCount + 1 : formalCount + 1;
+            const trialType = practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test';
+            const trialNumber = practiceCount < experimentConfig.practiceTrials ? practiceCount + 1 : formalCount + 1;
             const questionNumber = currentQuestionIndex + 1;
 
             // 构建CSV行数据
@@ -268,7 +272,16 @@
                 link.download = csvFileName; // 始终使用同一个文件名
                 link.click();
                 URL.revokeObjectURL(link.href); // 释放内存
+
+                // 保存数据到 localStorage
+                saveData(csvData.join('\n'));
             }
+        }
+
+        // 收集实验数据后执行
+        function saveData(data) {
+            localStorage.setItem(`${filename}-therapy`, data);
+            window.parent.postMessage('experiment_completed', '*');
         }
 
         // 显示屏幕函数
@@ -340,10 +353,10 @@
                         showPracticeInstruction();
                     } else {
                         alert('所有实验完成！');
-                        window.location.href = 'experiment_pre.html';
+                        window.parent.postMessage('experiment_completed', '*');
                     }
                 } else {
-                    window.location.href = 'experiment_pre.html';
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             };
             
@@ -437,14 +450,14 @@
             const questionContainer = document.querySelector('.question-container');
             questionContainer.style.display = 'none';
             
-            if (practiceCount < experimentConfig.practiceTrials - 1) {  // 练习阶段
+            if (practiceCount < experimentConfig.practiceTrials) {  // 练习阶段
                 practiceCount++;
                 showFixation();
-            } else if (practiceCount === experimentConfig.practiceTrials - 1) {  // 练习结束
+            } else if (practiceCount === experimentConfig.practiceTrials) {  // 练习结束
                 practiceCount++;
                 formalCount = 0;  // 确保正式实验从0开始
                 showFixation();
-            } else if (formalCount < experimentConfig.formalTrials - 1) {  // 正式实验阶段
+            } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
             } else {  // 当前变量结束
@@ -458,6 +471,7 @@
                     // 所有实验完成
                     alert('所有实验完成！即将导出结果。');
                     downloadCSV();  // 实验完成时下载CSV
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             }
         }
@@ -537,11 +551,15 @@
             currentLayout = 1;
             practiceCount = 0;
             formalCount = 0;
-            
+
+            // 获取 filename
+            const urlParams = new URLSearchParams(window.location.search);
+            const filename = urlParams.get('filename');
+
             // 初始化CSV文件
-            csvFileName = `${getCurrentDateTime()}.csv`;
+            csvFileName = `${filename || getCurrentDateTime()}-therapy.csv`;
             createCSVFile();
-            
+
             showScreen('instruction');
 
             // 添加意外退出时的数据保存
@@ -549,6 +567,7 @@
                 if (currentLayout <= experimentConfig.totalLayouts || formalCount < experimentConfig.formalTrials) {
                     // 如果实验未完成，保存当前数据
                     downloadCSV();
+                    window.parent.postMessage('experiment_completed', '*');
                 }
             };
         };

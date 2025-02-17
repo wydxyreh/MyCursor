@@ -261,20 +261,20 @@
         
         // 记录结果函数
         function recordResult(reactionTime) {
-            const currentQuestion = practiceCount < experimentConfig.practiceTrials ? 
+            const currentQuestion = practiceCount <= experimentConfig.practiceTrials ? 
                 questions[`layout${currentLayout}`].practice[practiceCount - 1] : 
                 questions[`layout${currentLayout}`].formal[formalCount - 1];
             
             const isCorrect = lastResponse === currentQuestion.correctAnswer;
             
             // 构建当前试次的图片路径
-            const imagePath = practiceCount < experimentConfig.practiceTrials ? 
+            const imagePath = practiceCount <= experimentConfig.practiceTrials ? 
                 `layout${currentLayout}/excise${practiceCount}.png` : 
                 `layout${currentLayout}/test${formalCount}.png`;
             
             // 构建CSV数据
             const csvRow = {
-                trial: `layout${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                trial: `layout${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'user-answer': lastResponse.toUpperCase(),
                 'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
                 check: isCorrect ? '0' : '1',
@@ -317,7 +317,7 @@
             
             // 构建图片路径
             let imagePath;
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount <= experimentConfig.practiceTrials) {
                 // 练习阶段：layout1/excise1.png, layout2/excise1.png 等
                 imagePath = `images/layout${currentLayout}/excise${practiceCount}.png`;
             } else {
@@ -349,7 +349,7 @@
         // 显示问题
         function showQuestion() {
             // 根据当前变量和阶段选择问题
-            const questionText = practiceCount < experimentConfig.practiceTrials ? 
+            const questionText = practiceCount <= experimentConfig.practiceTrials ? 
                 questions[`layout${currentLayout}`].practice[practiceCount - 1].question : 
                 questions[`layout${currentLayout}`].formal[formalCount - 1].question;
             
@@ -369,12 +369,12 @@
 
         // 处理超时
         function handleTimeout() {
-            const currentQuestion = practiceCount < experimentConfig.practiceTrials ? 
+            const currentQuestion = practiceCount <= experimentConfig.practiceTrials ? 
                 questions[`layout${currentLayout}`].practice[practiceCount - 1] : 
                 questions[`layout${currentLayout}`].formal[formalCount - 1];
             
             const csvRow = {
-                trial: `layout${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                trial: `layout${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'user-answer': 'NAN',
                 'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
                 check: 'NAN',
@@ -385,7 +385,7 @@
 
             appendDataToCSV(csvRow);
 
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount <= experimentConfig.practiceTrials) {
                 practiceCount++;
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
@@ -418,7 +418,7 @@
             recordResult(reactionTime);
             
             setTimeout(() => {
-                if (practiceCount < experimentConfig.practiceTrials) {
+                if (practiceCount <= experimentConfig.practiceTrials) {
                     practiceCount++;
                     showFixation();
                 } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段

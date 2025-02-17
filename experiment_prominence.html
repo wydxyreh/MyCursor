@@ -449,7 +449,7 @@
             
             // 构建图片路径
             let imagePath;
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount <= experimentConfig.practiceTrials) {
                 // 练习阶段：prominence1/excise1.png, prominence2/excise1.png 等
                 imagePath = `images/prominence${currentLayout}/excise${practiceCount}.png`;
             } else {
@@ -543,7 +543,7 @@
         // 获取当前问题
         function getCurrentQuestion() {
             const questionSet = questions[`prominence${currentLayout}`];
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount <= experimentConfig.practiceTrials) {
                 return questionSet.practice[practiceCount - 1].questions[0];
             } else {
                 return questionSet.formal[formalCount - 1].questions[0];
@@ -556,7 +556,7 @@
 
             const currentQuestion = getCurrentQuestion();
             const trialData = {
-                trial: `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                trial: `prominence${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'answer-position': 'NAN',
                 'correct-position': currentQuestion.correctAnswer[0],
                 'answer-number': 'NAN',
@@ -570,7 +570,7 @@
             // 追加数据到CSV文件
             appendDataToCSV(trialData);
 
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount <= experimentConfig.practiceTrials) {
                 practiceCount++;
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
@@ -606,7 +606,7 @@
 
             // 构建数据记录
             const trialData = {
-                trial: `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                trial: `prominence${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 'answer-position': position,
                 'correct-position': currentQuestion.correctAnswer[0],
                 'answer-number': value,
@@ -620,7 +620,7 @@
 
             // 后续流程控制
             setTimeout(() => {
-                if (practiceCount < experimentConfig.practiceTrials) {
+                if (practiceCount <= experimentConfig.practiceTrials) {
                     practiceCount++;
                     showFixation();
                 } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
@@ -702,7 +702,7 @@
         // 显示图片
         function showImage() {
             const imageContainer = document.getElementById('image');
-            const imagePath = `images/prominence${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.png`;
+            const imagePath = `images/prominence${currentLayout}/${practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}.png`;
             
             // 获取图片元素
             const imageElement = imageContainer.querySelector('img');

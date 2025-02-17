@@ -348,7 +348,7 @@
         function appendDataToCSV(data) {
             // 构建CSV行数据
             const csvRow = [
-                `prominence${currentLayout}-${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                `prominence${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 data['user-answer'],
                 data['correct-answer'],
                 data.check,
@@ -417,7 +417,7 @@
             video.muted = true;
             
             let videoPath;
-            if (practiceCount < experimentConfig.practiceTrials) {
+            if (practiceCount <= experimentConfig.practiceTrials) {
                 videoPath = `images/infographic${currentLayout}/excise${practiceCount}.mp4`;
             } else {
                 videoPath = `images/infographic${currentLayout}/test${formalCount}.mp4`;
@@ -444,7 +444,7 @@
         // 问题加载和显示逻辑
         function loadQuestions() {
             const layoutKey = `prominence${currentLayout}`;
-            const phase = practiceCount < experimentConfig.practiceTrials ? 'practice' : 'formal';
+            const phase = practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal';
             const trialIndex = phase === 'practice' ? practiceCount - 1 : formalCount - 1;
 
             currentQuestions = questions[layoutKey][phase][trialIndex].questions;
@@ -485,10 +485,10 @@
 
             results.push({
                 layout: currentLayout,
-                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount,
+                trialType: practiceCount <= experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
@@ -513,7 +513,7 @@
             const questionContainer = document.querySelector('.question-container');
             questionContainer.style.display = 'none';
 
-            if (practiceCount < experimentConfig.practiceTrials) {  // 练习阶段
+            if (practiceCount <= experimentConfig.practiceTrials) {  // 练习阶段
                 practiceCount++;
                 showFixation();
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
@@ -550,10 +550,10 @@
             // 记录结果
             results.push({
                 layout: currentLayout,
-                trialType: practiceCount < experimentConfig.practiceTrials ? '练习' : '正式',
-                trialNumber: practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount,
+                trialType: practiceCount <= experimentConfig.practiceTrials ? '练习' : '正式',
+                trialNumber: practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount < experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount < experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
+                videoPath: `infographic${currentLayout}/${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: key.toUpperCase(),

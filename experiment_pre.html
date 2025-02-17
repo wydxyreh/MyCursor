@@ -54,6 +54,11 @@
             font-size: 16px;
             color: #888;
         }
+
+        .experiment-button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -89,6 +94,10 @@
 
         // 启动实验
         function startExperiment(experimentType) {
+            // 禁用按钮
+            const button = document.querySelector(`button[onclick="startExperiment('${experimentType}')"]`);
+            button.disabled = true;
+
             // 存储当前实验类型到localStorage
             localStorage.setItem('currentExperiment', experimentType);
             
@@ -116,10 +125,11 @@
                 const completed = localStorage.getItem(`${exp}_completed`) === 'true';
                 experimentStatus[exp] = completed;
                 
-                // 更新按钮样式
+                // 更新按钮样式和禁用状态
                 const button = document.querySelector(`button[onclick="startExperiment('${exp}')"]`);
                 if (completed) {
                     button.classList.add('completed');
+                    button.disabled = true;
                 }
             });
 
@@ -141,4 +151,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

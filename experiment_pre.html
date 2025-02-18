@@ -144,13 +144,7 @@
             mainContent.style.display = 'none';
             iframe.src = `${getExperimentUrl(experimentType)}?filename=${encodeURIComponent(currentUsername)}`;
             iframe.style.display = 'block';
-            
-            // 新增自动聚焦逻辑
             iframe.onload = function() {
-                // 确保iframe内容加载完成后立即获得焦点
-                iframe.contentWindow.focus();  // 聚焦iframe窗口
-                iframe.contentDocument.body.focus();  // 聚焦body元素
-
                 window.addEventListener('message', function(event) {
                     if (event.data === 'experiment_completed') {
                         iframe.style.display = 'none';

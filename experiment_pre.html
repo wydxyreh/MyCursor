@@ -17,6 +17,7 @@
             color: white;
             font-family: Arial, sans-serif;
             position: relative;
+            overflow: hidden;
         }
 
         .user-info {
@@ -74,9 +75,73 @@
             border: none;
             background: black;
         }
+
+        /* 尺寸调试界面样式 */
+        #sizeAdjustment {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 1000;
+            transform-origin: center center;
+        }
+
+        .corner-marker {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            border: 2px solid white;
+        }
+
+        .top-left { top: 20px; left: 20px; }
+        .top-right { top: 20px; right: 20px; }
+        .bottom-left { bottom: 20px; left: 20px; }
+        .bottom-right { bottom: 20px; right: 20px; }
+
+        #confirmSize {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .size-instruction {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 16px;
+            width: 80%;
+        }
+
+        /* 实验选择界面和姓名输入框初始隐藏 */
+        #experimentSelection, #nameInput {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <!-- 尺寸调试界面 -->
+    <div id="sizeAdjustment">
+        <div class="corner-marker top-left"></div>
+        <div class="corner-marker top-right"></div>
+        <div class="corner-marker bottom-left"></div>
+        <div class="corner-marker bottom-right"></div>
+        <button id="confirmSize">确认尺寸调整完成</button>
+        <div class="size-instruction">
+            请按住 Ctrl + 鼠标滚轮调整页面尺寸，使四个角落的标记点恰好布满全屏<br>
+            调整完成后点击中央按钮确认
+        </div>
+    </div>
+
     <div class="user-info">
         <input type="text" id="username" placeholder="输入受试者名称">
         <button onclick="saveUsername()">保存</button>
@@ -109,6 +174,7 @@
         let currentUsername  = '';
         const iframe = document.getElementById('experimentFrame');
         const mainContent = document.querySelector('body > :not(iframe)');
+        let currentScale = 1;
 
         // 清除 localStorage 中的旧数据
         function clearOldData() {
@@ -217,6 +283,36 @@
                 document.body.removeChild(link);
             }
         }
+
+        // 处理缩放
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                currentScale = Math.max(0.1, Math.min(2, currentScale + delta));
+                document.body.style.transform = `scale(${currentScale})`;
+                document.body.style.transformOrigin = 'center center';
+            }
+        }, { passive: false });
+
+        // 确认按钮点击事件
+        document.getElementById('confirmSize').addEventListener('click', function() {
+            // 隐藏尺寸调试界面
+            document.getElementById('sizeAdjustment').style.display = 'none';
+            // 显示姓名输入框和实验选择界面
+            document.getElementById('nameInput').style.display = 'block';
+            document.getElementById('experimentSelection').style.display = 'block';
+            
+            // 清除 localStorage 中的旧数据
+            localStorage.clear();
+        });
+
+        // 页面加载时确保尺寸调试界面显示在最前
+        window.onload = function() {
+            document.getElementById('sizeAdjustment').style.display = 'block';
+            document.getElementById('nameInput').style.display = 'none';
+            document.getElementById('experimentSelection').style.display = 'none';
+        };
     </script>
 </body>
 </html>

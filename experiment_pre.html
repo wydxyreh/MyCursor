@@ -209,11 +209,14 @@
             document.querySelector('.main-title').style.display = 'none';
             document.querySelector('.button-container').style.display = 'none';
             document.querySelector('.progress-info').style.display = 'none';
-            
+
             // 显示 iframe
             iframe.src = `${getExperimentUrl(experimentType)}?filename=${encodeURIComponent(currentUsername)}`;
             iframe.style.display = 'block';
+
             iframe.onload = function() {
+                // iframe 聚焦
+                iframe.focus();
                 window.addEventListener('message', function(event) {
                     if (event.data === 'experiment_completed') {
                         iframe.style.display = 'none';

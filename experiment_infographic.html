@@ -44,6 +44,13 @@
             margin: 20px 0;
         }
 
+        /* 新增提示页面的样式 */
+        .practice-end-prompt {
+            font-size: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
         .stimulus img {
             max-width: 100%;
             height: auto;
@@ -104,6 +111,15 @@
             现在进入实验的练习，想象您正在监护一位急诊病人，他/她的病情正在发生恶化或者好转
             请观看视频，并尽可能记住病人情况的变化过程，然后根据您的理解和记忆回答问题，
             正确按A，错误按L
+        </div>
+    </div>
+
+    <!-- 练习结束提示页面 -->
+    <div id="practiceEndPrompt" class="screen">
+        <div class="instruction practice-end-prompt">
+            <h2>练习结束</h2>
+            <p>下面开始正式实验，请您保持专注。</p>
+            <p>按下任意键后继续...</p>
         </div>
     </div>
 
@@ -515,7 +531,14 @@
 
             if (practiceCount <= experimentConfig.practiceTrials) {  // 练习阶段
                 practiceCount++;
-                showFixation();
+
+                // 检查是否需要显示练习结束提示
+                if (practiceCount > experimentConfig.practiceTrials) {
+                    showScreen('practiceEndPrompt');
+                    currentPhase = 'practiceEnd';
+                } else {
+                    showFixation();
+                }
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
@@ -587,6 +610,13 @@
                 // 从参考图片页面进入练习说明
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
+                return;
+            }
+
+            // 练习结束提示页面的处理
+            if (currentPhase === 'practiceEnd') {
+                currentPhase = 'experiment';
+                showFixation();
                 return;
             }
             

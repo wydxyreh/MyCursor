@@ -44,6 +44,13 @@
             margin: 20px 0;
         }
 
+        /* 新增提示页面的样式 */
+        .practice-end-prompt {
+            font-size: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
         .stimulus img {
             max-width: 100%;
             height: auto;
@@ -152,6 +159,15 @@
             现在进入实验的练习，你会看到一张填充圆形阵列的图片，
             中间有些圆形被替换成了三角形，你需要在5秒内尽可能记住图片上的内容然后回答问题，
             正确按A，错误按L
+        </div>
+    </div>
+
+    <!-- 练习结束提示页面 -->
+    <div id="practiceEndPrompt" class="screen">
+        <div class="instruction practice-end-prompt">
+            <h2>练习结束</h2>
+            <p>下面开始正式实验，请您保持专注。</p>
+            <p>按下任意键后继续...</p>
         </div>
     </div>
 
@@ -572,7 +588,14 @@
 
             if (practiceCount <= experimentConfig.practiceTrials) {
                 practiceCount++;
-                showFixation();
+
+                // 练习结束提示的判断
+                if (practiceCount > experimentConfig.practiceTrials) {
+                    showScreen('practiceEndPrompt');
+                    currentPhase = 'practiceEnd';
+                } else {
+                    showFixation();
+                }
             } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                 formalCount++;
                 showFixation();
@@ -622,7 +645,14 @@
             setTimeout(() => {
                 if (practiceCount <= experimentConfig.practiceTrials) {
                     practiceCount++;
-                    showFixation();
+
+                    // 检查是否需要显示练习结束提示
+                    if (practiceCount > experimentConfig.practiceTrials) {
+                        showScreen('practiceEndPrompt');
+                        currentPhase = 'practiceEnd';
+                    } else {
+                        showFixation();
+                    }
                 } else if (formalCount < experimentConfig.formalTrials) {  // 正式实验阶段
                     formalCount++;
                     showFixation();
@@ -654,6 +684,13 @@
                 // 从参考图片页面进入练习说明
                 currentPhase = 'practiceInstruction';
                 showPracticeInstruction();
+                return;
+            }
+
+            // 练习结束提示页面的处理
+            if (currentPhase === 'practiceEnd') {
+                currentPhase = 'experiment';
+                showFixation();
                 return;
             }
             

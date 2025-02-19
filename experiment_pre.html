@@ -21,10 +21,10 @@
         }
 
         .user-info {
+            display: none; /* 初始隐藏用户信息 */
             position: absolute;
             top: 40px;
             align-items: center;
-            /* right: 20px; */
             display: flex;
             gap: 10px;
             z-index: 1000;
@@ -33,10 +33,11 @@
         .main-title {
             font-size: 32px;
             margin-bottom: 50px;
+            display: none; /* 初始隐藏 */
         }
 
         .button-container {
-            display: flex;
+            display: none; /* 初始隐藏 */
             flex-direction: column;
             gap: 20px;
         }
@@ -60,6 +61,7 @@
         }
 
         .progress-info {
+            display: none; /* 初始隐藏 */
             margin-top: 30px;
             font-size: 16px;
             color: #888;
@@ -120,11 +122,6 @@
             text-align: center;
             font-size: 16px;
             width: 80%;
-        }
-
-        /* 实验选择界面和姓名输入框初始隐藏 */
-        #experimentSelection, #nameInput {
-            display: none;
         }
     </style>
 </head>
@@ -207,14 +204,25 @@
                 alert('请先输入受试者名称并保存');
                 return;
             }
-            mainContent.style.display = 'none';
+            // 隐藏主界面内容
+            document.querySelector('.user-info').style.display = 'none';
+            document.querySelector('.main-title').style.display = 'none';
+            document.querySelector('.button-container').style.display = 'none';
+            document.querySelector('.progress-info').style.display = 'none';
+            
+            // 显示 iframe
             iframe.src = `${getExperimentUrl(experimentType)}?filename=${encodeURIComponent(currentUsername)}`;
             iframe.style.display = 'block';
             iframe.onload = function() {
                 window.addEventListener('message', function(event) {
                     if (event.data === 'experiment_completed') {
                         iframe.style.display = 'none';
-                        mainContent.style.display = 'flex';
+                        
+                        // 重新显示主界面内容
+                        document.querySelector('.user-info').style.display = 'flex';
+                        document.querySelector('.main-title').style.display = 'block';
+                        document.querySelector('.button-container').style.display = 'flex';
+                        document.querySelector('.progress-info').style.display = 'block';
                         
                         const button = document.querySelector(`button[onclick="startExperiment('${experimentType}')"]`);
                         button.disabled = true;
@@ -299,9 +307,11 @@
         document.getElementById('confirmSize').addEventListener('click', function() {
             // 隐藏尺寸调试界面
             document.getElementById('sizeAdjustment').style.display = 'none';
-            // 显示姓名输入框和实验选择界面
-            document.getElementById('nameInput').style.display = 'block';
-            document.getElementById('experimentSelection').style.display = 'block';
+            // 显示主界面
+            document.querySelector('.user-info').style.display = 'flex';
+            document.querySelector('.main-title').style.display = 'block';
+            document.querySelector('.button-container').style.display = 'flex';
+            document.querySelector('.progress-info').style.display = 'block';
             
             // 清除 localStorage 中的旧数据
             localStorage.clear();
@@ -310,8 +320,10 @@
         // 页面加载时确保尺寸调试界面显示在最前
         window.onload = function() {
             document.getElementById('sizeAdjustment').style.display = 'block';
-            document.getElementById('nameInput').style.display = 'none';
-            document.getElementById('experimentSelection').style.display = 'none';
+            document.querySelector('.user-info').style.display = 'none';
+            document.querySelector('.main-title').style.display = 'none';
+            document.querySelector('.button-container').style.display = 'none';
+            document.querySelector('.progress-info').style.display = 'none';
         };
     </script>
 </body>

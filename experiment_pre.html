@@ -90,15 +90,76 @@
 
         .corner-marker {
             position: fixed;
-            width: 30px;
-            height: 30px;
-            border: 2px solid white;
+            width: 0;
+            height: 0;
         }
 
-        .top-left { top: 20px; left: 20px; }
-        .top-right { top: 20px; right: 20px; }
-        .bottom-left { bottom: 20px; left: 20px; }
-        .bottom-right { bottom: 20px; right: 20px; }
+        /* 14寸屏幕参数（基准尺寸） */
+        .corner-marker::before,
+        .corner-marker::after {
+            content: '';
+            position: fixed;
+            background: white;
+            /* 14寸：线长20px，线宽2px，距边距10px */
+            /* 24寸建议：线长30px，线宽3px，距边距15px */
+            /* 27寸建议：线长35px，线宽3px，距边距20px */
+        }
+
+        /* 左上角 */
+        .top-left::before {
+            width: 20px;
+            height: 2px;
+            left: 10px;
+            top: 10px;
+        }
+        .top-left::after {
+            width: 2px;
+            height: 20px;
+            left: 10px;
+            top: 10px;
+        }
+
+        /* 右上角 */
+        .top-right::before {
+            width: 20px;
+            height: 2px;
+            right: 10px;
+            top: 10px;
+        }
+        .top-right::after {
+            width: 2px;
+            height: 20px;
+            right: 10px;
+            top: 10px;
+        }
+
+        /* 左下角 */
+        .bottom-left::before {
+            width: 20px;
+            height: 2px;
+            left: 10px;
+            bottom: 10px;
+        }
+        .bottom-left::after {
+            width: 2px;
+            height: 20px;
+            left: 10px;
+            bottom: 10px;
+        }
+        
+        /* 右下角 */
+        .bottom-right::before {
+            width: 20px;
+            height: 2px;
+            right: 10px;
+            bottom: 10px;
+        }
+        .bottom-right::after {
+            width: 2px;
+            height: 20px;
+            right: 10px;
+            bottom: 10px;
+        }
 
         #confirmSize {
             position: fixed;
@@ -112,6 +173,9 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 18px;
+            /* 14寸：按钮内边距15px 30px */
+            /* 24寸建议：内边距20px 40px，字体20px */
+            /* 27寸建议：内边距25px 50px，字体24px */
         }
 
         .size-instruction {

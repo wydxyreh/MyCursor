@@ -88,6 +88,7 @@
             <ul>
                 <li>您认为陈述正确请按 A 键</li>
                 <li>您认为陈述错误请按 L 键</li>
+                <li>如果您不确定答案，请按 G 键</li>
             </ul>
             <p>按任意键继续...</p>
         </div>
@@ -404,7 +405,7 @@
                     问题 ${currentQuestionIndex + 1}/${experimentConfig.questionsPerTrial}
                 </div>
                 ${currentQuestions[currentQuestionIndex].text}
-                <p>正确按A，错误按L</p>
+                <p>正确按A，错误按L，不确定按G</p>
             `;
             
             questionContainer.style.display = 'block';
@@ -429,7 +430,7 @@
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: 'TIMEOUT',
-                isCorrect: '错误',
+                isCorrect: '超时',
                 reactionTime: 10000
             });
 
@@ -488,7 +489,12 @@
             lastResponse = key;
 
             // 计算 check 值
-            const isCorrect = key === currentQuestions[currentQuestionIndex].correctAnswer ? 0 : 1;
+            let isCorrect;
+            if (key === 'g') {
+                isCorrect = '不确定';
+            } else {
+                isCorrect = key === currentQuestions[currentQuestionIndex].correctAnswer ? 0 : 1;
+            }
 
             // 记录结果
             results.push({
@@ -496,11 +502,11 @@
                 trialType: practiceCount <= experimentConfig.practiceTrials ? '练习' : '正式',
                 trialNumber: practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount,
                 questionNumber: currentQuestionIndex + 1,
-                videoPath: `infographic${currentLayout}/${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
+                videoPath: `therapy${currentLayout}/${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}.mp4`,
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: key.toUpperCase(),
-                isCorrect: isCorrect ? "错误" : "正确",
+                isCorrect: isCorrect === '不确定' ? '不确定' : isCorrect ? "错误" : "正确",
                 reactionTime: reactionTime
             });
 
@@ -508,7 +514,7 @@
             appendDataToCSV({
                 'user-answer': key.toUpperCase(),
                 'correct-answer': currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                'check': isCorrect,
+                'check': isCorrect === '不确定' ? 'NAN' : isCorrect,
                 'reaction time': reactionTime
             });
 
@@ -548,7 +554,7 @@
             
             if (currentPhase === 'experiment' && 
                 document.querySelector('.question-container').style.display === 'block') {
-                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
+                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l' || event.key.toLowerCase() === 'g') {
                     handleResponse(event.key.toLowerCase());
                 }
             }

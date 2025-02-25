@@ -838,11 +838,11 @@
                             } else if (value <= 100) { // 黄色区域 (90-100)
                                 // 计算在90到100之间的比例位置
                                 const position = (value - 90) / (100 - 90);
-                                y = containerHeight * (1 - (((position * (140 - 120) / bpv1_totalRange)) + ((120 - 50) / bpv1_totalRange))); // 加上前两段的比例
+                                y = containerHeight * (1 - (((position * (100 - 90) / bpv1_totalRange)) + ((90 - 50) / bpv1_totalRange))); // 加上前两段的比例
                             } else if (value <= 120) { // 绿色区域 (100-120)
                                 // 计算在100到120之间的比例位置
                                 const position = (value - 100) / (120 - 100);
-                                y = containerHeight * (1 - (((position * (120 - 90) / bpv1_totalRange)) + ((90 - 50) / bpv1_totalRange))); // 加上前一段的比例
+                                y = containerHeight * (1 - (((position * (120 - 100) / bpv1_totalRange)) + ((100 - 50) / bpv1_totalRange))); // 加上前一段的比例
                             } else if (value <= 140) { // 黄色区域 (120-140)
                                 // 计算在120到140之间的比例位置
                                 const position = (value - 120) / (140 - 120);
@@ -865,7 +865,7 @@
                                 const position = (value - 60) / (70 - 60);
                                 y = containerHeight * (1 - (((position * (70 - 60) / bpv2_totalRange)) + ((60 - 50) / bpv2_totalRange))); // 加上前两段的比例
                             } else if (value <= 80) { // 第三个区间 (70-80)
-                                // 计算在60到80之间的比例位置
+                                // 计算在70到80之间的比例位置
                                 const position = (value - 70) / (80 - 70);
                                 y = containerHeight * (1 - (((position * (80 - 70) / bpv2_totalRange)) + ((70 - 50) / bpv2_totalRange))); // 加上前一段的比例
                             } else if (value <= 90) { // 第四个区间 (80-90)

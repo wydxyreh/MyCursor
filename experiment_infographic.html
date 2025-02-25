@@ -484,7 +484,7 @@
                     问题 ${currentQuestionIndex + 1}/${experimentConfig.questionsPerTrial}
                 </div>
                 ${currentQuestion.text}
-                <p>正确按A，错误按L</p>
+                <p>正确按A，错误按L，不确定按G</p>
             `;
             
             questionContainer.style.display = 'block';
@@ -569,7 +569,12 @@
             lastResponse = key;
 
             // 计算 check 值
-            const isCorrect = key === currentQuestions[currentQuestionIndex].correctAnswer ? 0 : 1;
+            let isCorrect;
+            if (key === 'g') {
+                isCorrect = '不确定';
+            } else {
+                isCorrect = key === currentQuestions[currentQuestionIndex].correctAnswer ? 0 : 1;
+            }
 
             // 记录结果
             results.push({
@@ -581,7 +586,7 @@
                 question: currentQuestions[currentQuestionIndex].text,
                 correctAnswer: currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
                 userResponse: key.toUpperCase(),
-                isCorrect: isCorrect ? "错误" : "正确",
+                isCorrect: isCorrect === '不确定' ? '不确定' : isCorrect ? "错误" : "正确",
                 reactionTime: reactionTime
             });
 
@@ -589,7 +594,7 @@
             appendDataToCSV({
                 'user-answer': key.toUpperCase(),
                 'correct-answer': currentQuestions[currentQuestionIndex].correctAnswer.toUpperCase(),
-                'check': isCorrect,
+                'check': isCorrect === '不确定' ? 'NAN' : isCorrect,
                 'reaction time': reactionTime
             });
 
@@ -598,7 +603,7 @@
             showNextQuestion();
         }
 
-        // 修改按键事件处理
+        // 按键事件处理
         window.onkeydown = function(event) {
             if (currentPhase === 'instruction') {
                 // 从指导语进入参考图片页面
@@ -629,7 +634,7 @@
             
             if (currentPhase === 'experiment' && 
                 document.querySelector('.question-container').style.display === 'block') {
-                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l') {
+                if (event.key.toLowerCase() === 'a' || event.key.toLowerCase() === 'l' || event.key.toLowerCase() === 'g') {
                     handleResponse(event.key.toLowerCase());
                 }
             }

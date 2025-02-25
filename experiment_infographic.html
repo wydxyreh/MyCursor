@@ -89,6 +89,7 @@
             <ul>
                 <li>您认为陈述正确请按 A 键</li>
                 <li>您认为陈述错误请按 L 键</li>
+                <li>如您10秒内无应答，将会自动进入下个试次</li>
             </ul>
             <p>按任意键继续...</p>
         </div>
@@ -171,7 +172,7 @@
 
         // 问题数据结构
         const questions = {
-            prominence1: {
+            infographic1: {
                 practice: [
                     {
                         questions: [
@@ -193,7 +194,7 @@
                         { text: "当前病人的体温是否仍偏高？", correctAnswer: "a", level: "感知" },
                         { text: "过去一段时间病人的血氧是否有所改善？", correctAnswer: "a", level: "理解" },
                         { text: "过去一段时间病人的心率有所下降？", correctAnswer: "a", level: "理解" },
-                        { text: "根据当前态势变化，可以适当减少吸氧浓度？", correctAnswer: "a", level: "预测" },
+                        { text: "根据当前态势变化，可以适当减少吸氧浓度？", correctAnswer: "l", level: "预测" },
                         { text: "随着时间推移，病人的血压将会显著上升？", correctAnswer: "l", level: "预测" }
                         ]
                     },
@@ -202,7 +203,7 @@
                         { text: "当前病人的心率是否超过100？", correctAnswer: "a", level: "感知" },
                         { text: "当前病人的血氧饱和度已经低于90%？", correctAnswer: "l", level: "感知" },
                         { text: "当前病人的收缩压是否低于100mmHg？", correctAnswer: "a", level: "感知" },
-                        { text: "过去一段时间病人的各项指标是否都在恶化？", correctAnswer: "a", level: "理解" },
+                        { text: "过去一段时间，除体温外病人的各项指标是否都在恶化？", correctAnswer: "a", level: "理解" },
                         { text: "根据当前情况，病人可能面临循环衰竭风险？", correctAnswer: "a", level: "理解" },
                         { text: "根据当前态势变化，病人的血氧会很快上升？", correctAnswer: "l", level: "预测" },
                         { text: "如果不及时干预，病人的血压有可能进一步下降？", correctAnswer: "a", level: "预测" }
@@ -211,13 +212,13 @@
                    
                 ]
             },
-            prominence2: {
+            infographic2: {
                 practice: [
                     {
                         questions: [
                         { text: "当前病人的血压偏高？", correctAnswer: "l", level: "感知" },
                         { text: "当前病人的心率是否在正常范围？", correctAnswer: "a", level: "感知" },
-                        { text: "当前病人的体温是否偏高？", correctAnswer: "l", level: "感知" },
+                        { text: "当前病人的体温是否过高？", correctAnswer: "l", level: "感知" },
                         { text: "过去一段时间病人的整体情况是否有所好转？", correctAnswer: "a", level: "理解" },
                         { text: "病人的体温变化是因为环境变化？", correctAnswer: "l", level: "理解" },
                         { text: "根据当前态势变化，病人的血氧饱和度将会持续下降？", correctAnswer: "l", level: "预测" },
@@ -244,7 +245,7 @@
                         { text: "当前病人的舒张压是否超过85mmHg？", correctAnswer: "a", level: "感知" },
                         { text: "当前病人的心率在正常范围内？", correctAnswer: "a", level: "感知" },
                         { text: "过去一段时间病人是否出现高血压危象？", correctAnswer: "a", level: "理解" },
-                        { text: "根据当前情况，病人是否有脑血管意外风险？", correctAnswer: "a", level: "理解" },
+                        { text: "根据当前情况，病人是否可能有脑血管意外风险？", correctAnswer: "a", level: "理解" },
                         { text: "根据当前态势变化，是否应该进行降压治疗干预？", correctAnswer: "a", level: "预测" },
                         { text: "接下来一段时间病人的血氧会相对稳定？", correctAnswer: "a", level: "预测" }
                         ]
@@ -252,16 +253,16 @@
                 
                 ]
             },
-            prominence3: {
+            infographic3: {
                 practice: [
                     {
                         questions: [
                         { text: "当前病人的心率已降至100以下？", correctAnswer: "l", level: "感知" },
                         { text: "当前病人的血压已回升到正常范围？", correctAnswer: "a", level: "感知" },
-                        { text: "当前病人的血氧饱和度高于93%？", correctAnswer: "a", level: "感知" },
+                        { text: "当前病人的血氧饱和度高于92%？", correctAnswer: "a", level: "感知" },
                         { text: "过去一段时间病人的收缩压有所上升？", correctAnswer: "a", level: "理解" },
                         { text: "根据当前情况，病人的整体情况有所好转？", correctAnswer: "a", level: "理解" },
-                        { text: "根据当前态势变化，心率将会快速上升？", correctAnswer: "a", level: "预测" },
+                        { text: "根据当前态势变化，病人的体温将会保持稳定？", correctAnswer: "a", level: "预测" },
                         { text: "接下来一段时间，病人的心率不会下降？", correctAnswer: "l", level: "预测" }
                         ]
                     },
@@ -293,17 +294,17 @@
                 
                 ]
             },
-            prominence4: {
+            infographic4: {
                 practice: [
                     {
                         questions: [
-                        { text: "当前病人的血压偏高？", correctAnswer: "l", level: "感知" },
-                        { text: "当前病人的心率是否在正常范围？", correctAnswer: "a", level: "感知" },
-                        { text: "当前病人的体温是否偏高？", correctAnswer: "l", level: "感知" },
-                        { text: "过去一段时间病人的整体情况是否有所好转？", correctAnswer: "a", level: "理解" },
-                        { text: "病人的体温变化是因为环境变化？", correctAnswer: "l", level: "理解" },
-                        { text: "根据当前态势变化，病人的血氧饱和度将会持续下降？", correctAnswer: "l", level: "预测" },
-                        { text: "病人的血压可能会继续小幅度上升？", correctAnswer: "a", level: "预测" }
+                        { text: "当前病人的心率是否处于正常？", correctAnswer: "a", level: "感知" },
+                        { text: "当前病人的体温是否超过37.5度？", correctAnswer: "a", level: "感知" },
+                        { text: "当前病人的收缩压是否高于105mmHg？", correctAnswer: "l", level: "感知" },
+                        { text: "过去一段时间病人的体温是否持续升高？", correctAnswer: "a", level: "理解" },
+                        { text: "根据当前情况，病人可能出现了感染征象？", correctAnswer: "a", level: "理解" },
+                        { text: "根据当前态势变化，病人血氧将会下降？", correctAnswer: "l", level: "预测" },
+                        { text: "如果不及时干预，发热可能会持续加重？", correctAnswer: "a", level: "预测" }
                         ]
                     },
                   
@@ -311,24 +312,24 @@
                 formal: [
                     {
                         questions: [
-                        { text: "当前病人的收缩压是否高于80mmHg？", correctAnswer: "l", level: "感知" },
+                        { text: "当前病人的心率是否在110以下？", correctAnswer: "a", level: "感知" },
+                        { text: "当前病人的血压是否在正常范围？", correctAnswer: "l", level: "感知" },
                         { text: "当前病人的体温是否超过38度？", correctAnswer: "a", level: "感知" },
-                        { text: "当前病人的心率是否超过110？", correctAnswer: "a", level: "感知" },
-                        { text: "根据当前的情况，病人体内不存在感染？", correctAnswer: "l", level: "理解" },
-                        { text: "过去一段时间病人的心率持续上升？", correctAnswer: "a", level: "理解" },
-                        { text: "根据当前态势变化，病人的体温还会保持高温一段时间？", correctAnswer: "a", level: "预测" },
-                        { text: "如果不进行干预，病人的血压很快会上升？", correctAnswer: "l", level: "预测" }
+                        { text: "过去一段时间病人的心率持续下降？", correctAnswer: "a", level: "理解" },
+                        { text: "根据当前情况，病人的血氧有所改善？", correctAnswer: "a", level: "理解" },
+                        { text: "根据当前态势变化，给予适当治疗后血压可能会继续上升？", correctAnswer: "a", level: "预测" },
+                        { text: "在接下来一段时间，病人还将处于高热状态？", correctAnswer: "a", level: "预测" }
                         ]
                     },
                     {
                         questions: [
-                        { text: "当前病人的收缩压是否超过150mmHg？", correctAnswer: "l", level: "感知" },
-                        { text: "当前病人的舒张压是否超过85mmHg？", correctAnswer: "a", level: "感知" },
-                        { text: "当前病人的心率在正常范围内？", correctAnswer: "a", level: "感知" },
-                        { text: "过去一段时间病人是否出现高血压危象？", correctAnswer: "a", level: "理解" },
-                        { text: "根据当前情况，病人是否有脑血管意外风险？", correctAnswer: "a", level: "理解" },
-                        { text: "根据当前态势变化，是否应该进行降压治疗干预？", correctAnswer: "a", level: "预测" },
-                        { text: "接下来一段时间病人的血氧会相对稳定？", correctAnswer: "a", level: "预测" }
+                        { text: "当前病人的收缩压是否已降至140mmHg以下？", correctAnswer: "l", level: "感知" },
+                        { text: "当前病人的舒张压是否处于正常范围？", correctAnswer: "a", level: "感知" },
+                        { text: "当前病人的心率是否正常？", correctAnswer: "a", level: "感知" },
+                        { text: "过去一段时间病人的血压是否保持平稳？", correctAnswer: "l", level: "理解" },
+                        { text: "根据当前情况，降压治疗是否有一定效果？", correctAnswer: "a", level: "理解" },
+                        { text: "根据当前态势变化，病人的血氧将保持稳定？", correctAnswer: "a", level: "预测" },
+                        { text: "在接下来一段时间，应该继续观察并干预病人的血压？", correctAnswer: "a", level: "预测" }
                         ]
                     },
                  
@@ -364,7 +365,7 @@
         function appendDataToCSV(data) {
             // 构建CSV行数据
             const csvRow = [
-                `prominence${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                `infographic${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'excise' : 'test'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
                 data['user-answer'],
                 data['correct-answer'],
                 data.check,
@@ -459,7 +460,7 @@
 
         // 问题加载和显示逻辑
         function loadQuestions() {
-            const layoutKey = `prominence${currentLayout}`;
+            const layoutKey = `infographic${currentLayout}`;
             const phase = practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal';
             const trialIndex = phase === 'practice' ? practiceCount - 1 : formalCount - 1;
 

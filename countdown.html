@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: black;
+        }
+
+        #countdown {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #9AF441;
+        }
+    </style>
+</head>
+<body>
+    <div id="countdown">02:00</div>
+
+    <script>
+        class CountdownTimer {
+            constructor(duration = 120, speedFactor = 1) {
+                this.duration = duration; // 总时长（秒）
+                this.currentTime = duration;
+                this.speedFactor = speedFactor; // 速度因子，1为正常速度
+                this.element = document.getElementById('countdown');
+                this.intervalId = null;
+            }
+
+            formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+            }
+
+            start() {
+                if (this.intervalId) return;
+
+                const updateInterval = 1000 / this.speedFactor; // 根据速度因子调整更新间隔
+                this.intervalId = setInterval(() => {
+                    this.currentTime--;
+                    this.element.textContent = this.formatTime(this.currentTime);
+
+                    if (this.currentTime <= 0) {
+                        this.stop();
+                    }
+                }, updateInterval);
+            }
+
+            stop() {
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }
+
+            reset() {
+                this.currentTime = this.duration;
+                this.element.textContent = this.formatTime(this.currentTime);
+                this.stop();
+            }
+
+            setSpeed(speedFactor) {
+                this.speedFactor = speedFactor;
+                if (this.intervalId) {
+                    this.stop();
+                    this.start();
+                }
+            }
+        }
+
+        // 创建倒计时实例
+        const timer = new CountdownTimer(120);
+
+        // 示例：设置速度为4倍（30秒完成120秒的倒计时）
+        timer.setSpeed(4);
+        
+        // 开始倒计时
+        timer.start();
+    </script>
+</body>
+</html> 

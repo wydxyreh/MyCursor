@@ -75,6 +75,7 @@
             <ul>
                 <li>正确请按 A 键</li>
                 <li>错误请按 L 键</li>
+                <li>如您10秒内无应答，将会自动进入下个试次</li>
             </ul>
             <p>按任意键继续...</p>
         </div>
@@ -155,7 +156,7 @@
         // 实验配置接口
         const experimentConfig = {
             totalLayouts: 4,          // 变量数量
-            practiceTrials: 4,        // 每个变量的练习次数
+            practiceTrials: 2,        // 每个变量的练习次数
             formalTrials: 3,          // 每个变量的正式实验次数
             questionsPerTrial: 1,     // 每个试次的问题数量
         };
@@ -164,7 +165,7 @@
         const questions = {
             layout1: {      
                 practice: [
-                    { question: "变量1-练习1：图中三角形的数量是否大于8？", correctAnswer: "l" },
+                    { question: "变量1-练习1：图中三角形的数量是否大于9？", correctAnswer: "l" },
                     { question: "变量1-练习2：图中三角形的数量是否大于6？", correctAnswer: "a" },
                     { question: "变量1-练习3：图中三角形的数量是否小于8？", correctAnswer: "a" },
                     { question: "变量1-练习4：图中三角形的数量是否小于7？", correctAnswer: "l" }
@@ -190,15 +191,15 @@
             },
             layout3: {
                 practice: [
-                    { question: "变量3-练习1：图中三角形的数量是否小于7？", correctAnswer: "l" },
-                    { question: "变量3-练习2：图中三角形的数量是否大于6？", correctAnswer: "a" },
+                    { question: "变量3-练习1：图中三角形的数量是否小于6？", correctAnswer: "l" },
+                    { question: "变量3-练习2：图中三角形的数量是否大于5？", correctAnswer: "a" },
                     { question: "变量3-练习3：图中三角形的数量是否小于7？", correctAnswer: "l" },
                     { question: "变量3-练习4：图中三角形的数量是否大于6？", correctAnswer: "a" }
                 ],
                 formal: [
                     { question: "变量3-正式1：图中三角形的数量是否小于8？", correctAnswer: "l" },
                     { question: "变量3-正式2：图中三角形的数量是否小于7？", correctAnswer: "a" },
-                    { question: "变量3-正式3：图中三角形的数量是否大于6？", correctAnswer: "a" }
+                    { question: "变量3-正式3：图中三角形的数量是否大于7？", correctAnswer: "a" }
                 ]
             },
             layout4: {
@@ -318,8 +319,8 @@
 
         // 显示练习提示语
         function showPracticeInstruction() {
-            const practiceInstructionText = `现在进入变量${currentLayout}的第${practiceCount}次实验练习，
-                正确按A，错误按L，按任意键继续`;
+            const practiceInstructionText = `现在进入实验练习，请记住异常三角形的数量，
+                正确按A，错误按L，本变量将进行2次练习和3次正式实验按任意键继续`;
             
             document.querySelector('.practice-instruction').textContent = practiceInstructionText;
             showScreen('practiceInstruction');

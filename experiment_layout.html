@@ -60,6 +60,33 @@
             font-size: 24px;
             margin: 20px 0;
         }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .navigation-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .navigation-buttons button:hover {
+            background: #666;
+        }
+
+        .phase-info {
+            font-size: 20px;
+            color: #fff;
+            margin: 10px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -331,6 +358,14 @@
         function showStimulus() {
             const stimulusContainer = document.querySelector('.stimulus');
             const img = new Image();
+
+            // 构建阶段提示文字
+            let phaseText;
+            if (practiceCount <= experimentConfig.practiceTrials) {
+                phaseText = `变量${currentLayout}-练习${practiceCount}`;
+            } else {
+                phaseText = `变量${currentLayout}-正式${formalCount}`;
+            }
             
             // 构建图片路径
             let imagePath;
@@ -344,8 +379,47 @@
             
             img.onload = () => {
                 stimulusContainer.innerHTML = '';
-                stimulusContainer.appendChild(img);
+
+                // 创建阶段信息显示元素
+                const phaseInfo = document.createElement('div');
+                phaseInfo.className = 'phase-info';
+                phaseInfo.textContent = phaseText;
+                
+                // 创建图片容器
+                const imgContainer = document.createElement('div');
+                imgContainer.appendChild(img);
+                
+                // 添加元素到容器
+                stimulusContainer.appendChild(phaseInfo);
+                stimulusContainer.appendChild(imgContainer);
+
+                // 添加导航按钮
+                const navigationButtons = document.createElement('div');
+                navigationButtons.className = 'navigation-buttons';
+                navigationButtons.innerHTML = `
+                    <button id="prevButton">上一题</button>
+                    <button id="nextButton">下一题</button>
+                `;
+                stimulusContainer.appendChild(navigationButtons);
+
+                // 添加按钮事件监听
+                document.getElementById('prevButton').addEventListener('click', () => {
+                    handleNavigation('prev');
+                });
+                document.getElementById('nextButton').addEventListener('click', () => {
+                    handleNavigation('next');
+                });
+
+                // 保持原有图片显示逻辑
                 showScreen('stimulus');
+
+                // 设置自动跳转计时器（需要保存以便清除）
+                stimulus.timeout = setTimeout(() => {
+                    stimulusContainer.innerHTML = '';
+                    setTimeout(() => {
+                        showQuestion();
+                    }, 500);
+                }, 5000);
             };
             
             img.onerror = () => {
@@ -353,14 +427,105 @@
             };
             
             img.src = imagePath;
+        }
 
-            // 10秒后显示黑屏，再等500ms显示问题
-            setTimeout(() => {
-                stimulusContainer.innerHTML = '';
-                setTimeout(() => {
-                    showQuestion();
-                }, 500);
-            }, 5000);
+        // 处理导航按钮点击
+        function handleNavigation(direction) {
+            // 清除所有计时器
+            clearTimeout(stimulus.timeout);
+            clearTimeout(questionTimeout);
+
+            // 处理导航逻辑
+            if (direction === 'next') {
+                handleNextNavigation();
+            } else if (direction === 'prev') {
+                handlePrevNavigation();
+            }
+
+            // 重置回答状态
+            lastResponse = '';
+            isProcessingResponse = false;
+        }
+
+        function handleNextNavigation() {
+            // 记录当前题目的回答情况（即使没有回答）
+            const reactionTime = Date.now() - startTime;
+            if (lastResponse === '') {
+                const currentQuestion = practiceCount <= experimentConfig.practiceTrials ? 
+                    questions[`layout${currentLayout}`].practice[practiceCount - 1] : 
+                    questions[`layout${currentLayout}`].formal[formalCount - 1];
+                
+                const csvRow = {
+                    trial: `layout${currentLayout}-${practiceCount <= experimentConfig.practiceTrials ? 'practice' : 'formal'}${practiceCount <= experimentConfig.practiceTrials ? practiceCount : formalCount}`,
+                    'user-answer': 'Skipped',
+                    'correct-answer': currentQuestion.correctAnswer.toUpperCase(),
+                    check: 'Skipped',
+                    'reaction time': 'Skipped'
+                };
+                appendDataToCSV(csvRow);
+            }
+
+            // 更新计数
+            let shouldSwitchLayout = false;
+            if (practiceCount <= experimentConfig.practiceTrials) {
+                practiceCount++;
+                // 检查是否超出练习次数
+                if (practiceCount > experimentConfig.practiceTrials) {
+                    // 进入当前布局的正式试验
+                    formalCount = 1;
+                }
+            } else {
+                formalCount++;
+                // 检查是否超出正式试验次数
+                if (formalCount > experimentConfig.formalTrials) {
+                    // 标记需要切换布局
+                    shouldSwitchLayout = true;
+                }
+            }
+
+            // 处理布局切换
+            if (shouldSwitchLayout) {
+                if (currentLayout < experimentConfig.totalLayouts) {
+                    currentLayout++;
+                    practiceCount = 1;
+                    formalCount = 1;
+                    currentPhase = 'practiceInstruction';
+                } else {
+                    // 所有布局完成
+                    alert('实验结束！即将导出结果文件。');
+                    downloadCSV();
+                    return;
+                }
+            }
+
+            // 根据新的布局状态重新开始流程
+            showFixation();
+        }
+
+        function handlePrevNavigation() {
+            // 回退计数
+            if (formalCount > 1) {
+                formalCount--;
+            } else if (practiceCount > 1) {
+                practiceCount--;
+            } else {
+                // 需要切换到上一个布局
+                if (currentLayout > 1) {
+                    currentLayout--;
+                    // 进入上一个布局的最后一个正式试验
+                    practiceCount = experimentConfig.practiceTrials + 1;
+                    formalCount = experimentConfig.formalTrials;
+                }
+            }
+
+            // 处理边界（当在第一个布局的第一个练习时无法回退）
+            if (currentLayout === 1 && practiceCount === 1 && formalCount === 1) {
+                practiceCount = 1;
+                formalCount = 1;
+            }
+
+            // 根据新的布局状态重新开始流程
+            showFixation();
         }
 
         // 显示问题

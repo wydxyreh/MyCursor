@@ -84,4 +84,14 @@ window.onbeforeunload = function(event) {
 
 
 
-
+在上述代码的基础上，在每道题的时候(showStimulus阶段)，添加两个按钮，分别是上一题和下一题；
+如果选择了下一题按钮，则直接进入下一道题，当前题目的用户已回答的数据则记录下来，未作答的数据中 check、reaction time、user-answer 全部记为 "Skipped"，同时对应的各类参数也要同步修改；
+如果选择了上一题按钮，则直接跳到上一题，但是上一题的数据不做修改，除非用户重新作答，则使用用户新作答的数据覆盖旧有数据；
+只要点击了任意（上一题或者下一题）按钮，则直接重置题目的计时器，包括 image 和 Question 的显示，并重置其定时器，同时对于问题显示 showQuestion，也需要重置其定时器，即跳到其他问题时，取消掉旧问题的问题显示；
+在上一题和下一题按钮也需要注意，上一题或者下一题必须存在，不能盲目地+1或-1，而是要和 experimentConfig 参数对应比较；
+并且跳过时也只是跳过 Question 和 img 显示，但是练习阶段到正式阶段过度的提示词、totalLayouts 之间切换的提示词都要保留；
+在每次image下方，都显示出当前所处阶段，如：变量1-练习1；
+在上一题和下一题按钮切换的时候，也需要注意 experimentConfig.totalLayouts 的切换；
+当 formalCount 到 formalTrials 的时候，再次点击下一题，将切换成下一个 Layouts 的第一个 practice，并重置对应参数；
+当 practiceCount 到 1 的时候，再次点击上一题，将切换成上一个 Layouts 的最后一个 formal，并重置对应参数；
+当到了 experimentConfig.totalLayouts 布局的最后一个 formal 时，如果再次点击下一题，则提示实验结束，走正常的实验结束流程；
